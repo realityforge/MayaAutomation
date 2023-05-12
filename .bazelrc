@@ -1,0 +1,146 @@
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# force redownloading when repository URLs are changed. Otherwise, it's possible broken URLs can be masked
+# by the presence of a repository cache entry with the same hash.
+common --experimental_repository_cache_urls_as_default_canonical_id
+
+# Support implementation_deps attribute on cc_library
+build --experimental_cc_implementation_deps
+test --experimental_cc_implementation_deps
+
+# To ensure Bazel builds consistently on windows.
+# See https://docs.bazel.build/versions/main/windows.html#enable-symlink-support
+startup --windows_enable_symlinks
+build --enable_runfiles
+
+# Ensures tests don't depend upon remote services
+# use tags=["requires-network"] on the test target
+# to enable network services for a specific test.
+build --sandbox_default_allow_network=false
+
+# Fix a bug where Bazel didn't enable sandboxing
+# for tests with tags=["exclusive"].
+test --incompatible_exclusive_test_sandboxed
+
+# Improve performance of sandbox by skipping the
+# older my_repo/external/other_repo symlinks.
+build --nolegacy_external_runfiles
+
+# Ensure that the Bazel server notices when a directory
+# changes, if you have a directory listed in the srcs of
+# some target.
+startup --host_jvm_args=-DBAZEL_TRACK_SOURCE_DIRECTORIES=1
+
+# Improve remote cache checking speed by memorizing merkle
+# tree calculations, and tweak the amount of memory allocated to it.
+build --experimental_remote_merkle_tree_cache
+#build --experimental_remote_merkle_tree_cache_size=XX
+
+# If the grpc remote cache connection fails, it will fail
+# the build, add this so it falls back to the local cache.
+build --remote_local_fallback
+
+# Helps you debug when Bazel runs out of memory.
+build --heap_dump_on_oom
+
+# Do not stop at first error in build or analysis phase but keep going as long as prerequisites are successful
+build --keep_going
+test --keep_going
+
+# Do not embed build information in binaries. This reduces input volatility and maximizes build caching.
+build --nostamp
+
+# If you have both --noremote_upload_local_results and --disk_cache,
+# then this fixes a bug where Bazel doesn't write to the local
+# disk cache as it treats as a remote cache.
+build --incompatible_remote_results_ignore_disk
+
+# Speed up all builds by not checking if output files have been modified.
+build --noexperimental_check_output_files
+fetch --noexperimental_check_output_files
+query --noexperimental_check_output_files
+
+build --noexperimental_check_external_repository_files
+fetch --noexperimental_check_external_repository_files
+query --noexperimental_check_external_repository_files
+
+# Bazel's default for test_timeout is medium (5 min),
+# but most tests should instead be short (1 min).
+test --test_verbose_timeout_warnings
+
+# print test logs for failed tests
+test --test_output=errors
+
+# Don't upload artifacts referenced in the BEP if the action can't be cached remotely.
+build --experimental_remote_build_event_upload=minimal
+
+# Change the behavior of bazel test to not bother building targets
+# which aren't dependencies of the tests.
+test --build_tests_only
+
+# Try to use the operating system's file watch service for local changes instead of scanning every file for a change
+build --watchfs
+build --experimental_windows_watchfs
+
+# Use an environment with a static value for PATH and does not inherit LD_LIBRARY_PATH or TMPDIR
+# The goal is to enable cross-user caching when a shared cache is used
+build --incompatible_strict_action_env
+
+# Lock down some runtime versions
+build --host_force_python=PY3
+build --java_runtime_version=remotejdk_11
+build --tool_java_runtime_version=remotejdk_11
+
+# Disable legacy toolchain flags
+build --experimental_disallow_legacy_java_toolchain_flags
+
+build --java_language_version=11
+test --java_language_version=11
+build --tool_java_language_version=11
+test --tool_java_language_version=11
+
+# Remove unused java header compilation
+build --nojava_header_compilation
+
+# Enable the experimental persistent Java compiler.
+build --experimental_persistent_javac
+
+# Checks that a Java target explicitly declares all directly used targets as dependencies.
+test --experimental_strict_java_deps error
+build --experimental_strict_java_deps error
+
+# Explicitly specify a dependency to JUnit or Hamcrest in a java_test instead of accidentally obtaining from the TestRunner's deps
+test --explicit_java_test_deps
+build --explicit_java_test_deps
+
+# Check whether the dependencies of an aar_import are complete
+build --experimental_import_deps_checking error
+
+# filesets crossing package boundaries are reported as errors
+build --strict_filesets
+
+# Picks up host-OS-specific config lines from bazelrc files. Supported OS identifiers are linux, macos, windows, freebsd, and openbsd.
+# Enabling this flag is equivalent to using --config=linux on Linux, --config=windows on Windows, etc.
+build --enable_platform_specific_config
+
+# default to optimizing compilation
+build --compilation_mode=opt
+
+# If a command fails, print out the full command line.
+build --verbose_failures
+
+# Remove unused attributes
+build --incompatible_remove_cpu_and_compiler_attributes_from_cc_toolchain
+
+# Try and import a user specific configuration
+try-import %workspace%/user.bazelrc
