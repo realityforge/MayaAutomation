@@ -9,11 +9,3 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-# Workspace named so that BUILD.bazel files in other workspaces can reference this
-# namespace with a fixed name.
-workspace(name = "org_realityforge_maya")
-
-load("//third_party/maya_devkit:repository.bzl", _load_bazel_maya_devkit_repository = "load_repository")
-
-_load_bazel_maya_devkit_repository()
