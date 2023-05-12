@@ -1,0 +1,27 @@
+# *nix tool files
+############################
+*.swp
+*~
+
+# OS X files
+############################
+.Spotlight-V100/
+.Trashes/
+._*
+.DS_Store
+Icon\?
+
+# Bazel Build dirs
+############################
+/bazel-*
+/*.bazelrc
+!/.bazelrc
+
+# Local scripts
+############################
+/l_*.sh
+/l_*.bat
+
+# Temp dirs and local notes
+############################
+/tmp
