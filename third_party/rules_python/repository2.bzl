@@ -11,6 +11,9 @@
 # limitations under the License.
 
 load("@rules_python//python:repositories.bzl", _python_register_toolchains = "python_register_toolchains")
+load("@rules_python//python/pip_install:repositories.bzl", _pip_install_dependencies = "pip_install_dependencies")
 
 def configure_repository():
     _python_register_toolchains(name = "python39", python_version = "3.9")
+
+    _pip_install_dependencies()
