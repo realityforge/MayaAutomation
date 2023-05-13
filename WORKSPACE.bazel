@@ -18,6 +18,18 @@ load("//third_party/bazel_skylib:repository.bzl", _load_bazel_skylib_repository 
 
 _load_bazel_skylib_repository()
 
+load("//third_party/bazel_skylib:repository2.bzl", _configure_bazel_skylib_repository = "configure_repository")
+
+_configure_bazel_skylib_repository()
+
+load("//third_party/rules_python:repository.bzl", _load_rules_python_repository = "load_repository")
+
+_load_rules_python_repository()
+
+load("//third_party/rules_python:repository2.bzl", _configure_rules_python_repository = "configure_repository")
+
+_configure_rules_python_repository()
+
 load("//third_party/maya_devkit:repository.bzl", _load_bazel_maya_devkit_repository = "load_repository")
 
 _load_bazel_maya_devkit_repository()
