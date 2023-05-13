@@ -33,3 +33,11 @@ _configure_rules_python_repository()
 load("//third_party/maya_devkit:repository.bzl", _load_bazel_maya_devkit_repository = "load_repository")
 
 _load_bazel_maya_devkit_repository()
+
+load("//third_party/black:repository.bzl", _load_black_repository = "load_repository")
+
+_load_black_repository()
+
+load("//third_party/black:repository2.bzl", _configure_black_repository = "configure_repository")
+
+_configure_black_repository()
