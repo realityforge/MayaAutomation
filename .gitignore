@@ -3,6 +3,10 @@
 *.swp
 *~
 
+# Python compiled files
+############################
+**/__pycache__/*
+
 # OS X files
 ############################
 .Spotlight-V100/
