@@ -10,6 +10,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# *nix tool files
+############################
+*.swp
+*~
+
+# Python compiled files
+############################
+**/__pycache__/*
+
+# OS X files
+############################
+.Spotlight-V100/
+.Trashes/
+._*
+.DS_Store
+Icon\?
+
+# Local scripts
+############################
+/l_*.sh
+/l_*.bat
+
 # Temp dirs and local notes
 ############################
-tmp
+/tmp
