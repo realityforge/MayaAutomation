@@ -10,14 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Workspace named so that BUILD.bazel files in other workspaces can reference this
-# namespace with a fixed name.
-workspace(name = "org_realityforge_maya")
+load("@bazel_skylib//:workspace.bzl", _bazel_skylib_workspace = "bazel_skylib_workspace")
 
-load("//third_party/bazel_skylib:repository.bzl", _load_bazel_skylib_repository = "load_repository")
-
-_load_bazel_skylib_repository()
-
-load("//third_party/maya_devkit:repository.bzl", _load_bazel_maya_devkit_repository = "load_repository")
-
-_load_bazel_maya_devkit_repository()
+def configure_repository():
+    _bazel_skylib_workspace()
