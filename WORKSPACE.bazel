@@ -34,6 +34,14 @@ load("//third_party/go:repository2.bzl", _configure_go_repository = "configure_r
 
 _configure_go_repository()
 
+load("//third_party/protobuf:repository.bzl", _load_protobuf_repository = "load_repository")
+
+_load_protobuf_repository()
+
+load("//third_party/protobuf:repository2.bzl", _configure_protobuf_repository = "configure_repository")
+
+_configure_protobuf_repository()
+
 load("//third_party/rules_python:repository2.bzl", _configure_rules_python_repository = "configure_repository")
 
 _configure_rules_python_repository()
