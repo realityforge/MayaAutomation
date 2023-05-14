@@ -30,6 +30,10 @@ load("//third_party/go:repository.bzl", _load_go_repository = "load_repository")
 
 _load_go_repository()
 
+load("//third_party/buildifier:repository.bzl", _load_buildifier_repository = "load_repository")
+
+_load_buildifier_repository()
+
 load("//third_party/go:repository2.bzl", _configure_go_repository = "configure_repository")
 
 _configure_go_repository()
