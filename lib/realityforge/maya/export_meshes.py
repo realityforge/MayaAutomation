@@ -58,7 +58,6 @@ def export_file_to_substance_painter(base_directory, object_name):
     filename = base_directory + "/" + object_name + "/" + object_name + ".obj"
 
     _selected = cmds.ls(selection=True, shortNames=True)
-    print(_selected)
 
     _matched = polyCleanup(allMeshes=False, selectOnly=True)
     if 0 != len(_matched):
