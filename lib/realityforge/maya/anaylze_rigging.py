@@ -32,3 +32,31 @@ def move_preferred_angle(source_joint_name: str, target_joint_name: str) -> None
     cmds.setAttr(f"{target_joint_name}.preferredAngleX", x)
     cmds.setAttr(f"{target_joint_name}.preferredAngleY", y)
     cmds.setAttr(f"{target_joint_name}.preferredAngleZ", z)
+def has_IK_JDRV_parent(joint_name):
+    parents = cmds.listRelatives(joint_name, parent=True)
+    if parents and 0 != len(parents) and parents[0].endswith('_IK_JDRV'):
+        return True
+    else:
+        return False
+
+def has_IK_JDRV_child(joint_name):
+    children = cmds.listRelatives(joint_name, children=True)
+    if children:
+        for child in children:
+            if child.endswith('_IK_JDRV'):
+                return True
+    return False
+
+def analyze_IK_JDRV_joints(print_errors_only=True):
+    for o in cmds.ls('*_IK_JDRV'):
+        if has_IK_JDRV_parent(o) and has_IK_JDRV_child(o) and 0 == cmds.getAttr(f'{o}.preferredAngleX') and 0 == cmds.getAttr(
+                f'{o}.preferredAngleY') and 0 == cmds.getAttr(f'{o}.preferredAngleZ'):
+            # We should change this so that this check is only applied to internal joints?
+            print(f"{o} BAD - No Preferred Angle Set")
+        # elif 0 != cmds.getAttr(f'{o}.rotateX') or 0 != cmds.getAttr(f'{o}.rotateY') or 0 != cmds.getAttr(f'{o}.rotateZ'):
+        #     print(f"{o} BAD - Rotation is not 0")
+        elif not print_errors_only:
+            print(f"{o} OK")
+
+
+analyze_IK_JDRV_joints()
