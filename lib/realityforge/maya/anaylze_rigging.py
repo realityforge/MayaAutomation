@@ -32,6 +32,93 @@ def move_preferred_angle(source_joint_name: str, target_joint_name: str) -> None
     cmds.setAttr(f"{target_joint_name}.preferredAngleX", x)
     cmds.setAttr(f"{target_joint_name}.preferredAngleY", y)
     cmds.setAttr(f"{target_joint_name}.preferredAngleZ", z)
+
+
+class NodeNamingRule:
+    def __init__(self, node_type: str, pattern: str, optional_ik_system: bool, optional_fk_system: bool):
+        # TODO: Replace optional_(i/f)k_system with system enum?
+        self.node_type = node_type
+        self.pattern = pattern
+        self.needs_side = '[side]' in pattern
+        self.optional_ik_system = optional_ik_system
+        self.optional_fk_system = optional_fk_system
+
+    def matches(self, needs_side: bool, optional_fk_system: bool, optional_ik_system: bool) -> bool:
+        return needs_side == self.needs_side and optional_fk_system == self.optional_fk_system and optional_ik_system == self.optional_ik_system
+
+
+class NodeNameMap:
+    def __init__(self):
+        self.rules: dict[str, list[NodeNamingRule]] = dict()
+
+    def register_rule(self, node_type: str, pattern: str, optional_ik_system: bool = False,
+                      optional_fk_system: bool = False) -> None:
+        rule = NodeNamingRule(node_type, pattern, optional_ik_system=optional_ik_system,
+                              optional_fk_system=optional_fk_system)
+        if node_type not in self.rules:
+            self.rules[node_type] = list()
+
+        replaced = False
+        for i in range(len(self.rules[node_type])):
+            candidate = self.rules[node_type][i]
+            if candidate.matches(rule.needs_side, rule.optional_fk_system, rule.optional_ik_system):
+                self.rules[node_type][i] = rule
+                replaced = True
+        if not replaced:
+            self.rules[node_type].append(rule)
+
+    def derive_name(self, node_type: str, base_name: str, side_name: Optional[str], optional_ik_system: bool = False,
+                    optional_fk_system: bool = False) -> str:
+        needs_side = True if side_name else False
+        matched: Optional[NodeNamingRule] = None
+        for i in range(len(self.rules[node_type])):
+            candidate = self.rules[node_type][i]
+            if candidate.matches(needs_side, optional_fk_system, optional_ik_system):
+                matched = candidate
+
+        if matched:
+            pattern = matched.pattern
+            return pattern.replace("[name]", base_name).replace("[side]", side_name)
+        else:
+            raise Exception(
+                f"Unable to match rule for node_type {node_type}, side_name {side_name}, optional_ik_system {optional_ik_system}, optional_fk_system {optional_fk_system}")
+
+
+DefaultNameMap = NodeNameMap()
+DefaultNameMap.register_rule("joint", "[name]_JNT")
+
+DefaultNameMap.register_rule("control", "[name]_CTRL")
+DefaultNameMap.register_rule("control", "[name]_[side]_CTRL")
+DefaultNameMap.register_rule("control_offset", "[name]_CTRL_OFFSET")
+DefaultNameMap.register_rule("control_offset", "[name]_[side]_CTRL_OFFSET")
+
+DefaultNameMap.register_rule("control", "[name]_FK_CTRL", optional_fk_system=True)
+DefaultNameMap.register_rule("control", "[name]_[side]_FK_CTRL", optional_fk_system=True)
+DefaultNameMap.register_rule("control_offset", "[name]_FK_CTRL_OFFSET", optional_fk_system=True)
+DefaultNameMap.register_rule("control_offset", "[name]_[side]_FK_CTRL_OFFSET", optional_fk_system=True)
+
+DefaultNameMap.register_rule("control", "[name]_IK_CTRL", optional_ik_system=True)
+DefaultNameMap.register_rule("control", "[name]_[side]_IK_CTRL", optional_ik_system=True)
+DefaultNameMap.register_rule("control_offset", "[name]_IK_CTRL_OFFSET", optional_ik_system=True)
+DefaultNameMap.register_rule("control_offset", "[name]_[side]_IK_CTRL_OFFSET", optional_ik_system=True)
+
+
+def create_control_offset(base_name: str, side_name: Optional[str], optional_ik_system: bool = False,
+                          optional_fk_system: bool = False) -> str:
+    group_name = DefaultNameMap.derive_name("control_offset",
+                                            base_name,
+                                            side_name,
+                                            optional_ik_system=optional_ik_system,
+                                            optional_fk_system=optional_fk_system)
+    control_name = DefaultNameMap.derive_name("control",
+                                              base_name,
+                                              side_name,
+                                              optional_ik_system=optional_ik_system,
+                                              optional_fk_system=optional_fk_system)
+    # TODO: Placeholder code - do not use
+    # actual_group_name = cmds.group(name=group_name)
+    # cmds.parent(control_name, actual_group_name)
+
 def analyze_CTRL_joints(print_errors_only=True):
     for o in cmds.ls('*_CTRL'):
         if 0 != cmds.getAttr(f'{o}.translateX') or 0 != cmds.getAttr(f'{o}.translateY') or 0 != cmds.getAttr(
