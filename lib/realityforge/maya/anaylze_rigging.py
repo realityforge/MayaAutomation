@@ -32,6 +32,18 @@ def move_preferred_angle(source_joint_name: str, target_joint_name: str) -> None
     cmds.setAttr(f"{target_joint_name}.preferredAngleX", x)
     cmds.setAttr(f"{target_joint_name}.preferredAngleY", y)
     cmds.setAttr(f"{target_joint_name}.preferredAngleZ", z)
+def analyze_CTRL_joints(print_errors_only=True):
+    for o in cmds.ls('*_CTRL'):
+        if 0 != cmds.getAttr(f'{o}.translateX') or 0 != cmds.getAttr(f'{o}.translateY') or 0 != cmds.getAttr(
+                f'{o}.translateZ'):
+            print(f"{o} BAD - Translation is not 0")
+        elif 0 != cmds.getAttr(f'{o}.rotateX') or 0 != cmds.getAttr(f'{o}.rotateY') or 0 != cmds.getAttr(
+                f'{o}.rotateZ'):
+            print(f"{o} BAD - Rotation is not 0")
+        elif not print_errors_only:
+            print(f"{o} OK")
+
+
 def has_IK_JDRV_parent(joint_name):
     parents = cmds.listRelatives(joint_name, parent=True)
     if parents and 0 != len(parents) and parents[0].endswith('_IK_JDRV'):
@@ -60,3 +72,4 @@ def analyze_IK_JDRV_joints(print_errors_only=True):
 
 
 analyze_IK_JDRV_joints()
+analyze_CTRL_joints()
