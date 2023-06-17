@@ -119,6 +119,7 @@ def create_control_offset(base_name: str, side_name: Optional[str], optional_ik_
     # actual_group_name = cmds.group(name=group_name)
     # cmds.parent(control_name, actual_group_name)
 
+
 def analyze_CTRL_joints(print_errors_only=True):
     for o in cmds.ls('*_CTRL'):
         if 0 != cmds.getAttr(f'{o}.translateX') or 0 != cmds.getAttr(f'{o}.translateY') or 0 != cmds.getAttr(
@@ -138,6 +139,7 @@ def has_IK_JDRV_parent(joint_name):
     else:
         return False
 
+
 def has_IK_JDRV_child(joint_name):
     children = cmds.listRelatives(joint_name, children=True)
     if children:
@@ -146,9 +148,11 @@ def has_IK_JDRV_child(joint_name):
                 return True
     return False
 
+
 def analyze_IK_JDRV_joints(print_errors_only=True):
     for o in cmds.ls('*_IK_JDRV'):
-        if has_IK_JDRV_parent(o) and has_IK_JDRV_child(o) and 0 == cmds.getAttr(f'{o}.preferredAngleX') and 0 == cmds.getAttr(
+        if has_IK_JDRV_parent(o) and has_IK_JDRV_child(o) and 0 == cmds.getAttr(
+                f'{o}.preferredAngleX') and 0 == cmds.getAttr(
                 f'{o}.preferredAngleY') and 0 == cmds.getAttr(f'{o}.preferredAngleZ'):
             # We should change this so that this check is only applied to internal joints?
             print(f"{o} BAD - No Preferred Angle Set")
