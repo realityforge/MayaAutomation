@@ -94,7 +94,6 @@ def lock_and_hide_transform_properties_in_hierarchy(object_name: str, object_nam
     """
     transformed = 0
     matched_object_names = cmds.ls(object_name, type=["transform"])
-    print(f"{object_name} => {matched_object_names}")
     if 1 == len(matched_object_names):
         if parse(object_name_pattern, object_name):
             lock_and_hide_transform_properties(object_name)
@@ -106,5 +105,44 @@ def lock_and_hide_transform_properties_in_hierarchy(object_name: str, object_nam
     if children:
         for child in children:
             transformed += lock_and_hide_transform_properties_in_hierarchy(child, object_name_pattern)
+
+    return transformed
+
+
+def zero_transform_properties(object_name: str) -> None:
+    """Zero the translation, rotation and scale attributes of the specified transform node.
+
+    :param object_name: the name of the transform object.
+    """
+    for attr in ["translate", "rotate"]:
+        for axis in ["X", "Y", "Z"]:
+            if not cmds.getAttr(f"{object_name}.{attr}{axis}", lock=True):
+                cmds.setAttr(f"{object_name}.{attr}{axis}", 0)
+    for axis in ["X", "Y", "Z"]:
+        if not cmds.getAttr(f"{object_name}.scale{axis}", lock=True):
+            cmds.setAttr(f"{object_name}.scale{axis}", 1)
+
+
+def zero_transform_properties_in_hierarchy(object_name: str, object_name_pattern: str) -> int:
+    """Zero the translation, rotation and scale attributes of transform nodes starting at specified
+    root for all child nodes matching name pattern.
+
+    :param object_name: The root transform object name.
+    :param object_name_pattern: the f-string pattern used to match child transform objects.
+    :return: The number of objects matched.
+    """
+    transformed = 0
+    matched_object_names = cmds.ls(object_name, type=["transform"])
+    if 1 == len(matched_object_names):
+        if parse(object_name_pattern, object_name):
+            zero_transform_properties(object_name)
+            transformed += 1
+    elif 0 != len(matched_object_names):
+        raise Exception(f"Multiple objects detected with the name {object_name}. Aborting!")
+
+    children = cmds.listRelatives(object_name, type=["transform"])
+    if children:
+        for child in children:
+            transformed += zero_transform_properties_in_hierarchy(child, object_name_pattern)
 
     return transformed
