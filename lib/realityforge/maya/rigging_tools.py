@@ -70,3 +70,41 @@ def connect_transform_attributes_in_hierarchy(name: str,
                                                                              driven_object_name_pattern)
 
     return transformed
+
+
+def lock_and_hide_transform_properties(object_name: str) -> None:
+    """Lock and remove from the channelbox the attributes of the specified transform object.
+
+    :param object_name: the name of the transform object.
+    """
+    for attr in ["translate", "rotate", "scale"]:
+        for axis in ["X", "Y", "Z"]:
+            cmds.setAttr(f"{object_name}.{attr}{axis}", lock=False)
+            cmds.setAttr(f"{object_name}.{attr}{axis}", lock=False, keyable=False, channelBox=False)
+    cmds.setAttr(f"{object_name}.visibility", lock=False, keyable=False, channelBox=False)
+
+
+def lock_and_hide_transform_properties_in_hierarchy(object_name: str, object_name_pattern: str) -> int:
+    """Lock and remove from the channelbox the attributes of the specified transform object and all transitive
+     child objects that match the specified name pattern.
+
+    :param object_name: The root transform object name.
+    :param object_name_pattern: the f-string pattern used to match child transform objects.
+    :return: The number of objects matched.
+    """
+    transformed = 0
+    matched_object_names = cmds.ls(object_name, type=["transform"])
+    print(f"{object_name} => {matched_object_names}")
+    if 1 == len(matched_object_names):
+        if parse(object_name_pattern, object_name):
+            lock_and_hide_transform_properties(object_name)
+            transformed += 1
+    elif 0 != len(matched_object_names):
+        raise Exception(f"Multiple objects detected with the name {object_name}. Aborting!")
+
+    children = cmds.listRelatives(object_name, type=["transform"])
+    if children:
+        for child in children:
+            transformed += lock_and_hide_transform_properties_in_hierarchy(child, object_name_pattern)
+
+    return transformed
