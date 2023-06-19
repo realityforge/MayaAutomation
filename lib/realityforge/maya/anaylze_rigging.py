@@ -128,6 +128,8 @@ def analyze_CTRL_joints(print_errors_only=True):
         elif 0 != cmds.getAttr(f'{o}.rotateX') or 0 != cmds.getAttr(f'{o}.rotateY') or 0 != cmds.getAttr(
                 f'{o}.rotateZ'):
             print(f"{o} BAD - Rotation is not 0")
+        elif 1 != cmds.getAttr(f'{o}.scaleX') or 1 != cmds.getAttr(f'{o}.scaleY') or 1 != cmds.getAttr(f'{o}.scaleZ'):
+            print(f"{o} BAD - Rotation is not 0")
         elif not print_errors_only:
             print(f"{o} OK")
         # TODO: Add check here that it is not constrained by anything!
