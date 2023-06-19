@@ -130,6 +130,7 @@ def analyze_CTRL_joints(print_errors_only=True):
             print(f"{o} BAD - Rotation is not 0")
         elif not print_errors_only:
             print(f"{o} OK")
+        # TODO: Add check here that it is not constrained by anything!
 
 
 def has_IK_JDRV_parent(joint_name):
