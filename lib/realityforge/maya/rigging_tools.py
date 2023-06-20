@@ -240,3 +240,42 @@ def analyze_control_transforms_in_hierarchy(object_name: str, object_name_patter
             bad_controls += analyze_control_transforms_in_hierarchy(child, object_name_pattern)
 
     return bad_controls
+
+
+def analyze_joint(object_name: str) -> bool:
+    """Check that the joint conforms to expected shape and conventions.
+
+    :param object_name: the name of the object to check.
+    :return: False if the object exists and is invalid, else True.
+    """
+    for attr in ["jointOrient"]:
+        for axis in ["X", "Y", "Z"]:
+            attr_name = f'{object_name}.{attr}{axis}'
+            if 0 != cmds.getAttr(attr_name):
+                print(f"{object_name} BAD - {attr_name} is not 0")
+                return False
+    return True
+
+
+def analyze_joints_in_hierarchy(object_name: str, object_name_pattern: str) -> int:
+    """Check that the joints in object hierarchy conform to expected shape and conventions.
+
+    :param object_name: The root object name.
+    :param object_name_pattern: the f-string pattern used to match joint.
+    :return: The number of invalid joints.
+    """
+    bad_joints = 0
+    matched_object_names = cmds.ls(object_name, exactType="joint")
+    if 1 == len(matched_object_names):
+        if parse(object_name_pattern, object_name):
+            if not analyze_joint(object_name):
+                bad_joints += 1
+    elif 0 != len(matched_object_names):
+        raise Exception(f"Multiple objects detected with the name {object_name}. Aborting!")
+
+    children = cmds.listRelatives(object_name)
+    if children:
+        for child in children:
+            bad_joints += analyze_joints_in_hierarchy(child, object_name_pattern)
+
+    return bad_joints
