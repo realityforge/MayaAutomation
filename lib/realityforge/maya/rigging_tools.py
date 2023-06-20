@@ -146,3 +146,36 @@ def zero_transform_properties_in_hierarchy(object_name: str, object_name_pattern
             transformed += zero_transform_properties_in_hierarchy(child, object_name_pattern)
 
     return transformed
+
+
+def lock_influence_weights(object_name: str) -> None:
+    """Lock the influence weights on the joint specified.
+
+    :param object_name: the name of the joint object.
+    """
+    print(f"Locking {object_name}")
+    cmds.setAttr(f"{object_name}.lockInfluenceWeights", 1)
+
+
+def lock_influence_weights_in_hierarchy(object_name: str, object_name_pattern: str) -> int:
+    """Lock the influence weights on the joints starting at specified root for all child nodes matching name pattern.
+
+    :param object_name: The root object name.
+    :param object_name_pattern: the f-string pattern used to match joint objects.
+    :return: The number of objects matched.
+    """
+    transformed = 0
+    matched_object_names = cmds.ls(object_name, exactType="joint")
+    if 1 == len(matched_object_names):
+        if parse(object_name_pattern, object_name):
+            lock_influence_weights(object_name)
+            transformed += 1
+    elif 0 != len(matched_object_names):
+        raise Exception(f"Multiple objects detected with the name {object_name}. Aborting!")
+
+    children = cmds.listRelatives(object_name)
+    if children:
+        for child in children:
+            transformed += lock_influence_weights_in_hierarchy(child, object_name_pattern)
+
+    return transformed
