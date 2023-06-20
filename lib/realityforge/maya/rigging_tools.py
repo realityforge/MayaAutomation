@@ -179,3 +179,64 @@ def lock_influence_weights_in_hierarchy(object_name: str, object_name_pattern: s
             transformed += lock_influence_weights_in_hierarchy(child, object_name_pattern)
 
     return transformed
+
+
+def analyze_control_transform(object_name: str) -> bool:
+    """Check that the control conforms to expected shape and conventions.
+
+    :param object_name: the name of the object to check.
+    :return: False if the object exists and is invalid, else True.
+    """
+    for attr in ["translate", "rotate"]:
+        for axis in ["X", "Y", "Z"]:
+            attr_name = f'{object_name}.{attr}{axis}'
+            if 0 != cmds.getAttr(attr_name):
+                print(f"{object_name} BAD - {attr_name} is not 0")
+                return False
+            elif not cmds.getAttr(attr_name, lock=True) and not cmds.getAttr(attr_name, settable=True):
+                print(f"{object_name} BAD - {attr_name} is not settable and not locked. Assuming it is connected - Locked={cmds.getAttr(attr_name, lock=True)} Settable={cmds.getAttr(attr_name, settable=True)}")
+                return False
+    for axis in ["X", "Y", "Z"]:
+        attr_name = f'{object_name}.scale{axis}'
+        if 1 != cmds.getAttr(attr_name):
+            print(f"{object_name} BAD - {attr_name} is not 1")
+            return False
+        elif not cmds.getAttr(attr_name, lock=True) and not cmds.getAttr(attr_name, settable=True):
+            print(f"{object_name} BAD - {attr_name} is not settable and not locked. Assuming it is connected")
+            return False
+    # noinspection PyTypeChecker
+    constraints = cmds.listRelatives(object_name,
+                                     type=["parentConstraint",
+                                           "pointConstraint",
+                                           "orientConstraint",
+                                           "scaleConstraint",
+                                           "aimConstraint",
+                                           "pointOnPolyConstraint"])
+    if constraints and 0 != len(constraints):
+        print(f"{object_name} BAD - Constraints exist: {constraints}")
+        return False
+    return True
+
+
+def analyze_control_transforms_in_hierarchy(object_name: str, object_name_pattern: str) -> int:
+    """Check that the controls in object hierarchy conform to expected shape and conventions.
+
+    :param object_name: The root object name.
+    :param object_name_pattern: the f-string pattern used to match control transforms.
+    :return: The number of invalid controls.
+    """
+    bad_controls = 0
+    matched_object_names = cmds.ls(object_name, exactType="transform")
+    if 1 == len(matched_object_names):
+        if parse(object_name_pattern, object_name):
+            if not analyze_control_transform(object_name):
+                bad_controls += 1
+    elif 0 != len(matched_object_names):
+        raise Exception(f"Multiple objects detected with the name {object_name}. Aborting!")
+
+    children = cmds.listRelatives(object_name)
+    if children:
+        for child in children:
+            bad_controls += analyze_control_transforms_in_hierarchy(child, object_name_pattern)
+
+    return bad_controls
