@@ -120,21 +120,6 @@ def create_control_offset(base_name: str, side_name: Optional[str], optional_ik_
     # cmds.parent(control_name, actual_group_name)
 
 
-def analyze_CTRL_joints(print_errors_only=True):
-    for o in cmds.ls('*_CTRL'):
-        if 0 != cmds.getAttr(f'{o}.translateX') or 0 != cmds.getAttr(f'{o}.translateY') or 0 != cmds.getAttr(
-                f'{o}.translateZ'):
-            print(f"{o} BAD - Translation is not 0")
-        elif 0 != cmds.getAttr(f'{o}.rotateX') or 0 != cmds.getAttr(f'{o}.rotateY') or 0 != cmds.getAttr(
-                f'{o}.rotateZ'):
-            print(f"{o} BAD - Rotation is not 0")
-        elif 1 != cmds.getAttr(f'{o}.scaleX') or 1 != cmds.getAttr(f'{o}.scaleY') or 1 != cmds.getAttr(f'{o}.scaleZ'):
-            print(f"{o} BAD - Rotation is not 0")
-        elif not print_errors_only:
-            print(f"{o} OK")
-        # TODO: Add check here that it is not constrained by anything!
-
-
 def has_IK_JDRV_parent(joint_name):
     parents = cmds.listRelatives(joint_name, parent=True)
     if parents and 0 != len(parents) and parents[0].endswith('_IK_JDRV'):
@@ -166,4 +151,3 @@ def analyze_IK_JDRV_joints(print_errors_only=True):
 
 
 analyze_IK_JDRV_joints()
-analyze_CTRL_joints()
