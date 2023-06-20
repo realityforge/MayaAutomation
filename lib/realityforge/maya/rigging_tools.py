@@ -194,7 +194,7 @@ def analyze_control_transform(object_name: str) -> bool:
                 print(f"{object_name} BAD - {attr_name} is not 0")
                 return False
             elif not cmds.getAttr(attr_name, lock=True) and not cmds.getAttr(attr_name, settable=True):
-                print(f"{object_name} BAD - {attr_name} is not settable and not locked. Assuming it is connected - Locked={cmds.getAttr(attr_name, lock=True)} Settable={cmds.getAttr(attr_name, settable=True)}")
+                print(f"{object_name} BAD - {attr_name} is not settable and not locked. Assuming it is connected")
                 return False
     for axis in ["X", "Y", "Z"]:
         attr_name = f'{object_name}.scale{axis}'
