@@ -259,22 +259,22 @@ def polyCleanup(allMeshes, selectOnly, historyOn=False, quads=False, nsided=True
     """Run the cleanup command on polygonal meshes
 
     Args:
-		allMeshes : Run on all selectable meshes or only the currently selected?
-		selectOnly : Should cleanup occur or should we just select matched components?
-		historyOn : Keep construction history if we have chose to cleanup rather than select
+        allMeshes : Run on all selectable meshes or only the currently selected?
+        selectOnly : Should cleanup occur or should we just select matched components?
+        historyOn : Keep construction history if we have chose to cleanup rather than select
 
-		quads : match quad faces
-		nsided : match 4+-sided faces
-		nonplanar : match non-planar faces
-		holed : match faces with holes
-		concave : match concave faces
+        quads : match quad faces
+        nsided : match 4+-sided faces
+        nonplanar : match non-planar faces
+        holed : match faces with holes
+        concave : match concave faces
 
-		zeroGeom : match 0 area faces
-		zeroGeomTol : tolerance for face areas
-		zeroEdge : match 0 length edges
-		zeroEdgeTol : tolerance for edge length
-		zeroMap : match 0 uv face area
-		zeroMapTol : tolerance for uv face areas
+        zeroGeom : match 0 area faces
+        zeroGeomTol : tolerance for face areas
+        zeroEdge : match 0 length edges
+        zeroEdgeTol : tolerance for edge length
+        zeroMap : match 0 uv face area
+        zeroMapTol : tolerance for uv face areas
 
         sharedUVs: Match uvs that are shared across vertices
         nonmanifold: Match nonmanifold faces (0 = Do not match, 1 means Geometry and Normals, 2 means Geometry Only)
