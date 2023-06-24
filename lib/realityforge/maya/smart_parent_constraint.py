@@ -11,30 +11,7 @@
 # limitations under the License.
 
 import maya.cmds as cmds
-
-
-def is_locked(object_name, attr_name):
-    """Return true if the property on the specified object is locked.
-
-    :param object_name: the name of the object.
-    :param attr_name: the long or short name of the property.
-    :return: true if the property on the specified object is locked, false otherwise.
-    """
-    return cmds.getAttr(f"{object_name}.{attr_name}", lock=True)
-
-
-def is_any_locked(object_name, attr_names):
-    """Return true if any specified property on the specified object is locked.
-
-    :param object_name: the name of the object.
-    :param attr_names: a list of property names. They may be long or short names.
-    :return: true if any specified property on the specified object is locked, false otherwise.
-    """
-    for attr_name in attr_names:
-        if is_locked(object_name, attr_name):
-            return True
-    return False
-
+import realityforge.maya.util as util
 
 def smart_parent_constraint(driver_object_name, driven_object_names):
     """Add a parent constraint between the driver object and the driven objects, skipping locked attributes.
@@ -46,9 +23,9 @@ def smart_parent_constraint(driver_object_name, driven_object_names):
         skip_rotate = []
         skip_translate = []
         for axis in ['X', 'Y', 'Z']:
-            if is_locked(driven_object_name, f"rotate{axis}"):
+            if util.is_locked(driven_object_name, f"rotate{axis}"):
                 skip_rotate.append(axis.lower())
-            if is_locked(driven_object_name, f"translate{axis}"):
+            if util.is_locked(driven_object_name, f"translate{axis}"):
                 skip_translate.append(axis.lower())
         # noinspection PyTypeChecker
         cmds.parentConstraint(driver_object_name,
@@ -67,7 +44,7 @@ def smart_scale_constraint(driver_object_name, driven_object_names):
     for driven_object_name in driven_object_names:
         skip = []
         for axis in ['X', 'Y', 'Z']:
-            if is_locked(driven_object_name, f"scale{axis}"):
+            if util.is_locked(driven_object_name, f"scale{axis}"):
                 skip.append(axis.lower())
         cmds.scaleConstraint(driver_object_name, driven_object_name, skip=skip)
 

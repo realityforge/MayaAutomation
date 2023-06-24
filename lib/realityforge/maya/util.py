@@ -1,6 +1,29 @@
 import maya.cmds as cmds
 
 
+def is_locked(object_name, attr_name):
+    """Return true if the property on the specified object is locked.
+
+    :param object_name: the name of the object.
+    :param attr_name: the long or short name of the property.
+    :return: true if the property on the specified object is locked, false otherwise.
+    """
+    return cmds.getAttr(f"{object_name}.{attr_name}", lock=True)
+
+
+def is_any_locked(object_name, attr_names):
+    """Return true if any specified property on the specified object is locked.
+
+    :param object_name: the name of the object.
+    :param attr_names: a list of property names. They may be long or short names.
+    :return: true if any specified property on the specified object is locked, false otherwise.
+    """
+    for attr_name in attr_names:
+        if is_locked(object_name, attr_name):
+            return True
+    return False
+
+
 def unlock_all_attributes(object_name: str, print_debug: bool = False, transitive: bool = True) -> None:
     """Unlock the attributes of the specified object and optionally unlock all child objects.
 
