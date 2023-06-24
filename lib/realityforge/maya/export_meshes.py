@@ -16,11 +16,11 @@ import json
 
 
 def get_scene_short_name():
-    '''Return the basename of the scene file.
-    
+    """Return the basename of the scene file.
+
     Returns:
         the basename of the scene file.
-    '''
+    """
 
     # Get Full path of maya scene
     scene_filename = cmds.file(query=True, sceneName=True)
@@ -33,14 +33,14 @@ def get_scene_short_name():
 
 
 def select_if_present(object_name):
-    '''Check if object with that name exists and select it if present
-    
+    """Check if object with that name exists and select it if present
+
     Args:
         object_name: the name of the object to select
 
     Returns:
         bool: True if node was selected, False otherwise
-    '''
+    """
 
     try:
         cmds.select(object_name, replace=True)
@@ -51,10 +51,10 @@ def select_if_present(object_name):
 
 
 def export_file_to_substance_painter(base_directory, object_name):
-    '''Export file to be textured in the place required for Substance Painter.
-    
+    """Export file to be textured in the place required for Substance Painter.
+
     Expects that the currently selected objects should be exported.
-    '''
+    """
     filename = base_directory + "/" + object_name + "/" + object_name + ".obj"
 
     _selected = cmds.ls(selection=True, shortNames=True)
@@ -75,10 +75,10 @@ def export_file_to_substance_painter(base_directory, object_name):
 
 
 def export_file_to_unreal(base_directory, object_name):
-    '''Export file to be imported into Unreal in the place required for Substance Painter.
-    
+    """Export file to be imported into Unreal in the place required for Substance Painter.
+
     Expects that the currently selected objects should be exported.
-    '''
+    """
     filename = base_directory + "/" + object_name + "/SM_" + object_name + ".fbx"
 
     _selected = cmds.ls(selection=True, shortNames=True)
@@ -150,10 +150,10 @@ def export_file_to_unreal(base_directory, object_name):
 
 
 def export_files():
-    '''Export files required for Substance Painter and Unreal.
-    
+    """Export files required for Substance Painter and Unreal.
+
     The export process will remove the current selection, bake history and perform the export.
-    '''
+    """
     cmds.SelectFacetMask()
     cmds.select(clear=True)
     cmds.selectMode(component=True)
@@ -211,16 +211,16 @@ def export_files():
 
 
 def load_json_data(filename):
-    '''Load json data as dictionary from filename.
-    
+    """Load json data as dictionary from filename.
+
     The filename is relative to the project or absolute.
-    
+
     Args:
         filename: the name of the file to load
 
     Returns:
         dictionary|None: Dictionary if loaded, false otherwise
-    '''
+    """
     qualified_filename = cmds.workspace(expandName=filename)
     with open(qualified_filename, "r") as file:
         try:
@@ -232,7 +232,7 @@ def load_json_data(filename):
 
 
 def require_json_value(filename, data, label, primary_key, secondary_key):
-    '''Extract a value from json that is expected to be present.
+    """Extract a value from json that is expected to be present.
 
     Args:
         filename: the name of the file which the json was loaded
@@ -243,7 +243,7 @@ def require_json_value(filename, data, label, primary_key, secondary_key):
 
     Returns:
         the value of the property
-    '''
+    """
     if None != data[primary_key] and None != data[primary_key][secondary_key]:
         return data[primary_key][secondary_key]
     else:
@@ -254,7 +254,7 @@ def require_json_value(filename, data, label, primary_key, secondary_key):
 def polyCleanup(allMeshes, selectOnly, historyOn=False, quads=False, nsided=True, concave=True, holed=True,
                 nonplanar=False, zeroGeom=True, zeroGeomTol=0.000010, zeroEdge=True, zeroEdgeTol=0.000010, zeroMap=True,
                 zeroMapTol=0.000010, sharedUVs=False, nonmanifold=True, lamina=True, invalidComponents=False):
-    '''Run the cleanup command on polygonal meshes
+    """Run the cleanup command on polygonal meshes
 
     Args:
 		allMeshes : Run on all selectable meshes or only the currently selected?
@@ -282,7 +282,7 @@ def polyCleanup(allMeshes, selectOnly, historyOn=False, quads=False, nsided=True
 
     Returns:
         list of items selected or cleaned up. None if none
-    '''
+    """
 
     _allMeshes = '1' if allMeshes else '0'
     _selectOnly = '2' if selectOnly else '0'
