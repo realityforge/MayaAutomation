@@ -1,5 +1,32 @@
 import maya.cmds as cmds
 
+import os
+import pathlib
+import subprocess
+
+import maya.cmds as cmds
+
+
+def open_explorer(path: str) -> None:
+    """Open the windows explorer with the specified path.
+
+    :param path: the directory
+    """
+    actual_path = os.path.normpath(path)
+
+    explorer_path = pathlib.Path(os.getenv('WINDIR')) / 'explorer.exe'
+
+    if os.path.isdir(actual_path):
+        subprocess.run([explorer_path, actual_path])
+    elif os.path.isfile(actual_path):
+        subprocess.run([explorer_path, '/select,', actual_path])
+
+
+def open_explorer_in_workspace() -> None:
+    """Open the windows explorer in the workspace directory."""
+    # noinspection PyArgumentList
+    open_explorer(cmds.workspace(query=True, directory=True))
+
 
 def get_scene_short_name():
     """Return the basename of the scene file.
