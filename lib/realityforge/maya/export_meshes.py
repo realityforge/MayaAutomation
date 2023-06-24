@@ -13,41 +13,7 @@
 import maya.mel as mel
 import maya.cmds as cmds
 import json
-
-
-def get_scene_short_name():
-    """Return the basename of the scene file.
-
-    Returns:
-        the basename of the scene file.
-    """
-
-    # Get Full path of maya scene
-    scene_filename = cmds.file(query=True, sceneName=True)
-    # Get last part of the path
-    local_scene_filename = scene_filename.split('/')[-1]
-    size = len(local_scene_filename)
-    # Remove ".mb" from the filename
-    scene_short_name = local_scene_filename[:size - 3]
-    return scene_short_name
-
-
-def select_if_present(object_name):
-    """Check if object with that name exists and select it if present
-
-    Args:
-        object_name: the name of the object to select
-
-    Returns:
-        bool: True if node was selected, False otherwise
-    """
-
-    try:
-        cmds.select(object_name, replace=True)
-        return True
-    except:
-        return False
-    return True
+import realityforge.maya.util as util
 
 
 def export_file_to_substance_painter(base_directory, object_name, check_poly_cleanup: bool = True):
@@ -163,7 +129,7 @@ def export_files():
     cmds.selectMode(object=True)
     cmds.select(clear=True)
 
-    scene_short_name = get_scene_short_name()
+    scene_short_name = util.get_scene_short_name()
 
     model_repository_filename = "scenes/model_repository.json"
 
@@ -187,7 +153,7 @@ def export_files():
     cmds.bakePartialHistory(all=True, prePostDeformers=True)
 
     substance_painter_filename = None
-    if select_if_present(substance_painter_object_name):
+    if util.select_if_present(substance_painter_object_name):
         substance_painter_filename = export_file_to_substance_painter(substance_painter_export_directory,
                                                                       scene_short_name)
     else:
@@ -195,7 +161,7 @@ def export_files():
             "Unable to identify object to export for texturing. No object named " + substance_painter_object_name)
 
     unreal_filename = None
-    if select_if_present(scene_short_name):
+    if util.select_if_present(scene_short_name):
         unreal_filename = export_file_to_unreal(unreal_export_directory, scene_short_name)
     else:
         raise Exception(

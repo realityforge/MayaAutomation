@@ -1,6 +1,42 @@
 import maya.cmds as cmds
 
 
+def get_scene_short_name():
+    """Return the basename of the scene file.
+
+    Returns:
+        the basename of the scene file.
+    """
+
+    # Get Full path of maya scene
+    # noinspection PyArgumentList
+    scene_filename = cmds.file(query=True, sceneName=True)
+    # Get last part of the path
+    local_scene_filename = scene_filename.split('/')[-1]
+    size = len(local_scene_filename)
+    # Remove ".mb" from the filename
+    scene_short_name = local_scene_filename[:size - 3]
+    return scene_short_name
+
+
+def select_if_present(object_name):
+    """Check if object with that name exists and select it if present
+
+    Args:
+        object_name: the name of the object to select
+
+    Returns:
+        bool: True if node was selected, False otherwise
+    """
+
+    try:
+        cmds.select(object_name, replace=True)
+        return True
+    except:
+        return False
+    return True
+
+
 def is_locked(object_name, attr_name):
     """Return true if the property on the specified object is locked.
 
