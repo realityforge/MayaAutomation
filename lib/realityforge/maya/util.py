@@ -34,7 +34,6 @@ def select_if_present(object_name):
         return True
     except:
         return False
-    return True
 
 
 def is_locked(object_name, attr_name):
