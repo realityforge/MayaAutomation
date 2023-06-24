@@ -50,7 +50,7 @@ def select_if_present(object_name):
     return True
 
 
-def export_file_to_substance_painter(base_directory, object_name):
+def export_file_to_substance_painter(base_directory, object_name, check_poly_cleanup: bool = True):
     """Export file to be textured in the place required for Substance Painter.
 
     Expects that the currently selected objects should be exported.
@@ -59,11 +59,13 @@ def export_file_to_substance_painter(base_directory, object_name):
 
     _selected = cmds.ls(selection=True, shortNames=True)
 
-    _matched = polyCleanup(allMeshes=False, selectOnly=True)
-    if 0 != len(_matched):
-        raise Exception(
-            "Unable to export object " + object_name + " to '" + filename + "' for Substance Painter as the object has " + str(
-                len(_matched)) + " components that need cleaning up.")
+    if check_poly_cleanup:
+        _matched = polyCleanup(allMeshes=False, selectOnly=True)
+        if 0 != len(_matched):
+            raise Exception(
+                "Unable to export object " + object_name + " to '" + filename +
+                "' for Substance Painter as the object has " + str(len(_matched)) +
+                " components that need cleaning up.")
 
     # Select object again as cleanup identified no isssues
     cmds.select(_selected, replace=True)
