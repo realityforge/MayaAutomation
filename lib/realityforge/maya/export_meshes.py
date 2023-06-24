@@ -233,7 +233,7 @@ def load_json_data(filename):
 
 def require_json_value(filename, data, label, primary_key, secondary_key):
     '''Extract a value from json that is expected to be present.
-    
+
     Args:
         filename: the name of the file which the json was loaded
         data: the json data in Dictionary form
@@ -255,7 +255,7 @@ def polyCleanup(allMeshes, selectOnly, historyOn=False, quads=False, nsided=True
                 nonplanar=False, zeroGeom=True, zeroGeomTol=0.000010, zeroEdge=True, zeroEdgeTol=0.000010, zeroMap=True,
                 zeroMapTol=0.000010, sharedUVs=False, nonmanifold=True, lamina=True, invalidComponents=False):
     '''Run the cleanup command on polygonal meshes
-    
+
     Args:
 		allMeshes : Run on all selectable meshes or only the currently selected?
 		selectOnly : Should cleanup occur or should we just select matched components?
@@ -271,12 +271,12 @@ def polyCleanup(allMeshes, selectOnly, historyOn=False, quads=False, nsided=True
 		zeroGeomTol : tolerance for face areas
 		zeroEdge : match 0 length edges
 		zeroEdgeTol : tolerance for edge length
-		zeroMap : match 0 uv face area 
+		zeroMap : match 0 uv face area
 		zeroMapTol : tolerance for uv face areas
-        
+
         sharedUVs: Match uvs that are shared across vertices
         nonmanifold: Match nonmanifold faces (0 = Do not match, 1 means Geometry and Normals, 2 means Geometry Only)
-        
+
         lamina: Match lamina faces
         invalidComponents: Match invalid components
 
