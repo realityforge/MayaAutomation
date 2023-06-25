@@ -19,7 +19,8 @@ import realityforge.maya.util as util
 class RiggingSettings:
     def __init__(self,
                  root_group: Optional[str] = "rig",
-                 controls_group: Optional[str] = "controls",
+                 controls_group: Optional[str] = "controls_GRP",
+                 control_set: Optional[str] = "controlsSet",
                  use_driver_hierarchy: bool = True,
                  use_control_hierarchy: bool = True,
                  driven_joint_name_pattern: str = "{name}_JNT",
@@ -34,8 +35,10 @@ class RiggingSettings:
                  debug_logging: bool = True):
         self.root_group = root_group
         self.controls_group = controls_group
+        self.control_set = control_set
         self.use_driver_hierarchy = use_driver_hierarchy
         self.use_control_hierarchy = use_control_hierarchy
+        self.use_control_set = use_control_hierarchy
         self.driven_joint_name_pattern = driven_joint_name_pattern
         self.driver_joint_name_pattern = driver_joint_name_pattern
         self.ik_joint_name_pattern = ik_joint_name_pattern
@@ -238,6 +241,11 @@ def create_control(base_name: str, rigging_settings: RiggingSettings) -> str:
     #  scaling based on bone size and all sorts of options. For now we go with random control shape
     actual_control_name = cmds.circle(name=control_name)[0]
     util.ensure_created_object_name_matches("offset group", actual_control_name, control_name)
+
+    # TODO: At some point we may decide to filter which controls go into the control set
+    if rigging_settings.use_control_set:
+        cmds.sets(control_name, edit=True, forceElement=rigging_settings.control_set)
+
     return control_name
 
 
@@ -276,3 +284,20 @@ def setup_top_level_group(rigging_settings: RiggingSettings) -> None:
 
             # Clear selection to avoid unintended selection dependent behaviour
             cmds.select(clear=True)
+
+    if rigging_settings.use_control_set:
+        control_sets = cmds.ls(rigging_settings.control_set, exactType="objectSet")
+        if 0 == len(control_sets):
+            if rigging_settings.debug_logging:
+                print(f"Creating controls set '{rigging_settings.root_group}'")
+        elif 1 == len(control_sets):
+            if rigging_settings.debug_logging:
+                print(f"Re-creating control set '{rigging_settings.root_group}'")
+            cmds.delete(rigging_settings.control_set)
+        else:
+            raise Exception(f"Control set '{rigging_settings.control_set}' already has multiple instances. Aborting!")
+
+        cmds.sets(name=rigging_settings.control_set, empty=True)
+
+        if rigging_settings.debug_logging:
+            print(f"Created control set '{rigging_settings.control_set}'")
