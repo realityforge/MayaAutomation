@@ -124,3 +124,52 @@ def apply_material(object_name: str, material_name: str) -> None:
     """
     cmds.select(object_name, replace=True)
     cmds.hyperShade(assign=material_name)
+
+
+def ensure_single_object_named(object_type: str, object_name: str) -> None:
+    """Generate an error if there is not exactly one object with the specified name.
+
+    :param object_type: the type of the object (as used in error message)
+    :param object_name: the name of the object.
+    """
+    actual_joint_names = cmds.ls(object_name, exactType=object_type)
+    if 0 == len(actual_joint_names):
+        raise Exception(f"Unable to locate {object_type} named '{object_name}'")
+    elif 1 != len(actual_joint_names):
+        raise Exception(f"Multiple {object_type} instances named '{object_name}'. Aborting!")
+
+
+def ensure_created_object_name_matches(object_description: str,
+                                       actual_object_name: str,
+                                       expected_object_name: str) -> None:
+    """Generate an error if the actual object name does not match the expected object name.
+    This is expected to be used after the object has been created.
+
+    :param object_description: the description of the object created.
+    :param actual_object_name: the created objects name.
+    :param expected_object_name: the expected name of the created object.
+    """
+    if actual_object_name != expected_object_name:
+        raise Exception(f"Attempt to create a {object_description} named '{expected_object_name}' resulted in "
+                        f"the creation of a joint named {actual_object_name}'. Possible multiple objects with "
+                        f"the same name. Aborting!")
+
+
+def copy_attributes(source_object_name: str, target_object_name: str, attribute_names: list[str]) -> None:
+    """Copy the values of the specified attributes from the source object to the target object.
+
+    :param source_object_name: the source object.
+    :param target_object_name: the target object.
+    :param attribute_names: the attributes to copy
+    """
+    for attribute_name in attribute_names:
+        try:
+            value = cmds.getAttr(f"{source_object_name}.{attribute_name}")
+        except Exception:
+            raise Exception(f"Failed to get attribute {source_object_name}.{attribute_name} when attempting "
+                            f"to copy attribute to {target_object_name}.{attribute_name}")
+        try:
+            cmds.setAttr(f"{source_object_name}.{attribute_name}", value)
+        except Exception:
+            raise Exception(f"Failed to set attribute {target_object_name}.{attribute_name} when attempting "
+                            f"to copy attribute from {source_object_name}.{attribute_name}")
