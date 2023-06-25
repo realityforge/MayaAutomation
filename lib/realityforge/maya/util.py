@@ -96,7 +96,7 @@ def unlock_all_attributes(object_name: str, print_debug: bool = False, transitiv
     for attr in cmds.listAttr(object_name):
         qualified_attr_name = f"{object_name}.{attr}"
         try:
-            if cmds.getAttr(qualified_attr_name, lock=True) == True:
+            if cmds.getAttr(qualified_attr_name, lock=True):
                 if print_debug:
                     print(f"{qualified_attr_name} is Locked")
                 cmds.setAttr(qualified_attr_name, lock=False)
