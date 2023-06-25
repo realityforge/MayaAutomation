@@ -26,7 +26,7 @@ class RiggingSettings:
                  controls_group: Optional[str] = "controls_GRP",
                  control_set: Optional[str] = "controlsSet",
                  use_driver_hierarchy: bool = True,
-                 use_control_hierarchy: bool = True,
+                 use_control_hierarchy: bool = False,
                  use_control_set: bool = True,
                  driven_joint_name_pattern: str = "{name}_JNT",
                  driver_joint_name_pattern: str = "{name}_JDRV2",
@@ -185,7 +185,8 @@ def process_joint(joint_name: str,
                             world_offset_offset_group_name,
                             rigging_settings.root_group,
                             rigging_settings)
-            # TODO: Add parent (and scale?) constraints to parent control
+            parentConstraint(world_offset_offset_group_name, root_control_name)
+            scaleConstraint(world_offset_offset_group_name, root_control_name)
 
         world_offset_control_name = create_control(rigging_settings.world_offset_base_control_name, rigging_settings)
         safe_parent("world offset control", world_offset_control_name, world_offset_offset_group_name, rigging_settings)
@@ -207,7 +208,8 @@ def process_joint(joint_name: str,
                             cog_offset_group_name,
                             rigging_settings.root_group,
                             rigging_settings)
-            # TODO: Add parent (and scale?) constraints to parent control
+            parentConstraint(cog_offset_group_name, world_offset_control_name)
+            scaleConstraint(cog_offset_group_name, world_offset_control_name)
 
         cog_control_name = create_control(rigging_settings.cog_base_control_name, rigging_settings)
         safe_parent("cog control", cog_control_name, cog_offset_group_name, rigging_settings)
@@ -216,6 +218,18 @@ def process_joint(joint_name: str,
     if child_joints:
         for child_joint_name in child_joints:
             process_joint(child_joint_name, joint_name, rigging_settings)
+
+
+def scaleConstraint(driven_name, driverl_name):
+    cmds.scaleConstraint(driverl_name,
+                         driven_name,
+                         name=f"{driven_name}_scaleConstraint_{driverl_name}")
+
+
+def parentConstraint(driven_name, driver_name):
+    cmds.parentConstraint(driver_name,
+                          driven_name,
+                          name=f"{driven_name}_parentConstraint_{driver_name}")
 
 
 def safe_parent(label, object_name, parent_group_name, rigging_settings):
