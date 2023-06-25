@@ -13,6 +13,7 @@
 import maya.cmds as cmds
 import realityforge.maya.util as util
 
+
 def smart_parent_constraint(driver_object_name, driven_object_names):
     """Add a parent constraint between the driver object and the driven objects, skipping locked attributes.
 
