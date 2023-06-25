@@ -16,6 +16,10 @@ from parse import parse
 import realityforge.maya.util as util
 
 
+# TODO: In the future we should allow things like root group, controls group, controls set etc be prefixed
+#  with a character name or like in some sort of templateable fashion. (alternatively we could just
+#  have functions that create variants with prefixes?)
+
 class RiggingSettings:
     def __init__(self,
                  root_group: Optional[str] = "rig",
