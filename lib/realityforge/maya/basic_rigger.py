@@ -73,6 +73,7 @@ class RiggingSettings:
 
 def process_joint(joint_name: str,
                   parent_joint_name: Optional[str] = None,
+                  parent_control_name: Optional[str] = None,
                   rigging_settings: RiggingSettings = RiggingSettings()) -> None:
     if rigging_settings.debug_logging:
         print(f"Attempting to process joint '{joint_name}' with parent joint named '{parent_joint_name}'")
@@ -119,6 +120,17 @@ def process_joint(joint_name: str,
 
         util.ensure_created_object_name_matches("driver joint", actual_driver_joint_name, driver_joint_name)
 
+        if parent_joint_name:
+            driver_parent_joint_name = rigging_settings.driver_joint_name_pattern.format(name=base_parent_joint_name)
+            if rigging_settings.debug_logging:
+                print(f"Parenting driver joint '{driver_joint_name}' to '{driver_parent_joint_name}'")
+
+            parented = cmds.parent(driver_joint_name, driver_parent_joint_name)
+            if 0 == len(parented):
+                raise Exception(f"Failed to parent '{driver_joint_name}' under '{driver_parent_joint_name}'")
+        elif rigging_settings.root_group:
+            safe_parent("driver joint", driver_joint_name, rigging_settings.root_group, rigging_settings)
+
         cmds.matchTransform(driver_joint_name, joint_name)
         cmds.makeIdentity(driver_joint_name,
                           apply=True,
@@ -153,17 +165,6 @@ def process_joint(joint_name: str,
                              )
         set_selection_child_highlighting(driver_joint_name, rigging_settings)
 
-        if parent_joint_name:
-            driver_parent_joint_name = rigging_settings.driver_joint_name_pattern.format(name=base_parent_joint_name)
-            if rigging_settings.debug_logging:
-                print(f"Parenting driver joint '{driver_joint_name}' to '{driver_parent_joint_name}'")
-
-            parented = cmds.parent(driver_joint_name, driver_parent_joint_name)
-            if 0 == len(parented):
-                raise Exception(f"Failed to parent '{driver_joint_name}' under '{driver_parent_joint_name}'")
-        elif rigging_settings.root_group:
-            safe_parent("driver joint", driver_joint_name, rigging_settings.root_group, rigging_settings)
-
         if rigging_settings.debug_logging:
             print(f"Driver joint '{driver_joint_name}' created.")
 
@@ -171,88 +172,82 @@ def process_joint(joint_name: str,
         cmds.select(clear=True)
 
     if not parent_joint_name:
-        root_offset_group_name = rigging_settings.offset_group_name_pattern.format(name=base_joint_name)
-        world_offset_offset_group_name = \
-            rigging_settings.offset_group_name_pattern.format(name=rigging_settings.world_offset_base_control_name)
-        cog_offset_group_name = \
-            rigging_settings.offset_group_name_pattern.format(name=rigging_settings.cog_base_control_name)
+        root_control_name = setup_control("root", base_joint_name, joint_name, parent_control_name, rigging_settings)
 
-        if rigging_settings.debug_logging:
-            print(f"Creating root control starting at '{base_joint_name}'")
-
-        create_offset_group(root_offset_group_name, joint_name, rigging_settings)
-
-        if rigging_settings.controls_group:
-            safe_parent("root offset group", root_offset_group_name, rigging_settings.controls_group, rigging_settings)
-        elif rigging_settings.root_group:
-            safe_parent("root offset group", root_offset_group_name, rigging_settings.root_group, rigging_settings)
-
-        root_control_name = create_control(base_joint_name, rigging_settings)
-        safe_parent("world offset control", root_control_name, root_offset_group_name, rigging_settings)
-
-        if rigging_settings.debug_logging:
-            print(f"Creating world offset control starting at '{root_control_name}'")
-
-        create_offset_group(world_offset_offset_group_name, joint_name, rigging_settings)
-        if rigging_settings.use_control_hierarchy:
-            safe_parent("world offset group", world_offset_offset_group_name, root_control_name, rigging_settings)
-        else:
-            if rigging_settings.controls_group:
-                safe_parent("world offset group",
-                            world_offset_offset_group_name,
-                            rigging_settings.controls_group,
-                            rigging_settings)
-            elif rigging_settings.root_group:
-                safe_parent("world offset group",
-                            world_offset_offset_group_name,
-                            rigging_settings.root_group,
-                            rigging_settings)
-            parentConstraint(world_offset_offset_group_name, root_control_name)
-            scaleConstraint(world_offset_offset_group_name, root_control_name)
-
-        world_offset_control_name = create_control(rigging_settings.world_offset_base_control_name, rigging_settings)
-        safe_parent("world offset control", world_offset_control_name, world_offset_offset_group_name, rigging_settings)
-
-        if rigging_settings.debug_logging:
-            print(f"Creating cog control starting at '{root_control_name}'")
-
-    rigging_tools.lock_and_hide_transform_properties(offset_group_name)
-        create_offset_group(cog_offset_group_name, joint_name, rigging_settings)
-        if rigging_settings.use_control_hierarchy:
-            safe_parent("cog offset group", cog_offset_group_name, world_offset_control_name, rigging_settings)
-        else:
-            if rigging_settings.controls_group:
-                safe_parent("cog offset group",
-                            cog_offset_group_name,
-                            rigging_settings.controls_group,
-                            rigging_settings)
-            elif rigging_settings.root_group:
-                safe_parent("cog offset group",
-                            cog_offset_group_name,
-                            rigging_settings.root_group,
-                            rigging_settings)
-            parentConstraint(cog_offset_group_name, world_offset_control_name)
-            scaleConstraint(cog_offset_group_name, world_offset_control_name)
-
-        cog_control_name = create_control(rigging_settings.cog_base_control_name, rigging_settings)
-        safe_parent("cog control", cog_control_name, cog_offset_group_name, rigging_settings)
+        world_offset_control_name = setup_control("world offset",
+                                                  rigging_settings.world_offset_base_control_name,
+                                                  joint_name,
+                                                  root_control_name,
+                                                  rigging_settings)
+        control_name = setup_control("cog",
+                                     rigging_settings.cog_base_control_name,
+                                     joint_name,
+                                     world_offset_control_name,
+                                     rigging_settings)
+    else:
+        control_name = setup_control(base_joint_name,
+                                     base_joint_name,
+                                     joint_name,
+                                     parent_control_name,
+                                     rigging_settings)
 
     child_joints = cmds.listRelatives(joint_name, type="joint")
     if child_joints:
         for child_joint_name in child_joints:
-            process_joint(child_joint_name, joint_name, rigging_settings)
+            process_joint(child_joint_name, joint_name, control_name, rigging_settings)
 
 
-def scaleConstraint(driven_name, driverl_name):
-    cmds.scaleConstraint(driverl_name,
+def set_selection_child_highlighting(object_name, rigging_settings):
+    selection_child_highlighting = 1 if rigging_settings.selection_child_highlighting else 0
+    cmds.setAttr(f"{object_name}.selectionChildHighlighting", selection_child_highlighting)
+
+
+def setup_control(label: str,
+                  base_control_name: str,
+                  object_to_match_transforms: str,
+                  parent_control_name: Optional[str],
+                  rigging_settings: RiggingSettings) -> str:
+    if rigging_settings.debug_logging:
+        print(f"Creating {label} control with parent '{parent_control_name}'")
+
+    offset_group_name = rigging_settings.offset_group_name_pattern.format(name=base_control_name)
+    create_offset_group(offset_group_name, object_to_match_transforms, rigging_settings)
+    if rigging_settings.use_control_hierarchy and parent_control_name:
+        safe_parent(f"{label} offset group", offset_group_name, parent_control_name, rigging_settings)
+    else:
+        if rigging_settings.controls_group:
+            safe_parent(f"{label} offset group",
+                        offset_group_name,
+                        rigging_settings.controls_group,
+                        rigging_settings)
+        elif rigging_settings.root_group:
+            safe_parent(f"{label} offset group",
+                        offset_group_name,
+                        rigging_settings.root_group,
+                        rigging_settings)
+        if parent_control_name:
+            parent_constraint(offset_group_name, parent_control_name, True)
+            scale_constraint(offset_group_name, parent_control_name)
+
+    rigging_tools.lock_and_hide_transform_properties(offset_group_name)
+    cmds.select(clear=True)
+    control_name = create_control(base_control_name, rigging_settings)
+    safe_parent(f"{label} control", control_name, offset_group_name, rigging_settings)
+
+    return control_name
+
+
+def scale_constraint(driven_name, driver_name):
+    cmds.scaleConstraint(driver_name,
                          driven_name,
-                         name=f"{driven_name}_scaleConstraint_{driverl_name}")
+                         name=f"{driven_name}_scaleConstraint_{driver_name}")
 
 
-def parentConstraint(driven_name, driver_name):
+def parent_constraint(driven_name, driver_name, maintain_offset: bool = False):
     cmds.parentConstraint(driver_name,
                           driven_name,
-                          name=f"{driven_name}_parentConstraint_{driver_name}")
+                          maintainOffset=maintain_offset,
+                          name=f"{driver_name}_parentConstraint_{driven_name}")
 
 
 def safe_parent(label, object_name, parent_group_name, rigging_settings):
@@ -287,6 +282,8 @@ def create_control(base_name: str, rigging_settings: RiggingSettings) -> str:
     set_selection_child_highlighting(control_name, rigging_settings)
 
     cmds.select(clear=True)
+
+    parent_constraint(control_name, offset_group_name, False)
 
     # TODO: At some point we may decide to filter which controls go into the control set
     if rigging_settings.use_control_set:
