@@ -19,6 +19,7 @@ import realityforge.maya.util as util
 class RiggingSettings:
     def __init__(self,
                  root_group: Optional[str] = "rig",
+                 controls_group: Optional[str] = "controls",
                  use_driver_hierarchy: bool = True,
                  driven_joint_name_pattern: str = "{name}_JNT",
                  driver_joint_name_pattern: str = "{name}_JDRV2",
@@ -29,6 +30,7 @@ class RiggingSettings:
                  sided_name_pattern: str = "{name}_{side}",
                  debug_logging: bool = True):
         self.root_group = root_group
+        self.controls_group = controls_group
         self.use_driver_hierarchy = use_driver_hierarchy
         self.driven_joint_name_pattern = driven_joint_name_pattern
         self.driver_joint_name_pattern = driver_joint_name_pattern
@@ -74,25 +76,8 @@ def process_joint(joint_name: str,
         base_parent_joint_name = None
 
     # Setup the root group for rig ... if required
-    if rigging_settings.root_group and not parent_joint_name:
-        root_groups = cmds.ls(rigging_settings.root_group, exactType="transform")
-        if 0 == len(root_groups):
-            if rigging_settings.debug_logging:
-                print(f"Creating root group '{rigging_settings.root_group}'")
-            cmds.group(name=rigging_settings.root_group, empty=True)
-            # Clear selection to avoid unintended selection dependent behaviour
-            cmds.select(clear=True)
-        elif 1 == len(root_groups):
-            if rigging_settings.debug_logging:
-                print(f"Re-creating root group '{rigging_settings.root_group}'")
-            # Clear selection to avoid unintended selection dependent behaviour
-            cmds.select(clear=True)
-            cmds.delete(rigging_settings.root_group)
-            cmds.group(name=rigging_settings.root_group, empty=True)
-            # Clear selection to avoid unintended selection dependent behaviour
-            cmds.select(clear=True)
-        else:
-            raise Exception(f"Root group '{rigging_settings.root_group}' already has multiple instances. Aborting!")
+    if not parent_joint_name:
+        setup_top_level_group(rigging_settings)
 
     # Setup the driver joint chain
     if rigging_settings.use_driver_hierarchy:
@@ -157,3 +142,38 @@ def safe_parent(label, object_name, parent_group_name, rigging_settings):
     parented = cmds.parent(object_name, parent_group_name)
     if 0 == len(parented):
         raise Exception(f"Failed to parent '{object_name}' under '{parent_group_name}'")
+
+
+def setup_top_level_group(rigging_settings: RiggingSettings) -> None:
+    if rigging_settings.root_group:
+        root_groups = cmds.ls(rigging_settings.root_group, exactType="transform")
+        if 0 == len(root_groups):
+            if rigging_settings.debug_logging:
+                print(f"Creating root group '{rigging_settings.root_group}'")
+        elif 1 == len(root_groups):
+            if rigging_settings.debug_logging:
+                print(f"Re-creating root group '{rigging_settings.root_group}'")
+            cmds.delete(rigging_settings.root_group)
+        else:
+            raise Exception(f"Root group '{rigging_settings.root_group}' already has multiple instances. Aborting!")
+
+        actual_root_group_name = cmds.group(name=rigging_settings.root_group, empty=True)
+        util.ensure_created_object_name_matches("root group", actual_root_group_name, rigging_settings.root_group)
+        # Clear selection to avoid unintended selection dependent behaviour
+        cmds.select(clear=True)
+
+    if rigging_settings.controls_group:
+        actual_controls_group_name = cmds.group(name=rigging_settings.controls_group, empty=True)
+        util.ensure_created_object_name_matches("controls group",
+                                                actual_controls_group_name,
+                                                rigging_settings.controls_group)
+        # Clear selection to avoid unintended selection dependent behaviour
+        cmds.select(clear=True)
+        if rigging_settings.root_group:
+            safe_parent("controls group",
+                        rigging_settings.controls_group,
+                        rigging_settings.root_group,
+                        rigging_settings)
+
+            # Clear selection to avoid unintended selection dependent behaviour
+            cmds.select(clear=True)
