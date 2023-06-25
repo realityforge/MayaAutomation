@@ -48,9 +48,6 @@ class RiggingSettings:
         self.debug_logging = debug_logging
 
 
-DefaultRiggingSettings = RiggingSettings()
-
-
 # TODO: This following method should also:
 # - check that the incoming joint chain is valid in that it
 #    - has 0 jointOrient
@@ -60,7 +57,7 @@ DefaultRiggingSettings = RiggingSettings()
 
 def process_joint(joint_name: str,
                   parent_joint_name: Optional[str] = None,
-                  rigging_settings: RiggingSettings = DefaultRiggingSettings) -> None:
+                  rigging_settings: RiggingSettings = RiggingSettings()) -> None:
     if rigging_settings.debug_logging:
         print(f"Attempting to process joint '{joint_name}' with parent joint named '{parent_joint_name}'")
 
