@@ -21,6 +21,7 @@ class RiggingSettings:
                  root_group: Optional[str] = "rig",
                  controls_group: Optional[str] = "controls",
                  use_driver_hierarchy: bool = True,
+                 use_control_hierarchy: bool = True,
                  driven_joint_name_pattern: str = "{name}_JNT",
                  driver_joint_name_pattern: str = "{name}_JDRV2",
                  ik_joint_name_pattern: str = "{name}_IK_JDRV2",
@@ -28,10 +29,13 @@ class RiggingSettings:
                  offset_group_name_pattern: str = "{name}_OFF_GRP2",
                  control_name_pattern: str = "{name}_CTRL2",
                  sided_name_pattern: str = "{name}_{side}",
+                 cog_base_control_name: str = "cog2",
+                 world_offset_base_control_name: str = "world_offset2",
                  debug_logging: bool = True):
         self.root_group = root_group
         self.controls_group = controls_group
         self.use_driver_hierarchy = use_driver_hierarchy
+        self.use_control_hierarchy = use_control_hierarchy
         self.driven_joint_name_pattern = driven_joint_name_pattern
         self.driver_joint_name_pattern = driver_joint_name_pattern
         self.ik_joint_name_pattern = ik_joint_name_pattern
@@ -39,6 +43,8 @@ class RiggingSettings:
         self.offset_group_name_pattern = offset_group_name_pattern
         self.control_name_pattern = control_name_pattern
         self.sided_name_pattern = sided_name_pattern
+        self.cog_base_control_name = cog_base_control_name
+        self.world_offset_base_control_name = world_offset_base_control_name
         self.debug_logging = debug_logging
 
 
@@ -127,8 +133,72 @@ def process_joint(joint_name: str,
         if rigging_settings.debug_logging:
             print(f"Driver joint '{driver_joint_name}' created.")
 
-    # Clear selection to avoid unintended selection dependent behaviour
-    cmds.select(clear=True)
+        # Clear selection to avoid unintended selection dependent behaviour
+        cmds.select(clear=True)
+
+    if not parent_joint_name:
+        root_offset_group_name = rigging_settings.offset_group_name_pattern.format(name=base_joint_name)
+        world_offset_offset_group_name = \
+            rigging_settings.offset_group_name_pattern.format(name=rigging_settings.world_offset_base_control_name)
+        cog_offset_group_name = \
+            rigging_settings.offset_group_name_pattern.format(name=rigging_settings.cog_base_control_name)
+
+        if rigging_settings.debug_logging:
+            print(f"Creating root control starting at '{base_joint_name}'")
+
+        create_offset_group(root_offset_group_name, joint_name, rigging_settings)
+
+        if rigging_settings.controls_group:
+            safe_parent("root offset group", root_offset_group_name, rigging_settings.controls_group, rigging_settings)
+        elif rigging_settings.root_group:
+            safe_parent("root offset group", root_offset_group_name, rigging_settings.root_group, rigging_settings)
+
+        root_control_name = create_control(base_joint_name, rigging_settings)
+        safe_parent("world offset control", root_control_name, root_offset_group_name, rigging_settings)
+
+        if rigging_settings.debug_logging:
+            print(f"Creating world offset control starting at '{root_control_name}'")
+
+        create_offset_group(world_offset_offset_group_name, joint_name, rigging_settings)
+        if rigging_settings.use_control_hierarchy:
+            safe_parent("world offset group", world_offset_offset_group_name, root_control_name, rigging_settings)
+        else:
+            if rigging_settings.controls_group:
+                safe_parent("world offset group",
+                            world_offset_offset_group_name,
+                            rigging_settings.controls_group,
+                            rigging_settings)
+            elif rigging_settings.root_group:
+                safe_parent("world offset group",
+                            world_offset_offset_group_name,
+                            rigging_settings.root_group,
+                            rigging_settings)
+            # TODO: Add parent (and scale?) constraints to parent control
+
+        world_offset_control_name = create_control(rigging_settings.world_offset_base_control_name, rigging_settings)
+        safe_parent("world offset control", world_offset_control_name, world_offset_offset_group_name, rigging_settings)
+
+        if rigging_settings.debug_logging:
+            print(f"Creating cog control starting at '{root_control_name}'")
+
+        create_offset_group(cog_offset_group_name, joint_name, rigging_settings)
+        if rigging_settings.use_control_hierarchy:
+            safe_parent("cog offset group", cog_offset_group_name, world_offset_control_name, rigging_settings)
+        else:
+            if rigging_settings.controls_group:
+                safe_parent("cog offset group",
+                            cog_offset_group_name,
+                            rigging_settings.controls_group,
+                            rigging_settings)
+            elif rigging_settings.root_group:
+                safe_parent("cog offset group",
+                            cog_offset_group_name,
+                            rigging_settings.root_group,
+                            rigging_settings)
+            # TODO: Add parent (and scale?) constraints to parent control
+
+        cog_control_name = create_control(rigging_settings.cog_base_control_name, rigging_settings)
+        safe_parent("cog control", cog_control_name, cog_offset_group_name, rigging_settings)
 
     child_joints = cmds.listRelatives(joint_name, type="joint")
     if child_joints:
@@ -142,6 +212,29 @@ def safe_parent(label, object_name, parent_group_name, rigging_settings):
     parented = cmds.parent(object_name, parent_group_name)
     if 0 == len(parented):
         raise Exception(f"Failed to parent '{object_name}' under '{parent_group_name}'")
+
+
+def create_offset_group(object_name: str, object_name_to_match: str, rigging_settings: RiggingSettings) -> None:
+    if rigging_settings.debug_logging:
+        print(f"Creating offset group '{object_name}' matching '{object_name_to_match}'")
+    util.ensure_single_object_named(None, object_name_to_match)
+    actual_object_name = cmds.group(name=object_name, empty=True)
+    util.ensure_created_object_name_matches("offset group", actual_object_name, object_name)
+    cmds.matchTransform(object_name, object_name_to_match)
+
+
+def create_control(base_name: str, rigging_settings: RiggingSettings) -> str:
+    control_name = rigging_settings.control_name_pattern.format(name=base_name)
+    offset_group_name = rigging_settings.offset_group_name_pattern.format(name=base_name)
+    if rigging_settings.debug_logging:
+        print(f"Creating control '{control_name}' in offset group '{offset_group_name}'")
+    util.ensure_single_object_named(None, offset_group_name)
+
+    # TODO: In the future we should support all sorts of control types (copy from catalog?) and
+    #  scaling based on bone size and all sorts of options. For now we go with random control shape
+    actual_control_name = cmds.circle(name=control_name)[0]
+    util.ensure_created_object_name_matches("offset group", actual_control_name, control_name)
+    return control_name
 
 
 def setup_top_level_group(rigging_settings: RiggingSettings) -> None:
