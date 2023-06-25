@@ -140,7 +140,14 @@ def process_joint(joint_name: str,
                                  # Joint Labelling
                                  "side",
                                  "type",
-                                 "drawLabel"
+                                 "drawLabel",
+                                 # Drawing Overrides
+                                 "overrideEnabled",
+                                 "overrideColor",
+                                 "overridePlayback",
+                                 "overrideShading",
+                                 "overrideVisibility",
+                                 "overrideTexturing",
                              ]
                              )
 
