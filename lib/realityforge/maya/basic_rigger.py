@@ -284,6 +284,8 @@ def create_control(base_name: str, rigging_settings: RiggingSettings) -> str:
     util.ensure_created_object_name_matches("offset group", actual_control_name, control_name)
     set_selection_child_highlighting(control_name, rigging_settings)
 
+    cmds.select(clear=True)
+
     # TODO: At some point we may decide to filter which controls go into the control set
     if rigging_settings.use_control_set:
         cmds.sets(control_name, edit=True, forceElement=rigging_settings.control_set)
