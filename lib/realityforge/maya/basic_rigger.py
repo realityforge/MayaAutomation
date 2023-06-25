@@ -258,6 +258,8 @@ def setup_top_level_group(rigging_settings: RiggingSettings) -> None:
         util.ensure_created_object_name_matches("root group", actual_root_group_name, rigging_settings.root_group)
         # Clear selection to avoid unintended selection dependent behaviour
         cmds.select(clear=True)
+        if rigging_settings.debug_logging:
+            print(f"Created root group '{rigging_settings.root_group}'")
 
     if rigging_settings.controls_group:
         actual_controls_group_name = cmds.group(name=rigging_settings.controls_group, empty=True)
