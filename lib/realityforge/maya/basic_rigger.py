@@ -150,6 +150,7 @@ def process_joint(joint_name: str,
                                  "overrideTexturing",
                              ]
                              )
+        set_selection_child_highlighting(driver_joint_name, rigging_settings)
 
         if parent_joint_name:
             driver_parent_joint_name = rigging_settings.driver_joint_name_pattern.format(name=base_parent_joint_name)
