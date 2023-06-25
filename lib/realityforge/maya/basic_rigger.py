@@ -108,7 +108,7 @@ def process_joint(joint_name: str,
 
         util.ensure_created_object_name_matches("driver joint", actual_driver_joint_name, driver_joint_name)
 
-        cmds.matchTransform(driver_joint_name, joint_name, pivots=True, rotation=True)
+        cmds.matchTransform(driver_joint_name, joint_name)
         cmds.makeIdentity(driver_joint_name, apply=True, rotate=True)
 
         util.copy_attributes(joint_name,
