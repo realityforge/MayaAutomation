@@ -169,7 +169,7 @@ def copy_attributes(source_object_name: str, target_object_name: str, attribute_
             raise Exception(f"Failed to get attribute {source_object_name}.{attribute_name} when attempting "
                             f"to copy attribute to {target_object_name}.{attribute_name}")
         try:
-            cmds.setAttr(f"{source_object_name}.{attribute_name}", value)
+            cmds.setAttr(f"{target_object_name}.{attribute_name}", value)
         except Exception:
             raise Exception(f"Failed to set attribute {target_object_name}.{attribute_name} when attempting "
                             f"to copy attribute from {source_object_name}.{attribute_name}")
