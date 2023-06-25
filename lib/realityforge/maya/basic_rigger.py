@@ -14,6 +14,7 @@ import maya.cmds as cmds
 from typing import Optional
 from parse import parse
 import realityforge.maya.util as util
+import realityforge.maya.rigging_tools as rigging_tools
 
 
 # TODO: In the future we should allow things like root group, controls group, controls set etc be prefixed
@@ -215,6 +216,7 @@ def process_joint(joint_name: str,
         if rigging_settings.debug_logging:
             print(f"Creating cog control starting at '{root_control_name}'")
 
+    rigging_tools.lock_and_hide_transform_properties(offset_group_name)
         create_offset_group(cog_offset_group_name, joint_name, rigging_settings)
         if rigging_settings.use_control_hierarchy:
             safe_parent("cog offset group", cog_offset_group_name, world_offset_control_name, rigging_settings)
