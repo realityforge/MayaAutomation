@@ -137,12 +137,7 @@ def process_joint(joint_name: str,
             if 0 == len(parented):
                 raise Exception(f"Failed to parent '{driver_joint_name}' under '{driver_parent_joint_name}'")
         elif rigging_settings.root_group:
-            if rigging_settings.debug_logging:
-                print(f"Parenting driver joint '{driver_joint_name}' to '{rigging_settings.root_group}'")
-
-            parented = cmds.parent(driver_joint_name, rigging_settings.root_group)
-            if 0 == len(parented):
-                raise Exception(f"Failed to parent '{driver_joint_name}' under '{rigging_settings.root_group}'")
+            safe_parent("driver joint", driver_joint_name, rigging_settings.root_group, rigging_settings)
 
         if rigging_settings.debug_logging:
             print(f"Driver joint '{driver_joint_name}' created.")
@@ -154,3 +149,11 @@ def process_joint(joint_name: str,
     if child_joints:
         for child_joint_name in child_joints:
             process_joint(child_joint_name, joint_name, rigging_settings)
+
+
+def safe_parent(label, object_name, parent_group_name, rigging_settings):
+    if rigging_settings.debug_logging:
+        print(f"Parenting {label} '{object_name}' to '{parent_group_name}'")
+    parented = cmds.parent(object_name, parent_group_name)
+    if 0 == len(parented):
+        raise Exception(f"Failed to parent '{object_name}' under '{parent_group_name}'")
