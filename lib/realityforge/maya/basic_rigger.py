@@ -22,10 +22,10 @@ class RiggingSettings:
                  use_driver_hierarchy: bool = True,
                  driven_joint_name_pattern: str = "{name}_JNT",
                  driver_joint_name_pattern: str = "{name}_JDRV2",
-                 ik_joint_name_pattern: str = "{name}_IK_JDRV",
-                 fk_joint_name_pattern: str = "{name}_FK_JDRV",
-                 offset_group_name_pattern: str = "{name}_OFF_GRP",
-                 control_name_pattern: str = "{name}_CTRL",
+                 ik_joint_name_pattern: str = "{name}_IK_JDRV2",
+                 fk_joint_name_pattern: str = "{name}_FK_JDRV2",
+                 offset_group_name_pattern: str = "{name}_OFF_GRP2",
+                 control_name_pattern: str = "{name}_CTRL2",
                  sided_name_pattern: str = "{name}_{side}",
                  debug_logging: bool = True):
         self.root_group = root_group
