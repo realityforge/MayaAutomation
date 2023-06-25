@@ -37,6 +37,12 @@ class RiggingSettings:
                  sided_name_pattern: str = "{name}_{side}",
                  cog_base_control_name: str = "cog2",
                  world_offset_base_control_name: str = "world_offset2",
+
+                 # Should this variable be set on created elements? If so the user can change the
+                 # "Settings > Selection > Selection Child Highlighting" config via the menu item
+                 # "Windows > Settings/Preferences > Preferences" so that highlighting will not
+                 # flow down the hierarchy
+                 selection_child_highlighting: bool = False,
                  debug_logging: bool = True):
         self.root_group = root_group
         self.controls_group = controls_group
@@ -53,6 +59,7 @@ class RiggingSettings:
         self.sided_name_pattern = sided_name_pattern
         self.cog_base_control_name = cog_base_control_name
         self.world_offset_base_control_name = world_offset_base_control_name
+        self.selection_child_highlighting = selection_child_highlighting
         self.debug_logging = debug_logging
 
 
@@ -247,6 +254,7 @@ def create_offset_group(object_name: str, object_name_to_match: str, rigging_set
     actual_object_name = cmds.group(name=object_name, empty=True)
     util.ensure_created_object_name_matches("offset group", actual_object_name, object_name)
     cmds.matchTransform(object_name, object_name_to_match)
+    set_selection_child_highlighting(object_name, rigging_settings)
 
 
 def create_control(base_name: str, rigging_settings: RiggingSettings) -> str:
@@ -260,6 +268,7 @@ def create_control(base_name: str, rigging_settings: RiggingSettings) -> str:
     #  scaling based on bone size and all sorts of options. For now we go with random control shape
     actual_control_name = cmds.circle(name=control_name)[0]
     util.ensure_created_object_name_matches("offset group", actual_control_name, control_name)
+    set_selection_child_highlighting(control_name, rigging_settings)
 
     # TODO: At some point we may decide to filter which controls go into the control set
     if rigging_settings.use_control_set:
@@ -283,6 +292,7 @@ def setup_top_level_group(rigging_settings: RiggingSettings) -> None:
 
         actual_root_group_name = cmds.group(name=rigging_settings.root_group, empty=True)
         util.ensure_created_object_name_matches("root group", actual_root_group_name, rigging_settings.root_group)
+        set_selection_child_highlighting(rigging_settings.root_group, rigging_settings)
         # Clear selection to avoid unintended selection dependent behaviour
         cmds.select(clear=True)
         if rigging_settings.debug_logging:
@@ -293,6 +303,7 @@ def setup_top_level_group(rigging_settings: RiggingSettings) -> None:
         util.ensure_created_object_name_matches("controls group",
                                                 actual_controls_group_name,
                                                 rigging_settings.controls_group)
+        set_selection_child_highlighting(rigging_settings.controls_group, rigging_settings)
         # Clear selection to avoid unintended selection dependent behaviour
         cmds.select(clear=True)
         if rigging_settings.root_group:
