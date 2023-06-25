@@ -15,6 +15,7 @@ import pathlib
 import subprocess
 
 import maya.cmds as cmds
+from typing import Optional
 
 
 def open_explorer(path: str) -> None:
@@ -136,13 +137,18 @@ def apply_material(object_name: str, material_name: str) -> None:
     cmds.hyperShade(assign=material_name)
 
 
-def ensure_single_object_named(object_type: str, object_name: str) -> None:
+def ensure_single_object_named(exact_type: Optional[str], object_name: str) -> None:
     """Generate an error if there is not exactly one object with the specified name.
 
     :param object_type: the type of the object (as used in error message)
     :param object_name: the name of the object.
     """
-    actual_joint_names = cmds.ls(object_name, exactType=object_type)
+    if exact_type:
+        actual_joint_names = cmds.ls(object_name, exactType=exact_type)
+        object_type = exact_type
+    else:
+        actual_joint_names = cmds.ls(object_name)
+        object_type = "object"
     if 0 == len(actual_joint_names):
         raise Exception(f"Unable to locate {object_type} named '{object_name}'")
     elif 1 != len(actual_joint_names):
