@@ -17,7 +17,6 @@ import subprocess
 import maya.cmds as cmds
 from typing import Optional
 
-
 def open_explorer(path: str) -> None:
     """Open the windows explorer with the specified path.
 
@@ -104,6 +103,8 @@ def unlock_all_attributes(object_name: str, print_debug: bool = False, transitiv
     :param print_debug: should debug prints be emitted.
     :param transitive: should the unlocking process propagate to child.
     """
+    if print_debug:
+        print(f"unlock_all_attributes({object_name}, transitive={transitive})")
     for attr in cmds.listAttr(object_name):
         qualified_attr_name = f"{object_name}.{attr}"
         try:
