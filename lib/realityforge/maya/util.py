@@ -94,8 +94,8 @@ def unlock_all_attributes(object_name: str, print_debug: bool = False, transitiv
     :param transitive: should the unlocking process propagate to child.
     """
     for attr in cmds.listAttr(object_name):
+        qualified_attr_name = f"{object_name}.{attr}"
         try:
-            qualified_attr_name = f"{object_name}.{attr}"
             if cmds.getAttr(qualified_attr_name, lock=True) == True:
                 if print_debug:
                     print(f"{qualified_attr_name} is Locked")
