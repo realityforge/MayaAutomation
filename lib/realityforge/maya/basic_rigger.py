@@ -51,6 +51,13 @@ class RiggingSettings:
 DefaultRiggingSettings = RiggingSettings()
 
 
+# TODO: This following method should also:
+# - check that the incoming joint chain is valid in that it
+#    - has 0 jointOrient
+#    - has preferred angle set for internal joints in IK chains
+#    - has skin clusters for all joins except those that are on an allow list for no clusters
+#    - has joint orientations that are world for certain joints chains????
+
 def process_joint(joint_name: str,
                   parent_joint_name: Optional[str] = None,
                   rigging_settings: RiggingSettings = DefaultRiggingSettings) -> None:
