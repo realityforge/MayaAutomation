@@ -27,6 +27,7 @@ class RiggingSettings:
                  control_set: Optional[str] = "controlsSet",
                  use_driver_hierarchy: bool = True,
                  use_control_hierarchy: bool = True,
+                 use_control_set: bool = True,
                  driven_joint_name_pattern: str = "{name}_JNT",
                  driver_joint_name_pattern: str = "{name}_JDRV2",
                  ik_joint_name_pattern: str = "{name}_IK_JDRV2",
@@ -42,7 +43,7 @@ class RiggingSettings:
         self.control_set = control_set
         self.use_driver_hierarchy = use_driver_hierarchy
         self.use_control_hierarchy = use_control_hierarchy
-        self.use_control_set = use_control_hierarchy
+        self.use_control_set = use_control_set
         self.driven_joint_name_pattern = driven_joint_name_pattern
         self.driver_joint_name_pattern = driver_joint_name_pattern
         self.ik_joint_name_pattern = ik_joint_name_pattern
