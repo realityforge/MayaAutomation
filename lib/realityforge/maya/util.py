@@ -1,5 +1,3 @@
-import maya.cmds as cmds
-
 import os
 import pathlib
 import subprocess
