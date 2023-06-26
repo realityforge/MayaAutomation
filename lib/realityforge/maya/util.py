@@ -17,6 +17,7 @@ import subprocess
 import maya.cmds as cmds
 from typing import Optional
 
+
 def open_explorer(path: str) -> None:
     """Open the windows explorer with the specified path.
 
