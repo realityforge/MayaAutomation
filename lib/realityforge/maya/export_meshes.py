@@ -60,6 +60,12 @@ def export_file_to_unreal(base_directory, object_name):
     # Select object again as cleanup identified no issues
     cmds.select(_selected, replace=True)
 
+    export_selected_as_fbx(filename)
+
+    return filename
+
+
+def export_selected_as_fbx(filename: str) -> None:
     # get current user settings for FBX export and store them
     mel.eval('FBXPushSettings')
     try:
@@ -113,8 +119,6 @@ def export_file_to_unreal(base_directory, object_name):
     finally:
         # set user-defined FBX settings back after export
         mel.eval('FBXPopSettings')
-
-    return filename
 
 
 def export_files():
