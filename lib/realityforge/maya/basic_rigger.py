@@ -346,3 +346,11 @@ def setup_top_level_group(rigging_settings: RiggingSettings) -> None:
 
         if rigging_settings.debug_logging:
             print(f"Created control set '{rigging_settings.control_set}'")
+
+
+
+# TODO: Features to add:
+# * a "set" that includes the joints to export as a skeleton
+# * a "set" that includes the joints and mesh to export as a skeletal mesh
+# * put controls in layers so that they can be turned off individually (Remove visibility switch from controls? or support both?). See Azri rig for example
+# * Generate ik/fk (and stretch???) chains for limbs and switch between them? (See https://www.youtube.com/playlist?list=PLgala72Uap1rtRRi-MAI0RMc7w1fpD2Io
