@@ -277,7 +277,7 @@ def create_control(base_name: str, rigging_settings: RiggingSettings) -> str:
 
     # TODO: In the future we should support all sorts of control types (copy from catalog?) and
     #  scaling based on bone size and all sorts of options. For now we go with random control shape
-    actual_control_name = cmds.circle(name=control_name)[0]
+    actual_control_name = cmds.circle(name=control_name, normalX=0, normalY=1, normalZ=0, radius=1)[0]
     util.ensure_created_object_name_matches("offset group", actual_control_name, control_name)
     set_selection_child_highlighting(control_name, rigging_settings)
 
