@@ -18,6 +18,24 @@ import maya.cmds as cmds
 from typing import Optional
 
 
+def open_console(path: str) -> None:
+    """Open the windows command prompt in the the specified directory.
+
+    :param path: the directory
+    """
+    actual_path = os.path.normpath(path)
+
+    explorer_path = pathlib.Path(os.getenv('WINDIR')) / r'system32\cmd.exe'
+
+    subprocess.run([explorer_path, "/K", "cd", actual_path])
+
+
+def open_console_in_workspace() -> None:
+    """Open the windows command prompt in the workspace directory."""
+    # noinspection PyArgumentList
+    open_console(cmds.workspace(query=True, directory=True))
+
+
 def open_explorer(path: str) -> None:
     """Open the windows explorer with the specified path.
 
