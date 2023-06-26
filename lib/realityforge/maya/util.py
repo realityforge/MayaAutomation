@@ -19,7 +19,7 @@ from typing import Optional
 
 
 def open_console(path: str) -> None:
-    """Open the windows command prompt in the the specified directory.
+    """Open the windows command prompt in the specified directory.
 
     :param path: the directory
     """
