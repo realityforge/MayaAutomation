@@ -14,7 +14,7 @@ The correct location to put this file is:
 
 * **Mac**: /Users/<username>/Library/Preferences/Autodesk/maya/<version>/scripts
 * **Linux**: ~<username>/maya/<version>/scripts
-* **Windows**: C:\Users\<username>\Documents\maya\<version>\scripts
+* **Windows**: C:\\Users\\<username>\\Documents\\maya\\<version>\\scripts
 
 To add a script action to the shelf, the standard process is to force the reload of the script when the action runs. You can add a python snippet like  
 
