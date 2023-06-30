@@ -14,6 +14,7 @@ import maya.mel as mel
 import maya.cmds as cmds
 import json
 import realityforge.maya.util as util
+import traceback
 
 
 def export_file_to_substance_painter(base_directory, object_name, check_poly_cleanup: bool = True):
@@ -113,7 +114,8 @@ def export_selected_as_fbx(filename: str) -> None:
             # Export selected object
             mel.eval('FBXExport -f "{}" -s'.format(filename))
         except Exception as e:
-            sys.stdout.write(str(e) + '\n')
+            print(str(e))
+            traceback.print_exc()
             return None
 
     finally:
