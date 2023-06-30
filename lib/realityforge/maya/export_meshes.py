@@ -34,7 +34,7 @@ def export_file_to_substance_painter(base_directory, object_name, check_poly_cle
                 "' for Substance Painter as the object has " + str(len(_matched)) +
                 " components that need cleaning up.")
 
-    # Select object again as cleanup identified no isssues
+    # Select object again as cleanup identified no issues
     cmds.select(_selected, replace=True)
 
     cmds.file(filename, force=True, options="groups=1;ptgroups=1;materials=0;smoothing=1;normals=1", type="OBJexport",
