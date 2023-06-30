@@ -115,6 +115,37 @@ def is_any_locked(object_name, attr_names):
     return False
 
 
+def lock_all_attributes(object_name: str, print_debug: bool = False, transitive: bool = True) -> None:
+    """Lock the attributes of the specified object and optionally lock all child objects.
+
+    :param object_name: the name of the object to start lock process at.
+    :param print_debug: should debug prints be emitted.
+    :param transitive: should the locking process propagate to child.
+    """
+    if print_debug:
+        print(f"lock_all_attributes({object_name}, transitive={transitive})")
+    if transitive:
+        children = cmds.listRelatives(object_name)
+        if children:
+            for child_object_name in cmds.listRelatives(object_name):
+                lock_all_attributes(child_object_name, print_debug, transitive)
+    for attr in cmds.listAttr(object_name):
+        qualified_attr_name = f"{object_name}.{attr}"
+        try:
+            if not cmds.getAttr(qualified_attr_name, lock=True):
+                if print_debug:
+                    print(f"{qualified_attr_name} is not Locked")
+                cmds.setAttr(qualified_attr_name, lock=True)
+                if print_debug:
+                    print(f"{qualified_attr_name} has been Locked")
+            else:
+                if print_debug:
+                    print(f"{qualified_attr_name} is Locked")
+        except ValueError:
+            if print_debug:
+                print(f"Couldn't get locked-state of {qualified_attr_name}")
+
+
 def unlock_all_attributes(object_name: str, print_debug: bool = False, transitive: bool = True) -> None:
     """Unlock the attributes of the specified object and optionally unlock all child objects.
 
