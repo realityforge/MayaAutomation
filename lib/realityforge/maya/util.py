@@ -177,6 +177,34 @@ def unlock_all_attributes(object_name: str, print_debug: bool = False, transitiv
                 unlock_all_attributes(child_object_name, print_debug, transitive)
 
 
+def lock_object_set(object_set_name: str) -> None:
+    """Lock the attributes of all the objects in the specified object set.
+
+    :param object_set_name: the object set
+    """
+    print(f"lock_object_set {object_set_name}")
+    object_names_to_lock = cmds.sets(object_set_name, query=True)
+    print(f"Objects to lock: {object_names_to_lock}")
+    for object_name in object_names_to_lock:
+        print(f"Locking {object_name}")
+        lock_all_attributes(object_name)
+        print(f"Locked {object_name}")
+
+
+def unlock_object_set(object_set_name: str) -> None:
+    """Unlock the attributes of all the objects in the specified object set.
+
+    :param object_set_name: the object set
+    """
+    print(f"unlock_object_set {object_set_name}")
+    object_names_to_lock = cmds.sets(object_set_name, query=True)
+    print(f"Objects to unlock: {object_names_to_lock}")
+    for object_name in object_names_to_lock:
+        print(f"Unlocking {object_name}")
+        unlock_all_attributes(object_name)
+        print(f"Unlocked {object_name}")
+
+
 def apply_material(object_name: str, material_name: str) -> None:
     """Apply specified material to specified object.
     The object is expected to transform node above a Shape and will be left selected after this method.
