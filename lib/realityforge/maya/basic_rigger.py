@@ -165,10 +165,13 @@ def process_joint(rigging_settings: RiggingSettings,
                                  # Joint Labelling
                                  "side",
                                  "type",
+                                 "otherType",
                                  "drawLabel",
                                  # Drawing Overrides
                                  "overrideEnabled",
                                  "overrideColor",
+                                 "overrideColorRGB",
+                                 "overrideRGBColors",
                                  "overridePlayback",
                                  "overrideShading",
                                  "overrideVisibility",
