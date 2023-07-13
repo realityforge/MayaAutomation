@@ -293,6 +293,11 @@ def setup_control(label: str,
     control_name = create_control(base_control_name, rigging_settings)
     safe_parent(f"{label} control", control_name, offset_group_name, rigging_settings)
 
+    cmds.addAttr(control_name, longName="rfJointSide", niceName="Joint Side", dataType="string")
+    cmds.setAttr(f"{control_name}.rfJointSide", side, type="string")
+
+    set_override_colors_based_on_side(control_name, rigging_settings)
+
     return control_name
 
 
@@ -314,6 +319,32 @@ def expect_control_not_match_side(side, side_label, base_control_name, rigging_s
                 parse(p.replace("{seq}_", ""), base_control_name):
             raise Exception(f"Invalid name detected when creating control for side '{side}' with base "
                             f"name '{base_control_name}' which un-expectedly matched '{expected_name_pattern}'")
+
+
+def set_override_colors_based_on_side(control_name: str, rigging_settings: RiggingSettings) -> None:
+    side = cmds.getAttr(f"{control_name}.rfJointSide")
+    child_shapes = cmds.listRelatives(control_name, type="nurbsCurve")
+    if child_shapes:
+        for child in child_shapes:
+            if "center" == side:
+                set_override_color_attributes(child, rigging_settings.center_side_color)
+            elif "left" == side:
+                set_override_color_attributes(child, rigging_settings.left_side_color)
+            elif "right" == side:
+                set_override_color_attributes(child, rigging_settings.right_side_color)
+            else:
+                # noinspection DuplicatedCode
+                set_override_color_attributes(child, rigging_settings.none_side_color)
+
+
+# noinspection PyTypeChecker
+def set_override_color_attributes(object_name: str, color: tuple[float, float, float]):
+    if color:
+        cmds.setAttr(f"{object_name}.overrideEnabled", True)
+        cmds.setAttr(f"{object_name}.overrideRGBColors", True)
+        cmds.setAttr(f"{object_name}.overrideColorR", color[0])
+        cmds.setAttr(f"{object_name}.overrideColorG", color[1])
+        cmds.setAttr(f"{object_name}.overrideColorB", color[2])
 
 
 def scale_constraint(driven_name, driver_name):
