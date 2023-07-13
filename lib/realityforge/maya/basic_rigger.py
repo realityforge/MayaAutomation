@@ -34,11 +34,11 @@ class RiggingSettings:
                  use_control_hierarchy: bool = False,
                  use_control_set: bool = True,
                  driven_joint_name_pattern: str = "{name}_JNT",
-                 driver_joint_name_pattern: str = "{name}_JDRV2",
-                 ik_joint_name_pattern: str = "{name}_IK_JDRV2",
-                 fk_joint_name_pattern: str = "{name}_FK_JDRV2",
-                 offset_group_name_pattern: str = "{name}_OFF_GRP2",
-                 control_name_pattern: str = "{name}_CTRL2",
+                 driver_joint_name_pattern: str = "{name}_JDRV",
+                 ik_joint_name_pattern: str = "{name}_IK_JDRV",
+                 fk_joint_name_pattern: str = "{name}_FK_JDRV",
+                 offset_group_name_pattern: str = "{name}_OFF_GRP",
+                 control_name_pattern: str = "{name}_CTRL",
                  sided_name_pattern: str = "{name}_{side}_{seq}",
                  cog_base_control_name: str = "cog",
                  world_offset_base_control_name: str = "world_offset",
@@ -192,6 +192,9 @@ def process_joint(rigging_settings: RiggingSettings,
                   parent_control_name: Optional[str] = None) -> None:
     if rigging_settings.debug_logging:
         print(f"Attempting to process joint '{joint_name}' with parent joint named '{parent_joint_name}'")
+
+    # TODO: Do FK/IK chains based on config
+    # TODO: Also do adding of
 
     # Ensure there is a single joint of expected name
     util.ensure_single_object_named("joint", joint_name)
