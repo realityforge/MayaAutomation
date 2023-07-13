@@ -322,19 +322,24 @@ def expect_control_not_match_side(side, side_label, base_control_name, rigging_s
 
 
 def set_override_colors_based_on_side(control_name: str, rigging_settings: RiggingSettings) -> None:
-    side = cmds.getAttr(f"{control_name}.rfJointSide")
-    child_shapes = cmds.listRelatives(control_name, type="nurbsCurve")
-    if child_shapes:
-        for child in child_shapes:
-            if "center" == side:
-                set_override_color_attributes(child, rigging_settings.center_side_color)
-            elif "left" == side:
-                set_override_color_attributes(child, rigging_settings.left_side_color)
-            elif "right" == side:
-                set_override_color_attributes(child, rigging_settings.right_side_color)
-            else:
-                # noinspection DuplicatedCode
-                set_override_color_attributes(child, rigging_settings.none_side_color)
+    side = None
+    try:
+        side = cmds.getAttr(f"{control_name}.rfJointSide")
+    except:
+        pass
+    if side:
+        child_shapes = cmds.listRelatives(control_name, type="nurbsCurve")
+        if child_shapes:
+            for child in child_shapes:
+                if "center" == side:
+                    set_override_color_attributes(child, rigging_settings.center_side_color)
+                elif "left" == side:
+                    set_override_color_attributes(child, rigging_settings.left_side_color)
+                elif "right" == side:
+                    set_override_color_attributes(child, rigging_settings.right_side_color)
+                else:
+                    # noinspection DuplicatedCode
+                    set_override_color_attributes(child, rigging_settings.none_side_color)
 
 
 # noinspection PyTypeChecker
