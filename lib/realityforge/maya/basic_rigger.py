@@ -16,6 +16,7 @@ from parse import parse
 import realityforge.maya.util as util
 import realityforge.maya.rigging_tools as rigging_tools
 
+__all__ = ['RiggingSettings', 'create_rig']
 
 # TODO: In the future we should allow things like root group, controls group, controls set etc be prefixed
 #  with a character name or like in some sort of templateable fashion. (alternatively we could just
@@ -64,6 +65,16 @@ class RiggingSettings:
         self.debug_logging = debug_logging
 
 
+def create_rig(root_joint_name: str, rigging_settings: RiggingSettings = RiggingSettings()) -> None:
+    if rigging_settings.debug_logging:
+        print(f"Creating rig with root joint '{root_joint_name}'")
+
+    process_joint(rigging_settings, root_joint_name)
+
+    if rigging_settings.debug_logging:
+        print(f"Rig created for root joint '{root_joint_name}'")
+
+
 # TODO: This following method should also:
 # - check that the incoming joint chain is valid in that it
 #    - has 0 jointOrient
@@ -71,10 +82,10 @@ class RiggingSettings:
 #    - has skin clusters for all joins except those that are on an allow list for no clusters
 #    - has joint orientations that are world for certain joints chains????
 
-def process_joint(joint_name: str,
+def process_joint(rigging_settings: RiggingSettings,
+                  joint_name: str,
                   parent_joint_name: Optional[str] = None,
-                  parent_control_name: Optional[str] = None,
-                  rigging_settings: RiggingSettings = RiggingSettings()) -> None:
+                  parent_control_name: Optional[str] = None) -> None:
     if rigging_settings.debug_logging:
         print(f"Attempting to process joint '{joint_name}' with parent joint named '{parent_joint_name}'")
 
@@ -194,7 +205,7 @@ def process_joint(joint_name: str,
     child_joints = cmds.listRelatives(joint_name, type="joint")
     if child_joints:
         for child_joint_name in child_joints:
-            process_joint(child_joint_name, joint_name, control_name, rigging_settings)
+            process_joint(rigging_settings, child_joint_name, joint_name, control_name)
 
 
 def set_selection_child_highlighting(object_name, rigging_settings):
