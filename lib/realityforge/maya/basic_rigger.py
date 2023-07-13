@@ -42,6 +42,9 @@ class RiggingSettings:
                  sided_name_pattern: str = "{name}_{side}_{seq}",
                  cog_base_control_name: str = "cog",
                  world_offset_base_control_name: str = "world_offset",
+                 # A map that maps the logical name of the ik/fk chain to the chain of bones that make up the chain
+                 # i.e. "arm_l": ["shoulder_l", "elbow_l", "wrist_l"]
+                 ik_chains: dict[str, list[str]] = {},
                  left_side_color: Optional[tuple[float, float, float]] = (1, 0, 0),
                  right_side_color: Optional[tuple[float, float, float]] = (0, 0, 1),
                  center_side_color: Optional[tuple[float, float, float]] = (1, 1, 0),
@@ -74,6 +77,7 @@ class RiggingSettings:
         self.world_offset_base_control_name = world_offset_base_control_name
         self.selection_child_highlighting = selection_child_highlighting
         self.debug_logging = debug_logging
+        self.ik_chains = ik_chains
         self.left_side_color = left_side_color
         self.right_side_color = right_side_color
         self.center_side_color = center_side_color
@@ -149,6 +153,24 @@ def copy_control(source_control_name: str, target_control_name: str, rigging_set
 def create_rig(root_joint_name: str, rigging_settings: RiggingSettings = RiggingSettings()) -> None:
     if rigging_settings.debug_logging:
         print(f"Creating rig with root joint '{root_joint_name}'")
+
+    # Check the ik chains are valid
+    for chain_name in rigging_settings.ik_chains.keys():
+        chain = rigging_settings.ik_chains[chain_name]
+        if 0 == len(chain):
+            raise Exception(f"Attempted to define invalid ik chain named '{chain_name}' with no joints")
+        p = rigging_settings.driven_joint_name_pattern
+        index = len(chain) - 1
+        while index > 0:
+            current_joint_name = p.format(name=chain[index])
+            expected_previous_joint_name = p.format(name=chain[index - 1])
+            actual_previous_joint_name = util.get_parent(current_joint_name)
+
+            if actual_previous_joint_name != expected_previous_joint_name:
+                raise Exception(f"Attempted to define invalid ik chain named '{chain_name}' as joint "
+                                f"named '{current_joint_name} has an actual parent '{actual_previous_joint_name} "
+                                f"but the configuration expected parent with the name '{expected_previous_joint_name}'")
+            index -= 1
 
     process_joint(rigging_settings, root_joint_name)
 
