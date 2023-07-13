@@ -82,6 +82,7 @@ def create_rig(root_joint_name: str, rigging_settings: RiggingSettings = Rigging
 #    - has preferred angle set for internal joints in IK chains
 #    - has skin clusters for all joins except those that are on an allow list for no clusters
 #    - has joint orientations that are world for certain joints chains????
+#    - joints have sides specified as non None unless explicitly overriden
 
 def process_joint(rigging_settings: RiggingSettings,
                   joint_name: str,
