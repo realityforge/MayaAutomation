@@ -358,8 +358,6 @@ def setup_top_level_group(rigging_settings: RiggingSettings) -> None:
         if rigging_settings.debug_logging:
             print(f"Created control set '{rigging_settings.control_set}'")
 
-
-
 # TODO: Features to add:
 # * a "set" that includes the joints to export as a skeleton
 # * a "set" that includes the joints and mesh to export as a skeletal mesh
