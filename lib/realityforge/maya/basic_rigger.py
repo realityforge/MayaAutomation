@@ -220,14 +220,14 @@ def set_selection_child_highlighting(object_name, rigging_settings):
 
 def setup_control(label: str,
                   base_control_name: str,
-                  object_to_match_transforms: str,
+                  joint_name: str,
                   parent_control_name: Optional[str],
                   rigging_settings: RiggingSettings) -> str:
     if rigging_settings.debug_logging:
         print(f"Creating {label} control with parent '{parent_control_name}'")
 
     offset_group_name = rigging_settings.offset_group_name_pattern.format(name=base_control_name)
-    create_offset_group(offset_group_name, object_to_match_transforms, rigging_settings)
+    create_offset_group(offset_group_name, joint_name, rigging_settings)
     if rigging_settings.use_control_hierarchy and parent_control_name:
         safe_parent(f"{label} offset group", offset_group_name, parent_control_name, rigging_settings)
     else:
