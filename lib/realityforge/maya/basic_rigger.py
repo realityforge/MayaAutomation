@@ -18,7 +18,7 @@ from parse import parse
 import realityforge.maya.rigging_tools as rigging_tools
 import realityforge.maya.util as util
 
-__all__ = ['RiggingSettings', 'create_rig']
+__all__ = ['RiggingSettings', 'create_rig', 'copy_control_from_selection']
 
 
 # TODO: In the future we should allow things like root group, controls group, controls set etc be prefixed
@@ -82,6 +82,68 @@ class RiggingSettings:
         self.right_side_name = right_side_name
         self.center_side_name = center_side_name
         self.none_side_name = none_side_name
+
+
+def copy_control_from_selection(rigging_settings: RiggingSettings = RiggingSettings()) -> None:
+    selected = cmds.ls(selection=True)
+    if 2 != len(selected):
+        raise Exception("Need to select a source and a target control and try again.")
+    copy_control(selected[0], selected[1], rigging_settings)
+
+
+def copy_control(source_control_name: str, target_control_name: str, rigging_settings: RiggingSettings) -> None:
+    if rigging_settings.debug_logging:
+        print(f"Copying control shape from '{source_control_name}' to '{target_control_name}'")
+
+    util.ensure_single_object_named("transform", source_control_name)
+    util.ensure_single_object_named("transform", target_control_name)
+
+    duplicate_object_name = cmds.duplicate(source_control_name, returnRootsOnly=True)[0]
+
+    source_side = None
+    target_side = None
+
+    try:
+        source_side = cmds.getAttr(f"{source_control_name}.rfJointSide")
+    except:
+        pass
+    try:
+        target_side = cmds.getAttr(f"{target_control_name}.rfJointSide")
+    except:
+        pass
+
+    if source_side != target_side:
+        if ("left" == source_side and "right" == target_side) or ("right" == source_side and "left" == target_side):
+            cmds.setAttr(f"{duplicate_object_name}.scaleX", -1)
+            cmds.setAttr(f"{duplicate_object_name}.scaleY", -1)
+            cmds.setAttr(f"{duplicate_object_name}.scaleZ", -1)
+            cmds.makeIdentity(duplicate_object_name,
+                              apply=True,
+                              rotate=True,
+                              translate=True,
+                              preserveNormals=True,
+                              scale=True,
+                              normal=False)
+
+    target_children = cmds.listRelatives(target_control_name, type="nurbsCurve")
+    if target_children:
+        for child in target_children:
+            cmds.delete(child)
+    source_children = cmds.listRelatives(duplicate_object_name, type="nurbsCurve")
+    if source_children:
+        index = 0
+        for child in source_children:
+            index += 1
+            cmds.parent(child, target_control_name, shape=True, relative=True)
+            cmds.rename(child, f"{target_control_name}Shape{index}")
+
+    cmds.delete(duplicate_object_name)
+    try:
+        cmds.bakePartialHistory(all=True, prePostDeformers=True)
+    except:
+        pass
+
+    set_override_colors_based_on_side(target_control_name, rigging_settings)
 
 
 def create_rig(root_joint_name: str, rigging_settings: RiggingSettings = RiggingSettings()) -> None:
