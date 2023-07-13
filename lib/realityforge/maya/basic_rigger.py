@@ -10,11 +10,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import maya.cmds as cmds
 from typing import Optional
+
+import maya.cmds as cmds
 from parse import parse
-import realityforge.maya.util as util
+
 import realityforge.maya.rigging_tools as rigging_tools
+import realityforge.maya.util as util
 
 __all__ = ['RiggingSettings', 'create_rig']
 
