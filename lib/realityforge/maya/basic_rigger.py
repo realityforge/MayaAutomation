@@ -214,6 +214,7 @@ def process_joint(rigging_settings: RiggingSettings,
 
 def set_selection_child_highlighting(object_name, rigging_settings):
     selection_child_highlighting = 1 if rigging_settings.selection_child_highlighting else 0
+    # noinspection PyTypeChecker
     cmds.setAttr(f"{object_name}.selectionChildHighlighting", selection_child_highlighting)
 
 
