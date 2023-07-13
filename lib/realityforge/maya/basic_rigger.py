@@ -18,6 +18,7 @@ import realityforge.maya.rigging_tools as rigging_tools
 
 __all__ = ['RiggingSettings', 'create_rig']
 
+
 # TODO: In the future we should allow things like root group, controls group, controls set etc be prefixed
 #  with a character name or like in some sort of templateable fashion. (alternatively we could just
 #  have functions that create variants with prefixes?)
