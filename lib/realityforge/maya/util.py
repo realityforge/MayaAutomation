@@ -57,6 +57,16 @@ def open_explorer_in_workspace() -> None:
     open_explorer(cmds.workspace(query=True, directory=True))
 
 
+def get_parent(object_name: str) -> Optional[str]:
+    """Return the name of the parent object of the specified object.
+
+    :param object_name: the object to retrieve the parent of.
+    :return: The parent object name or None if no such element.
+    """
+    parents = cmds.listRelatives(object_name, parent=True)
+    return parents[0] if parents and 0 != len(parents) else None
+
+
 def get_scene_short_name():
     """Return the basename of the scene file.
 
