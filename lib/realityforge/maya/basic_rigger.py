@@ -37,9 +37,17 @@ class RiggingSettings:
                  fk_joint_name_pattern: str = "{name}_FK_JDRV2",
                  offset_group_name_pattern: str = "{name}_OFF_GRP2",
                  control_name_pattern: str = "{name}_CTRL2",
-                 sided_name_pattern: str = "{name}_{side}",
+                 sided_name_pattern: str = "{name}_{side}_{seq}",
                  cog_base_control_name: str = "cog2",
                  world_offset_base_control_name: str = "world_offset2",
+                 left_side_color: Optional[tuple[float, float, float]] = (1, 0, 0),
+                 right_side_color: Optional[tuple[float, float, float]] = (0, 0, 1),
+                 center_side_color: Optional[tuple[float, float, float]] = (1, 1, 0),
+                 none_side_color: Optional[tuple[float, float, float]] = None,
+                 left_side_name: Optional[str] = "l",
+                 right_side_name: Optional[str] = "r",
+                 center_side_name: Optional[str] = None,
+                 none_side_name: Optional[str] = None,
 
                  # Should this variable be set on created elements? If so the user can change the
                  # "Settings > Selection > Selection Child Highlighting" config via the menu item
@@ -64,6 +72,14 @@ class RiggingSettings:
         self.world_offset_base_control_name = world_offset_base_control_name
         self.selection_child_highlighting = selection_child_highlighting
         self.debug_logging = debug_logging
+        self.left_side_color = left_side_color
+        self.right_side_color = right_side_color
+        self.center_side_color = center_side_color
+        self.none_side_color = none_side_color
+        self.left_side_name = left_side_name
+        self.right_side_name = right_side_name
+        self.center_side_name = center_side_name
+        self.none_side_name = none_side_name
 
 
 def create_rig(root_joint_name: str, rigging_settings: RiggingSettings = RiggingSettings()) -> None:
@@ -245,10 +261,57 @@ def setup_control(label: str,
 
     rigging_tools.lock_and_hide_transform_properties(offset_group_name)
     cmds.select(clear=True)
+
+    joint_side = cmds.getAttr(f"{joint_name}.side")
+    if 0 == joint_side:
+        side = "center"
+        expect_control_matches_side(side, rigging_settings.center_side_name, base_control_name, rigging_settings)
+        expect_control_not_match_side(side, rigging_settings.left_side_name, base_control_name, rigging_settings)
+        expect_control_not_match_side(side, rigging_settings.right_side_name, base_control_name, rigging_settings)
+        expect_control_not_match_side(side, rigging_settings.none_side_name, base_control_name, rigging_settings)
+    elif 1 == joint_side:
+        side = "left"
+        expect_control_not_match_side(side, rigging_settings.center_side_name, base_control_name, rigging_settings)
+        expect_control_matches_side(side, rigging_settings.left_side_name, base_control_name, rigging_settings)
+        expect_control_not_match_side(side, rigging_settings.right_side_name, base_control_name, rigging_settings)
+        expect_control_not_match_side(side, rigging_settings.none_side_name, base_control_name, rigging_settings)
+    elif 2 == joint_side:
+        side = "right"
+        expect_control_not_match_side(side, rigging_settings.center_side_name, base_control_name, rigging_settings)
+        expect_control_not_match_side(side, rigging_settings.left_side_name, base_control_name, rigging_settings)
+        expect_control_matches_side(side, rigging_settings.right_side_name, base_control_name, rigging_settings)
+        expect_control_not_match_side(side, rigging_settings.none_side_name, base_control_name, rigging_settings)
+    else:
+        side = "none"
+        expect_control_not_match_side(side, rigging_settings.center_side_name, base_control_name, rigging_settings)
+        expect_control_not_match_side(side, rigging_settings.left_side_name, base_control_name, rigging_settings)
+        expect_control_not_match_side(side, rigging_settings.right_side_name, base_control_name, rigging_settings)
+        expect_control_matches_side(side, rigging_settings.none_side_name, base_control_name, rigging_settings)
+
     control_name = create_control(base_control_name, rigging_settings)
     safe_parent(f"{label} control", control_name, offset_group_name, rigging_settings)
 
     return control_name
+
+
+def expect_control_matches_side(side, side_label, base_control_name, rigging_settings) -> None:
+    if side_label:
+        p = rigging_settings.sided_name_pattern.replace("{side}", side_label)
+        if not parse(p, base_control_name) and \
+                not parse(p.replace("_{seq}", ""), base_control_name) and \
+                not parse(p.replace("{seq}_", ""), base_control_name):
+            raise Exception(f"Invalid name detected when creating control for side '{side}' with base "
+                            f"name '{base_control_name}' which was expected to match '{expected_name_pattern}'")
+
+
+def expect_control_not_match_side(side, side_label, base_control_name, rigging_settings) -> None:
+    if side_label:
+        p = rigging_settings.sided_name_pattern.replace("{side}", side_label)
+        if parse(p, base_control_name) or \
+                parse(p.replace("_{seq}", ""), base_control_name) or \
+                parse(p.replace("{seq}_", ""), base_control_name):
+            raise Exception(f"Invalid name detected when creating control for side '{side}' with base "
+                            f"name '{base_control_name}' which un-expectedly matched '{expected_name_pattern}'")
 
 
 def scale_constraint(driven_name, driver_name):
