@@ -148,13 +148,12 @@ def export_files():
     substance_painter_export_directory = cmds.workspace(expandName=substance_painter_dir)
     unreal_export_directory = cmds.workspace(expandName=unreal_export_dir)
 
-    scenes_data = model_repository_data["scenes"] if None != model_repository_data["scenes"] else []
-    scene_data = scenes_data[scene_short_name] if None != scenes_data[scene_short_name] else []
-    unreal_section_data = scene_data["unreal"] if None != scene_data["unreal"] else []
-    unreal_object_name = unreal_section_data["object"] if None != unreal_section_data["object"] else scene_short_name
-    sp_section_data = scene_data["substance_painter"] if None != scene_data["substance_painter"] else []
-    substance_painter_object_name = sp_section_data["object"] if None != sp_section_data[
-        "object"] else unreal_object_name
+    scenes_data = model_repository_data["scenes"] if model_repository_data["scenes"] is not None else []
+    scene_data = scenes_data[scene_short_name] if scenes_data[scene_short_name] is not None else []
+    unreal_section_data = scene_data["unreal"] if scene_data["unreal"] is not None else []
+    unreal_object_name = unreal_section_data["object"] if unreal_section_data["object"] is not None else scene_short_name
+    sp_section_data = scene_data["substance_painter"] if scene_data["substance_painter"] is not None else []
+    substance_painter_object_name = sp_section_data["object"] if sp_section_data["object"] is not None else unreal_object_name
 
     cmds.bakePartialHistory(all=True, prePostDeformers=True)
 
@@ -218,7 +217,7 @@ def require_json_value(filename, data, label, primary_key, secondary_key):
     Returns:
         the value of the property
     """
-    if None != data[primary_key] and None != data[primary_key][secondary_key]:
+    if data[primary_key] is not None and data[primary_key][secondary_key] is not None:
         return data[primary_key][secondary_key]
     else:
         raise Exception(
