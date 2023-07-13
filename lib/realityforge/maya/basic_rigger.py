@@ -318,7 +318,7 @@ def expect_control_not_match_side(side, side_label, base_control_name, rigging_s
                 parse(p.replace("_{seq}", ""), base_control_name) or \
                 parse(p.replace("{seq}_", ""), base_control_name):
             raise Exception(f"Invalid name detected when creating control for side '{side}' with base "
-                            f"name '{base_control_name}' which un-expectedly matched '{expected_name_pattern}'")
+                            f"name '{base_control_name}' which un-expectedly matched '{p}'")
 
 
 def set_override_colors_based_on_side(control_name: str, rigging_settings: RiggingSettings) -> None:
