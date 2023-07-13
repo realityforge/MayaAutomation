@@ -10,6 +10,12 @@
       <excludeFolder url="file://$MODULE_DIR$/tmp" />
       <excludeFolder url="file://$MODULE_DIR$/venv" />
     </content>
+    <content url="file://$MODULE_DIR$/../course-rigging-basics-for-games">
+      <excludeFolder url="file://$MODULE_DIR$/../course-rigging-basics-for-games/images" />
+      <excludeFolder url="file://$MODULE_DIR$/../course-rigging-basics-for-games/scenes" />
+      <excludeFolder url="file://$MODULE_DIR$/../course-rigging-basics-for-games/sourceimages" />
+      <excludeFolder url="file://$MODULE_DIR$/../course-rigging-basics-for-games/vendor" />
+    </content>
     <content url="file://D:/Code/aie_course/modules/5_Character_Pipeline/Assessment/CharacterPipeline_PeterDonald/CharacterPipeline_Game_PeterDonald/Production/Maya">
       <sourceFolder url="file://D:/Code/aie_course/modules/5_Character_Pipeline/Assessment/CharacterPipeline_PeterDonald/CharacterPipeline_Game_PeterDonald/Production/Maya/scripts" isTestSource="false" />
       <excludeFolder url="file://D:/Code/aie_course/modules/5_Character_Pipeline/Assessment/CharacterPipeline_PeterDonald/CharacterPipeline_Game_PeterDonald/Production/Maya/images" />
