@@ -623,7 +623,7 @@ def _parent_constraint(driven_name: str, driver_name: str, maintain_offset: bool
     cmds.parentConstraint(driver_name,
                           driven_name,
                           maintainOffset=maintain_offset,
-                          name=f"{driver_name}_parentConstraint_{driven_name}")
+                          name=f"{driven_name}_parentConstraint_{driver_name}")
 
 
 def _safe_parent(label: str, child_name: str, parent_name: str, rs: RiggingSettings):
