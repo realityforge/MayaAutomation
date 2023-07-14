@@ -329,6 +329,7 @@ def _validate_ik_chains(rs: RiggingSettings) -> None:
 
             index -= 1
 
+
 def _process_joint(rs: RiggingSettings,
                    joint_name: str,
                    parent_joint_name: Optional[str] = None,
