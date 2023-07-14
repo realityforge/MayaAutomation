@@ -668,6 +668,7 @@ def _create_control(base_name: str, rs: RiggingSettings) -> str:
     util.ensure_created_object_name_matches("offset group", actual_control_name, control_name)
     _set_selection_child_highlighting(control_name, rs)
 
+    cmds.matchTransform(control_name, offset_group_name)
     cmds.select(clear=True)
 
     _parent_constraint(control_name, offset_group_name, False)
