@@ -28,6 +28,9 @@ __all__ = ['IkChain', 'RiggingSettings', 'create_rig', 'copy_control_from_select
 #  do not see them. i.e. Remove the ability for any FK controls to scale or translate unless allow listed?
 #  Probably have a default allow state and then an exception list (probably do it per attribute? or per attribute group?
 
+# TODO: Add display layer that contains the "controls_GRP" so can hide all controls with one click.
+# TODO: Add display layers for groups of controls starting at a root. (so could have layer for LH or RH)
+
 # TODO: Features to add:
 # * a "set" that includes the joints to export as a skeleton
 # * a "set" that includes the joints and mesh to export as a skeletal mesh
