@@ -427,7 +427,6 @@ def _process_joint(rs: RiggingSettings,
 
         # TODO: Create IK/FK joints
 
-        _setup_control(ik_joint_base_name, ik_parent_joint_name, joint_name, rs)
         _setup_control(fk_joint_base_name, fk_parent_joint_name, joint_name, rs)
 
         if ik_chain.does_chain_end_at_joint(base_name):
