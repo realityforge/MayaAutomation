@@ -380,9 +380,14 @@ def _process_joint(rs: RiggingSettings,
     if ik_chain:
         pass
     else:
-        driven_name = rs.derive_target_joint_name(base_name)
-        _parent_constraint(driven_name, joint_name)
-        _scale_constraint(driven_name, joint_name)
+        driver_joint_name = rs.derive_driver_joint_name(base_name)
+        if rs.use_driver_hierarchy:
+            _connect_transform_attributes(driver_joint_name, joint_name)
+            _parent_constraint(driver_joint_name, control_name)
+            _scale_constraint(driver_joint_name, control_name)
+        else:
+            _parent_constraint(joint_name, control_name)
+            _scale_constraint(joint_name, control_name)
 
     at_chain_start = False
     at_chain_end = False
@@ -450,6 +455,20 @@ def _process_joint(rs: RiggingSettings,
                 child_ik_chain = rs.get_ik_chain_starting_at_joint(child_base_joint_name)
 
             _process_joint(rs, child_joint_name, joint_name, child_parent_control_name, child_ik_chain)
+
+
+def _connect_transform_attributes(driver_object_name: str, driven_object_name: str) -> None:
+    """Connect the transform, rotate and scale attributes of the driver object to the driven object.
+
+    This is typically used to copy attributes from a driver joint into a driven joint so that the
+    joint hierarchy/skeleton can be cleanly exported for game engines.
+
+    :param driver_object_name: the name of the driver object.
+    :param driven_object_name:  the name of the driven object.
+    """
+    for attr in ["translate", "rotate", "scale"]:
+        cmds.setAttr(f"{driven_object_name}.{attr}", lock=False)
+        cmds.connectAttr(f"{driver_object_name}.{attr}", f"{driven_object_name}.{attr}", lock=True, force=True)
 
 
 def _create_driver_joint(joint_name: str,
