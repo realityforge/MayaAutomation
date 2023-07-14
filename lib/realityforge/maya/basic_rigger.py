@@ -419,13 +419,17 @@ def _process_joint(rs: RiggingSettings,
         fk_parent_joint_name = None
         if base_parent_name:
             if at_chain_start:
-                ik_parent_joint_name = base_parent_name
-                fk_parent_joint_name = base_parent_name
+                ik_parent_joint_name = rs.derive_target_joint_name(base_parent_name)
+                fk_parent_joint_name = rs.derive_target_joint_name(base_parent_name)
             else:
                 ik_parent_joint_name = rs.derive_ik_joint_name(base_parent_name, ik_chain.name)
                 fk_parent_joint_name = rs.derive_fk_joint_name(base_parent_name, ik_chain.name)
 
-        # TODO: Create IK/FK joints
+        ik_joint_name = rs.derive_ik_joint_name(base_name, ik_chain.name)
+        fk_joint_name = rs.derive_fk_joint_name(base_name, ik_chain.name)
+
+        _create_joint_from_template(joint_name, "ik joint", ik_joint_name, ik_parent_joint_name, rs)
+        _create_joint_from_template(joint_name, "ik joint", fk_joint_name, fk_parent_joint_name, rs)
 
         _setup_control(fk_joint_base_name, fk_parent_joint_name, joint_name, rs)
 
@@ -476,28 +480,50 @@ def _create_driver_joint(joint_name: str,
                          base_joint_name: str,
                          base_parent_joint_name: Optional[str],
                          rs: RiggingSettings) -> None:
-    driver_joint_name = rs.derive_target_joint_name(base_joint_name)
+    new_joint_name = rs.derive_driver_joint_name(base_joint_name)
+    parent_new_joint_name = rs.derive_driver_joint_name(base_parent_joint_name) if base_parent_joint_name else None
+    _create_joint_from_template(joint_name, "driver joint", new_joint_name, parent_new_joint_name, rs)
+
+
+def _create_ik_joint(joint_name: str,
+                     base_joint_name: str,
+                     parent_joint_name: Optional[str],
+                     rs: RiggingSettings) -> None:
+    _create_joint_from_template(joint_name, "ik joint", rs.derive_ik_joint_name(base_joint_name), parent_joint_name, rs)
+
+
+def _create_fk_joint(joint_name: str,
+                     base_joint_name: str,
+                     parent_joint_name: Optional[str],
+                     rs: RiggingSettings) -> None:
+    _create_joint_from_template(joint_name, "ik joint", rs.derive_fk_joint_name(base_joint_name), parent_joint_name, rs)
+
+
+def _create_joint_from_template(source_joint_name: str,
+                                label: str,
+                                new_joint_name: str,
+                                parent_new_joint_name: Optional[str],
+                                rs: RiggingSettings) -> None:
     if rs.debug_logging:
-        print(f"Creating driver joint '{driver_joint_name}'")
-    actual_driver_joint_name = cmds.joint(name=driver_joint_name)
+        print(f"Creating {label} '{new_joint_name}'")
+    actual_new_joint_name = cmds.joint(name=new_joint_name)
     # Clear selection to avoid unintended selection dependent behaviour
     cmds.select(clear=True)
-    util.ensure_created_object_name_matches("driver joint", actual_driver_joint_name, driver_joint_name)
-    if base_parent_joint_name:
-        driver_parent_joint_name = rs.derive_target_joint_name(base_parent_joint_name)
-        _safe_parent("driver joint", driver_joint_name, driver_parent_joint_name, rs)
+    util.ensure_created_object_name_matches(label, actual_new_joint_name, new_joint_name)
+    if parent_new_joint_name:
+        _safe_parent(label, new_joint_name, parent_new_joint_name, rs)
     elif rs.root_group:
-        _safe_parent("driver joint", driver_joint_name, rs.root_group, rs)
-    cmds.matchTransform(driver_joint_name, joint_name)
-    cmds.makeIdentity(driver_joint_name,
+        _safe_parent(label, new_joint_name, rs.root_group, rs)
+    cmds.matchTransform(new_joint_name, source_joint_name)
+    cmds.makeIdentity(new_joint_name,
                       apply=True,
                       rotate=True,
                       translate=True,
                       preserveNormals=True,
                       scale=True,
                       normal=False)
-    util.copy_attributes(joint_name,
-                         driver_joint_name,
+    util.copy_attributes(source_joint_name,
+                         new_joint_name,
                          [
                              # Joint Attributes
                              "drawStyle",
@@ -519,9 +545,9 @@ def _create_driver_joint(joint_name: str,
                              "overrideTexturing",
                          ]
                          )
-    _set_selection_child_highlighting(driver_joint_name, rs)
+    _set_selection_child_highlighting(new_joint_name, rs)
     if rs.debug_logging:
-        print(f"Driver joint '{driver_joint_name}' created.")
+        print(f"Created {label} named '{new_joint_name}'.")
     # Clear selection to avoid unintended selection dependent behaviour
     cmds.select(clear=True)
 
