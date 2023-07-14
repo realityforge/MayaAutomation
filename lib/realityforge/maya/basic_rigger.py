@@ -15,7 +15,6 @@ from typing import Optional
 import maya.cmds as cmds
 from parse import parse
 
-import realityforge.maya.rigging_tools as rigging_tools
 import realityforge.maya.util as util
 
 __all__ = ['IkChain', 'RiggingSettings', 'create_rig', 'copy_control_from_selection']
