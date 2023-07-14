@@ -351,7 +351,7 @@ def _process_joint(rs: RiggingSettings,
 
     # Setup the root group for rig ... if required
     if not parent_joint_name:
-        _setup_top_level_group(rs)
+        _setup_top_level_groups(rs)
 
     # Setup the driver joint chain
     if rs.use_driver_hierarchy:
@@ -684,7 +684,14 @@ def _create_control(base_name: str, rs: RiggingSettings) -> str:
     return control_name
 
 
-def _setup_top_level_group(rs: RiggingSettings) -> None:
+def _setup_top_level_groups(rs: RiggingSettings) -> None:
+    _create_top_level_group(rs)
+    _create_controls_group(rs)
+    _create_control_sets_if_required(rs)
+
+
+def _create_top_level_group(rs: RiggingSettings) -> None:
+    """Create a group in which to place our rig and related infrastructure."""
     if rs.root_group:
         root_groups = cmds.ls(rs.root_group, exactType="transform")
         if 0 == len(root_groups):
@@ -707,6 +714,12 @@ def _setup_top_level_group(rs: RiggingSettings) -> None:
         if rs.debug_logging:
             print(f"Created root group '{rs.root_group}'")
 
+
+def _create_controls_group(rs: RiggingSettings) -> None:
+    """
+    Create a group to contain all the controls.
+    This is organisational and particularly useful if controls use constraints rather than a hierarchy.
+    """
     if rs.controls_group:
         actual_controls_group_name = cmds.group(name=rs.controls_group, empty=True)
         util.ensure_created_object_name_matches("controls group", actual_controls_group_name, rs.controls_group)
@@ -720,6 +733,12 @@ def _setup_top_level_group(rs: RiggingSettings) -> None:
             # Clear selection to avoid unintended selection dependent behaviour
             cmds.select(clear=True)
 
+
+def _create_control_sets_if_required(rs: RiggingSettings) -> None:
+    """
+      Create the set containing the controls if rigging settings enables this feature.
+      The set is intended to make it easier for animators to locate all the controls without trawling the hierarchy.
+    """
     if rs.use_control_set:
         control_sets = cmds.ls(rs.control_set, exactType="objectSet")
         if 0 == len(control_sets):
