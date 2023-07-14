@@ -526,8 +526,7 @@ def _setup_control(base_control_name: str,
 
     offset_group_name = rs.derive_offset_group_name(base_control_name)
     _create_group("offset group", offset_group_name, joint_name, rs)
-    if parent_control_name:
-        _parent_group("offset group", offset_group_name, parent_control_name, rs)
+    _parent_group("offset group", offset_group_name, parent_control_name, rs)
 
     joint_side = cmds.getAttr(f"{joint_name}.side")
     if 0 == joint_side:
@@ -639,7 +638,7 @@ def _safe_parent(label: str, child_name: str, parent_name: str, rs: RiggingSetti
         raise Exception(f"Failed to parent '{child_name}' under '{parent_name}'")
 
 
-def _parent_group(label: str, group_name: str, parent_object_name: str, rs: RiggingSettings) -> None:
+def _parent_group(label: str, group_name: str, parent_object_name: Optional[str], rs: RiggingSettings) -> None:
     if rs.use_control_hierarchy and parent_object_name:
         _safe_parent(label, group_name, parent_object_name, rs)
     else:
