@@ -20,21 +20,16 @@ import realityforge.maya.util as util
 __all__ = ['IkChain', 'RiggingSettings', 'create_rig', 'copy_control_from_selection']
 
 
-# TODO: In the future we should allow things like root group, controls group, controls set etc be prefixed
-#  with a character name or like in some sort of templateable fashion. (alternatively we could just
-#  have functions that create variants with prefixes?)
-
-# TODO: Allow/Deny list for which attributes should be locked and removed from channelbox so animators
+# TODO: Allow/Deny list for which attributes should be locked and removed from channelbox in controls so animators
 #  do not see them. i.e. Remove the ability for any FK controls to scale or translate unless allow listed?
 #  Probably have a default allow state and then an exception list (probably do it per attribute? or per attribute group?
 
-# TODO: Add display layer that contains the "controls_GRP" so can hide all controls with one click.
-# TODO: Add display layers for groups of controls starting at a root. (so could have layer for LH or RH)
+# TODO: Add display layers for groups of controls starting at a root. (so could have layer for LH or RH). Maybe
+#  remove visibility switch from controls? or support both?). See Azri rig for example
 
 # TODO: Features to add:
 # * a "set" that includes the joints to export as a skeleton
 # * a "set" that includes the joints and mesh to export as a skeletal mesh
-# * put controls in layers so that they can be turned off individually (Remove visibility switch from controls? or support both?). See Azri rig for example
 # * Generate ik/fk (and stretch???) chains for limbs and switch between them? (See https://www.youtube.com/playlist?list=PLgala72Uap1rtRRi-MAI0RMc7w1fpD2Io
 
 
