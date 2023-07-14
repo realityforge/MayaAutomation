@@ -25,6 +25,10 @@ __all__ = ['RiggingSettings', 'create_rig', 'copy_control_from_selection']
 #  with a character name or like in some sort of templateable fashion. (alternatively we could just
 #  have functions that create variants with prefixes?)
 
+# TODO: Allow/Deny list for which attributes should be locked and removed from channelbox so animators
+#  do not see them. i.e. Remove the ability for any FK controls to scale or translate unless allow listed?
+#  Probably have a default allow state and then an exception list (probably do it per attribute? or per attribute group?
+
 class RiggingSettings:
     def __init__(self,
                  root_group: Optional[str] = "rig",
