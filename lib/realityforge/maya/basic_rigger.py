@@ -51,6 +51,9 @@ class IkChain:
         self.joints = joints
         self.effector_name = effector_name if effector_name else f"{name}_end"
 
+    def __str__(self):
+        return f"IkChain[{self.name}]"
+
     def does_chain_start_at_joint(self, joint_base_name: str) -> bool:
         """Return True if the chain starts at the specified joint.
 
