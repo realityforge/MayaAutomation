@@ -286,6 +286,7 @@ def create_rig(root_joint_name: str, rigging_settings: RiggingSettings = Rigging
     # Check the ik chains are valid
     _validate_ik_chains(rigging_settings)
 
+    _setup_top_level_infrastructure(rigging_settings)
     _process_joint(rigging_settings, root_joint_name)
 
     if rigging_settings.debug_logging:
@@ -349,10 +350,6 @@ def _process_joint(rs: RiggingSettings,
 
     # Derive the base parent name
     base_parent_joint_name = rs.extract_source_joint_base_name(parent_joint_name) if parent_joint_name else None
-
-    if not parent_joint_name:
-        # Set up the infrastructure for organising rig ... if configured
-        _setup_top_level_infrastructure(rs)
 
     # Setup the driver joint chain
     if rs.use_driver_hierarchy:
