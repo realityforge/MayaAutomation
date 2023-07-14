@@ -349,9 +349,9 @@ def _process_joint(rs: RiggingSettings,
     # Derive the base parent name
     base_parent_joint_name = rs.extract_source_joint_base_name(parent_joint_name) if parent_joint_name else None
 
-    # Setup the root group for rig ... if required
     if not parent_joint_name:
-        _setup_top_level_groups(rs)
+        # Set up the infrastructure for organising rig ... if configured
+        _setup_top_level_infrastructure(rs)
 
     # Setup the driver joint chain
     if rs.use_driver_hierarchy:
@@ -684,7 +684,8 @@ def _create_control(base_name: str, rs: RiggingSettings) -> str:
     return control_name
 
 
-def _setup_top_level_groups(rs: RiggingSettings) -> None:
+def _setup_top_level_infrastructure(rs: RiggingSettings) -> None:
+    """Create the groups, sets, layers etc required to organize our rig."""
     _create_top_level_group(rs)
     _create_controls_group(rs)
     _create_control_sets_if_required(rs)
