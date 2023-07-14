@@ -709,9 +709,7 @@ def _setup_top_level_group(rs: RiggingSettings) -> None:
 
     if rs.controls_group:
         actual_controls_group_name = cmds.group(name=rs.controls_group, empty=True)
-        util.ensure_created_object_name_matches("controls group",
-                                                actual_controls_group_name,
-                                                rs.controls_group)
+        util.ensure_created_object_name_matches("controls group", actual_controls_group_name, rs.controls_group)
         _set_selection_child_highlighting(rs.controls_group, rs)
         _lock_and_hide_transform_properties(actual_controls_group_name)
         # Clear selection to avoid unintended selection dependent behaviour
