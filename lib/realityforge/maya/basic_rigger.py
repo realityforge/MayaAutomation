@@ -571,7 +571,8 @@ def _setup_control(base_control_name: str,
     :return: the name of the control.
     """
     if rs.debug_logging:
-        print(f"Creating {base_control_name} control for joint '{joint_name}'")
+        print(f"Creating {base_control_name} control for joint '{joint_name}' under "
+              f"parent control '{parent_control_name}'")
 
     offset_group_name = rs.derive_offset_group_name(base_control_name)
     _create_group("offset group", offset_group_name, joint_name, rs)
