@@ -344,8 +344,8 @@ def _process_joint(rs: RiggingSettings,
                    parent_control_base_name: Optional[str] = None,
                    ik_chain: Optional[IkChain] = None) -> None:
     if rs.debug_logging:
-        print( f"Attempting to process joint '{joint_name}' with parent joint named '{parent_joint_name}', "
-               f"parent control named '{parent_control_name}' and ik chain {ik_chain}")
+        print(f"Attempting to process joint '{joint_name}' with parent joint named '{parent_joint_name}', "
+              f"parent control named '{parent_control_name}' and ik chain {ik_chain}")
 
     # Ensure there is a single joint of expected name
     util.ensure_single_object_named("joint", joint_name)
