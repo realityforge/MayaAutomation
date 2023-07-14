@@ -631,33 +631,48 @@ def _parent_constraint(driven_name: str, driver_name: str, maintain_offset: bool
                           name=f"{driver_name}_parentConstraint_{driven_name}")
 
 
-def _safe_parent(label: str, object_name: str, parent_group_name: str, rs: RiggingSettings):
+def _safe_parent(label: str, child_name: str, parent_name: str, rs: RiggingSettings):
+    """Parent child to parent with additional checks to verify success and add debug logging."""
     if rs.debug_logging:
-        print(f"Parenting {label} '{object_name}' to '{parent_group_name}'")
-    parented = cmds.parent(object_name, parent_group_name)
+        print(f"Parenting {label} '{child_name}' to '{parent_name}'")
+    parented = cmds.parent(child_name, parent_name)
     if 0 == len(parented):
-        raise Exception(f"Failed to parent '{object_name}' under '{parent_group_name}'")
+        raise Exception(f"Failed to parent '{child_name}' under '{parent_name}'")
 
 
-def _create_group(label: str, group_name: str, parent_control_name: str, rs: RiggingSettings) -> None:
+def _create_group(label: str, group_name: str, parent_object_name: Optional[str], rs: RiggingSettings) -> None:
+    """
+    Create a group under a parent object.
+    The group ensures all the transforms are locked and hidden from channel box.
+
+    :param label: the human-readable name used to describe the group
+    :param group_name: the name used to create group.
+    :param parent_object_name: the object that this group will be "logically parented under" if specified
+    :param rs:the RiggingSettings
+    """
     if rs.debug_logging:
-        print(f"Creating {label} '{group_name}' with parent control '{parent_control_name}'")
-    util.ensure_single_object_named(None, parent_control_name)
+        print(f"Creating {label} '{group_name}' with parent '{parent_object_name}'")
+    util.ensure_single_object_named(None, parent_object_name)
     actual_object_name = cmds.group(name=group_name, empty=True)
     util.ensure_created_object_name_matches(label, actual_object_name, group_name)
-    cmds.matchTransform(group_name, parent_control_name)
+    if parent_object_name:
+        cmds.matchTransform(group_name, parent_object_name)
     _set_selection_child_highlighting(group_name, rs)
 
-    if rs.use_control_hierarchy and parent_control_name:
-        _safe_parent(label, group_name, parent_control_name, rs)
+    if rs.use_control_hierarchy and parent_object_name:
+        _safe_parent(label, group_name, parent_object_name, rs)
     else:
+        # Place the group under one of the administrative groups if enabled
         if rs.controls_group:
             _safe_parent(label, group_name, rs.controls_group, rs)
         elif rs.root_group:
             _safe_parent(label, group_name, rs.root_group, rs)
-        if parent_control_name:
-            _parent_constraint(group_name, parent_control_name, True)
-            _scale_constraint(group_name, parent_control_name)
+
+        # If there is a "logical" parent then add constraints so that the group behaves as
+        # if it was in a direct hierarchy
+        if parent_object_name:
+            _parent_constraint(group_name, parent_object_name, True)
+            _scale_constraint(group_name, parent_object_name)
 
     _lock_and_hide_transform_properties(group_name)
     cmds.select(clear=True)
