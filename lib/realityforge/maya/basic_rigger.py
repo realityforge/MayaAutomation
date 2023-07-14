@@ -155,14 +155,34 @@ def create_rig(root_joint_name: str, rigging_settings: RiggingSettings = Rigging
         print(f"Creating rig with root joint '{root_joint_name}'")
 
     # Check the ik chains are valid
+    validate_ik_chains(rigging_settings)
+
+    process_joint(rigging_settings, root_joint_name)
+
+    if rigging_settings.debug_logging:
+        print(f"Rig created for root joint '{root_joint_name}'")
+
+
+def validate_ik_chains(rigging_settings: RiggingSettings) -> None:
+    """Verify that the ik chains specified in the settings are valid.
+    They are valid if the joints in the ik chains are not overlapping, exist in the scene and have matching
+    hierarchy.
+
+    :param rigging_settings: the settings to check.
+    """
+    # A map of joint name => chain name. Used to ensure that a joint internal to a chain does not appear
+    # in multiple chains
+    internal_joints_in_ik_chains = {}
     for chain_name in rigging_settings.ik_chains.keys():
         chain = rigging_settings.ik_chains[chain_name]
         if 0 == len(chain):
             raise Exception(f"Attempted to define invalid ik chain named '{chain_name}' with no joints")
         p = rigging_settings.driven_joint_name_pattern
-        index = len(chain) - 1
+        terminal_joint_index = len(chain) - 1
+        index = terminal_joint_index
         while index > 0:
-            current_joint_name = p.format(name=chain[index])
+            current_joint_base_name = chain[index]
+            current_joint_name = p.format(name=current_joint_base_name)
             expected_previous_joint_name = p.format(name=chain[index - 1])
             actual_previous_joint_name = util.get_parent(current_joint_name)
 
@@ -170,12 +190,16 @@ def create_rig(root_joint_name: str, rigging_settings: RiggingSettings = Rigging
                 raise Exception(f"Attempted to define invalid ik chain named '{chain_name}' as joint "
                                 f"named '{current_joint_name} has an actual parent '{actual_previous_joint_name} "
                                 f"but the configuration expected parent with the name '{expected_previous_joint_name}'")
+            if terminal_joint_index != index:
+                # If we are not on the terminal joint in the chain (or the head joint as index > 0)
+                if current_joint_base_name in internal_joints_in_ik_chains:
+                    raise Exception(
+                        f"Attempted to create overlapping ik joint chains where '{current_joint_base_name}' "
+                        f"is in the chains named '{chain_name} and "
+                        f"'{internal_joints_in_ik_chains[current_joint_base_name]}'")
+                internal_joints_in_ik_chains[current_joint_base_name] = chain_name
+
             index -= 1
-
-    process_joint(rigging_settings, root_joint_name)
-
-    if rigging_settings.debug_logging:
-        print(f"Rig created for root joint '{root_joint_name}'")
 
 
 # TODO: This following method should also:
