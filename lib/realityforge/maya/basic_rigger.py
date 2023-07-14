@@ -442,9 +442,6 @@ def _process_joint(rs: RiggingSettings,
 
     if ik_chain:
         if ik_chain.does_chain_start_at_joint(base_joint_name):
-            # TODO: Create Group to contain PV control, ik handle control and ik handle named "{chain}_SYS"
-            # TODO: Create another Group using effector_name that will contain downstream controls and switch control
-
             world_offset_control = rs.derive_control_name(rs.world_offset_base_control_name)
 
             # Create a group for all the controls that are past the end off the ik chain and also
