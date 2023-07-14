@@ -654,6 +654,7 @@ def _create_group(label: str, group_name: str, parent_control_name: str, rs: Rig
     _lock_and_hide_transform_properties(group_name)
     cmds.select(clear=True)
 
+
 def _create_control(base_name: str, rs: RiggingSettings) -> str:
     control_name = rs.derive_control_name(base_name)
     offset_group_name = rs.derive_offset_group_name(base_name)
@@ -711,10 +712,7 @@ def _setup_top_level_group(rs: RiggingSettings) -> None:
         # Clear selection to avoid unintended selection dependent behaviour
         cmds.select(clear=True)
         if rs.root_group:
-            _safe_parent("controls group",
-                         rs.controls_group,
-                         rs.root_group,
-                         rs)
+            _safe_parent("controls group", rs.controls_group, rs.root_group, rs)
 
             # Clear selection to avoid unintended selection dependent behaviour
             cmds.select(clear=True)
