@@ -350,7 +350,6 @@ def _process_joint(rs: RiggingSettings,
                    joint_name: str,
                    parent_joint_name: Optional[str] = None,
                    parent_control_name: Optional[str] = None,
-                   parent_control_base_name: Optional[str] = None,
                    ik_chain: Optional[IkChain] = None) -> None:
     if rs.debug_logging:
         print(f"Attempting to process joint '{joint_name}' with parent joint named '{parent_joint_name}', "
