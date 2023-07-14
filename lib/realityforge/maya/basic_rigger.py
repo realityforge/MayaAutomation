@@ -165,6 +165,13 @@ class RiggingSettings:
                             f"'{self.driven_joint_name_pattern}'. Aborting!")
         return result.named["name"]
 
+    def extract_control_base_name(self, name: str) -> str:
+        result = parse(self.control_name_pattern, name)
+        if not result:
+            raise Exception(f"Control named '{name}' does not match expected pattern "
+                            f"'{self.control_name_pattern}'. Aborting!")
+        return result.named["name"]
+
     def get_target_joint_pattern(self) -> str:
         return self.driver_joint_name_pattern if self.use_driver_hierarchy else self.driven_joint_name_pattern
 
@@ -334,10 +341,11 @@ def _process_joint(rs: RiggingSettings,
                    joint_name: str,
                    parent_joint_name: Optional[str] = None,
                    parent_control_name: Optional[str] = None,
+                   parent_control_base_name: Optional[str] = None,
                    ik_chain: Optional[IkChain] = None) -> None:
     if rs.debug_logging:
-        print(
-            f"Attempting to process joint '{joint_name}' with parent joint named '{parent_joint_name}', parent control named '{parent_control_name}' and ik chain {ik_chain}")
+        print( f"Attempting to process joint '{joint_name}' with parent joint named '{parent_joint_name}', "
+               f"parent control named '{parent_control_name}' and ik chain {ik_chain}")
 
     # Ensure there is a single joint of expected name
     util.ensure_single_object_named("joint", joint_name)
@@ -347,52 +355,71 @@ def _process_joint(rs: RiggingSettings,
         util.ensure_single_object_named("joint", parent_joint_name)
 
     # Derive the base name
-    base_joint_name = rs.extract_source_joint_base_name(joint_name)
+    base_name = rs.extract_source_joint_base_name(joint_name)
 
     # Derive the base parent name
-    base_parent_joint_name = rs.extract_source_joint_base_name(parent_joint_name) if parent_joint_name else None
+    base_parent_name = rs.extract_source_joint_base_name(parent_joint_name) if parent_joint_name else None
 
     # Set up the driver joint chain
     if rs.use_driver_hierarchy:
-        _create_driver_joint(joint_name, base_joint_name, base_parent_joint_name, rs)
+        _create_driver_joint(joint_name, base_name, base_parent_name, rs)
 
-    if not parent_joint_name:
-        _setup_control(base_joint_name, joint_name, rs)
-        _setup_control(rs.world_offset_base_control_name, joint_name, rs)
-        control_name = _setup_control(rs.cog_base_control_name, joint_name, rs)
+    if not base_parent_name:
+        root_control_name = _setup_control(base_name, None, joint_name, rs)
+        world_offset_control_name = _setup_control(rs.world_offset_base_control_name, root_control_name, joint_name, rs)
+        control_name = _setup_control(rs.cog_base_control_name, world_offset_control_name, joint_name, rs)
     else:
-        control_name = _setup_control(base_joint_name, joint_name, rs)
+        control_name = _setup_control(base_name, parent_control_name, joint_name, rs)
 
+    if ik_chain:
+        pass
+    else:
+        driven_name = rs.derive_target_joint_name(base_name)
+        _parent_constraint(driven_name, joint_name)
+        _scale_constraint(driven_name, joint_name)
+
+    at_chain_start = False
     at_chain_end = False
     in_chain_middle = False
 
     if ik_chain:
-        if ik_chain.does_chain_start_at_joint(base_joint_name):
+        if ik_chain.does_chain_start_at_joint(base_name):
             world_offset_control = rs.derive_control_name(rs.world_offset_base_control_name)
 
             # Create a group for all the controls that are past the end off the ik chain and also
             # contains the IK/FK switch control
-            _create_group("ik effector group", rs.derive_effector_name(ik_chain), world_offset_control, rs)
+            effector_name = rs.derive_effector_name(ik_chain)
+            _create_group("ik effector group", effector_name, world_offset_control, rs)
+            _parent_group("ik effector group", effector_name, world_offset_control, rs)
 
             # Create a group to contain the Ik Handle and the controls for the PoleVector and IkHandle
-            _create_group("ik system group", rs.derive_ik_system_name(ik_chain), world_offset_control, rs)
+            ik_system_name = rs.derive_ik_system_name(ik_chain)
+            _create_group("ik system group", ik_system_name, world_offset_control, rs)
+            _parent_group("ik system group", ik_system_name, world_offset_control, rs)
+            at_chain_start = True
 
         # Create IK/FK controls and support joints
 
-        ik_joint_base_name = rs.derive_ik_joint_base_name(base_joint_name, ik_chain.name)
-        fk_joint_base_name = rs.derive_fk_joint_base_name(base_joint_name, ik_chain.name)
+        ik_joint_base_name = rs.derive_ik_joint_base_name(base_name, ik_chain.name)
+        fk_joint_base_name = rs.derive_fk_joint_base_name(base_name, ik_chain.name)
         ik_parent_joint_name = None
         fk_parent_joint_name = None
-        if base_parent_joint_name:
-            ik_parent_joint_name = rs.derive_ik_joint_name(base_parent_joint_name, ik_chain.name)
-            fk_parent_joint_name = rs.derive_fk_joint_name(base_parent_joint_name, ik_chain.name)
+        if base_parent_name:
+            if at_chain_start:
+                ik_parent_joint_name = base_parent_name
+                fk_parent_joint_name = base_parent_name
+            else:
+                ik_parent_joint_name = rs.derive_ik_joint_name(base_parent_name, ik_chain.name)
+                fk_parent_joint_name = rs.derive_fk_joint_name(base_parent_name, ik_chain.name)
 
         # TODO: Create IK/FK joints
 
-        _setup_control(ik_joint_base_name, joint_name, rs)
-        _setup_control(fk_joint_base_name, joint_name, rs)
+        print(f"ik_joint_base_name={ik_joint_base_name}")
+        print(f"fk_parent_joint_name={fk_parent_joint_name}")
+        _setup_control(ik_joint_base_name, ik_parent_joint_name, joint_name, rs)
+        _setup_control(fk_joint_base_name, fk_parent_joint_name, joint_name, rs)
 
-        if ik_chain.does_chain_end_at_joint(base_joint_name):
+        if ik_chain.does_chain_end_at_joint(base_name):
             # TODO: Create IK Handle in ik_system group
             # TODO: Create PV control in ik_system group
             # TODO: Create IK Handle control in ik_system group
@@ -482,10 +509,14 @@ def _set_selection_child_highlighting(object_name: str, rs: RiggingSettings):
     cmds.setAttr(f"{object_name}.selectionChildHighlighting", selection_child_highlighting)
 
 
-def _setup_control(base_control_name: str, joint_name: str, rs: RiggingSettings) -> str:
+def _setup_control(base_control_name: str,
+                   parent_control_name: Optional[str],
+                   joint_name: str,
+                   rs: RiggingSettings) -> str:
     """Create a control offset group and control.
 
     :param base_control_name: the base name of the control, offset group etc.
+    :param parent_control_name: the name of the parent object if any.
     :param joint_name: the name of the joint that the offset group will match transforms to and derived side-edness from. This is typically the joint in source skeleton that we want to control.
     :param rs: the settings that drive the rigging process.
     :return: the name of the control.
@@ -495,6 +526,8 @@ def _setup_control(base_control_name: str, joint_name: str, rs: RiggingSettings)
 
     offset_group_name = rs.derive_offset_group_name(base_control_name)
     _create_group("offset group", offset_group_name, joint_name, rs)
+    if parent_control_name:
+        _parent_group("offset group", offset_group_name, parent_control_name, rs)
 
     joint_side = cmds.getAttr(f"{joint_name}.side")
     if 0 == joint_side:
@@ -606,25 +639,7 @@ def _safe_parent(label: str, child_name: str, parent_name: str, rs: RiggingSetti
         raise Exception(f"Failed to parent '{child_name}' under '{parent_name}'")
 
 
-def _create_group(label: str, group_name: str, parent_object_name: Optional[str], rs: RiggingSettings) -> None:
-    """
-    Create a group under a parent object.
-    The group ensures all the transforms are locked and hidden from channel box.
-
-    :param label: the human-readable name used to describe the group
-    :param group_name: the name used to create group.
-    :param parent_object_name: the object that this group will be "logically parented under" if specified
-    :param rs:the RiggingSettings
-    """
-    if rs.debug_logging:
-        print(f"Creating {label} '{group_name}' with parent '{parent_object_name}'")
-    util.ensure_single_object_named(None, parent_object_name)
-    actual_object_name = cmds.group(name=group_name, empty=True)
-    util.ensure_created_object_name_matches(label, actual_object_name, group_name)
-    if parent_object_name:
-        cmds.matchTransform(group_name, parent_object_name)
-    _set_selection_child_highlighting(group_name, rs)
-
+def _parent_group(label: str, group_name: str, parent_object_name: str, rs: RiggingSettings) -> None:
     if rs.use_control_hierarchy and parent_object_name:
         _safe_parent(label, group_name, parent_object_name, rs)
     else:
@@ -639,6 +654,26 @@ def _create_group(label: str, group_name: str, parent_object_name: Optional[str]
         if parent_object_name:
             _parent_constraint(group_name, parent_object_name, True)
             _scale_constraint(group_name, parent_object_name)
+    cmds.select(clear=True)
+
+
+def _create_group(label: str, group_name: str, match_transform_object_name: str, rs: RiggingSettings) -> None:
+    """
+    Create a group under a parent object.
+    The group ensures all the transforms are locked and hidden from channel box.
+
+    :param label: the human-readable name used to describe the group
+    :param group_name: the name used to create group.
+    :param parent_object_name: the object that this group will be "logically parented under" if specified
+    :param rs:the RiggingSettings
+    """
+    if rs.debug_logging:
+        print(f"Creating {label} '{group_name}' matching transform of '{match_transform_object_name}'")
+    util.ensure_single_object_named(None, match_transform_object_name)
+    actual_object_name = cmds.group(name=group_name, empty=True)
+    util.ensure_created_object_name_matches(label, actual_object_name, group_name)
+    cmds.matchTransform(group_name, match_transform_object_name)
+    _set_selection_child_highlighting(group_name, rs)
 
     _lock_and_hide_transform_properties(group_name)
     cmds.select(clear=True)
