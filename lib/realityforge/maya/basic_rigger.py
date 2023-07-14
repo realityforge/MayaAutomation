@@ -414,8 +414,6 @@ def _process_joint(rs: RiggingSettings,
 
         # TODO: Create IK/FK joints
 
-        print(f"ik_joint_base_name={ik_joint_base_name}")
-        print(f"fk_parent_joint_name={fk_parent_joint_name}")
         _setup_control(ik_joint_base_name, ik_parent_joint_name, joint_name, rs)
         _setup_control(fk_joint_base_name, fk_parent_joint_name, joint_name, rs)
 
@@ -442,7 +440,6 @@ def _process_joint(rs: RiggingSettings,
                 if ik_chain.does_chain_contain_joint(child_base_joint_name):
                     child_ik_chain = ik_chain
 
-            print(f"Looking for ik chain starting at {child_base_joint_name} when have {child_ik_chain}")
             if not child_ik_chain:
                 child_ik_chain = rs.get_ik_chain_starting_at_joint(child_base_joint_name)
 
