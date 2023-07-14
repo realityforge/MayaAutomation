@@ -436,7 +436,6 @@ def _process_joint(rs: RiggingSettings,
                                       parent_control_name,
                                       rs)
 
-    at_chain_start = False
     at_chain_end = False
     in_chain_middle = False
 
@@ -451,7 +450,6 @@ def _process_joint(rs: RiggingSettings,
             # Create a group to contain the Ik Handle and the controls for the PoleVector and IkHandle
             _create_group("ik system group", rs.derive_ik_system_name(ik_chain), world_offset_control, rs)
 
-            at_chain_start = True
         else:
             # Otherwise we create IK/FK controls and support joints
             # TODO: Create joints
