@@ -734,6 +734,8 @@ def _setup_top_level_group(rs: RiggingSettings) -> None:
         else:
             raise Exception(f"Control set '{rs.control_set}' already has multiple instances. Aborting!")
 
+        # TODO: In the future we may want to support multiple (potentially overlapping) control sets.
+
         cmds.sets(name=rs.control_set, empty=True)
 
         if rs.debug_logging:
