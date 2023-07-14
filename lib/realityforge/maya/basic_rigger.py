@@ -29,6 +29,12 @@ __all__ = ['IkChain', 'RiggingSettings', 'create_rig', 'copy_control_from_select
 #  do not see them. i.e. Remove the ability for any FK controls to scale or translate unless allow listed?
 #  Probably have a default allow state and then an exception list (probably do it per attribute? or per attribute group?
 
+# TODO: Features to add:
+# * a "set" that includes the joints to export as a skeleton
+# * a "set" that includes the joints and mesh to export as a skeletal mesh
+# * put controls in layers so that they can be turned off individually (Remove visibility switch from controls? or support both?). See Azri rig for example
+# * Generate ik/fk (and stretch???) chains for limbs and switch between them? (See https://www.youtube.com/playlist?list=PLgala72Uap1rtRRi-MAI0RMc7w1fpD2Io
+
 class IkChain:
     def __init__(self, name: str, joints: list[str], effector_name: Optional[str] = None):
         self.name = name
@@ -732,9 +738,3 @@ def _setup_top_level_group(rs: RiggingSettings) -> None:
 
         if rs.debug_logging:
             print(f"Created control set '{rs.control_set}'")
-
-# TODO: Features to add:
-# * a "set" that includes the joints to export as a skeleton
-# * a "set" that includes the joints and mesh to export as a skeletal mesh
-# * put controls in layers so that they can be turned off individually (Remove visibility switch from controls? or support both?). See Azri rig for example
-# * Generate ik/fk (and stretch???) chains for limbs and switch between them? (See https://www.youtube.com/playlist?list=PLgala72Uap1rtRRi-MAI0RMc7w1fpD2Io
