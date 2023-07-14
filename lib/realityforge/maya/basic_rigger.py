@@ -91,6 +91,17 @@ class RiggingSettings:
         self.center_side_name = center_side_name
         self.none_side_name = none_side_name
 
+def _lock_and_hide_transform_properties(object_name: str) -> None:
+    """Lock and remove from the channelbox the attributes of the specified transform object.
+
+    :param object_name: the name of the transform object.
+    """
+    for attr in ["translate", "rotate", "scale"]:
+        for axis in ["X", "Y", "Z"]:
+            cmds.setAttr(f"{object_name}.{attr}{axis}", lock=False)
+            cmds.setAttr(f"{object_name}.{attr}{axis}", lock=False, keyable=False, channelBox=False)
+    cmds.setAttr(f"{object_name}.visibility", lock=False, keyable=False, channelBox=False)
+
 
 def copy_control_from_selection(rigging_settings: RiggingSettings = RiggingSettings()) -> None:
     selected = cmds.ls(selection=True)
