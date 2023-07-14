@@ -155,6 +155,12 @@ class RiggingSettings:
     def derive_target_joint_name(self, base_name: str) -> str:
         return self.get_target_joint_pattern().format(name=base_name)
 
+    def derive_driven_joint_name(self, base_name: str) -> str:
+        return self.driven_joint_name_pattern.format(name=base_name)
+
+    def derive_driver_joint_name(self, base_name: str) -> str:
+        return self.driver_joint_name_pattern.format(name=base_name)
+
     def derive_source_joint_name(self, base_name: str) -> str:
         return self.driven_joint_name_pattern.format(name=base_name)
 
