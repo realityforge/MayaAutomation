@@ -351,7 +351,7 @@ def _process_joint(rs: RiggingSettings,
     # Derive the base parent name
     base_parent_joint_name = rs.extract_source_joint_base_name(parent_joint_name) if parent_joint_name else None
 
-    # Setup the driver joint chain
+    # Set up the driver joint chain
     if rs.use_driver_hierarchy:
         driver_joint_name = rs.derive_target_joint_name(base_joint_name)
 
