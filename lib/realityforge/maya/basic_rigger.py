@@ -664,6 +664,14 @@ def _create_group(label: str, group_name: str, parent_control_name: str, rs: Rig
 
 
 def _create_control(base_name: str, rs: RiggingSettings) -> str:
+    """
+    Create a control with the specified base name.
+    It is expected that the offset group has already been created. The control will be moved to the offset group
+
+    :param base_name: the base name.
+    :param rs: the RiggingSettings.
+    :return: the name of the control.
+    """
     control_name = rs.derive_control_name(base_name)
     offset_group_name = rs.derive_offset_group_name(base_name)
     if rs.debug_logging:
@@ -681,6 +689,7 @@ def _create_control(base_name: str, rs: RiggingSettings) -> str:
 
     # TODO: At some point we may decide to filter which controls go into the control set
     if rs.use_control_set:
+        # Add  control to the control set if configured
         cmds.sets(control_name, edit=True, forceElement=rs.control_set)
 
     return control_name
