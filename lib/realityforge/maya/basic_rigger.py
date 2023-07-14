@@ -37,6 +37,14 @@ __all__ = ['IkChain', 'RiggingSettings', 'create_rig', 'copy_control_from_select
 # * put controls in layers so that they can be turned off individually (Remove visibility switch from controls? or support both?). See Azri rig for example
 # * Generate ik/fk (and stretch???) chains for limbs and switch between them? (See https://www.youtube.com/playlist?list=PLgala72Uap1rtRRi-MAI0RMc7w1fpD2Io
 
+
+# TODO: Add validation before creating rig
+# - check that the incoming joint chain is valid in that it
+#    - has 0 jointOrient
+#    - has preferred angle set for internal joints in IK chains
+#    - has joint orientations that are world for certain joints chains????
+#    - joints have sides specified as non None unless explicitly overriden
+
 class IkChain:
     def __init__(self, name: str, joints: list[str], effector_name: Optional[str] = None):
         self.name = name
@@ -319,15 +327,6 @@ def _validate_ik_chains(rs: RiggingSettings) -> None:
                 internal_joints_in_ik_chains[current_joint_base_name] = chain.name
 
             index -= 1
-
-
-# TODO: This following method should also:
-# - check that the incoming joint chain is valid in that it
-#    - has 0 jointOrient
-#    - has preferred angle set for internal joints in IK chains
-#    - has skin clusters for all joins except those that are on an allow list for no clusters
-#    - has joint orientations that are world for certain joints chains????
-#    - joints have sides specified as non None unless explicitly overriden
 
 def _process_joint(rs: RiggingSettings,
                    joint_name: str,
