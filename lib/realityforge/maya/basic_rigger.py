@@ -353,88 +353,14 @@ def _process_joint(rs: RiggingSettings,
 
     # Set up the driver joint chain
     if rs.use_driver_hierarchy:
-        driver_joint_name = rs.derive_target_joint_name(base_joint_name)
-
-        if rs.debug_logging:
-            print(f"Creating driver joint '{driver_joint_name}'")
-
-        actual_driver_joint_name = cmds.joint(name=driver_joint_name)
-
-        # Clear selection to avoid unintended selection dependent behaviour
-        cmds.select(clear=True)
-
-        util.ensure_created_object_name_matches("driver joint", actual_driver_joint_name, driver_joint_name)
-
-        if parent_joint_name:
-            driver_parent_joint_name = rs.derive_target_joint_name(base_parent_joint_name)
-            if rs.debug_logging:
-                print(f"Parenting driver joint '{driver_joint_name}' to '{driver_parent_joint_name}'")
-
-            parented = cmds.parent(driver_joint_name, driver_parent_joint_name)
-            if 0 == len(parented):
-                raise Exception(f"Failed to parent '{driver_joint_name}' under '{driver_parent_joint_name}'")
-        elif rs.root_group:
-            _safe_parent("driver joint", driver_joint_name, rs.root_group, rs)
-
-        cmds.matchTransform(driver_joint_name, joint_name)
-        cmds.makeIdentity(driver_joint_name,
-                          apply=True,
-                          rotate=True,
-                          translate=True,
-                          preserveNormals=True,
-                          scale=True,
-                          normal=False)
-
-        util.copy_attributes(joint_name,
-                             driver_joint_name,
-                             [
-                                 # Joint Attributes
-                                 "drawStyle",
-                                 "radius",
-                                 "jointTypeX", "jointTypeY", "jointTypeZ",
-                                 "preferredAngleX", "preferredAngleY", "preferredAngleZ",
-                                 "jointOrientX", "jointOrientY", "jointOrientZ",
-                                 "segmentScaleCompensate",
-                                 # Joint Labelling
-                                 "side",
-                                 "type",
-                                 "drawLabel",
-                                 # Drawing Overrides
-                                 "overrideEnabled",
-                                 "overrideColor",
-                                 "overridePlayback",
-                                 "overrideShading",
-                                 "overrideVisibility",
-                                 "overrideTexturing",
-                             ]
-                             )
-        _set_selection_child_highlighting(driver_joint_name, rs)
-
-        if rs.debug_logging:
-            print(f"Driver joint '{driver_joint_name}' created.")
-
-        # Clear selection to avoid unintended selection dependent behaviour
-        cmds.select(clear=True)
+        _create_driver_joint(joint_name, base_joint_name, base_parent_joint_name, rs)
 
     if not parent_joint_name:
-        root_control_name = _setup_control("root", base_joint_name, joint_name, parent_control_name, rs)
-
-        world_offset_control_name = _setup_control("world offset",
-                                                   rs.world_offset_base_control_name,
-                                                   joint_name,
-                                                   root_control_name,
-                                                   rs)
-        control_name = _setup_control("cog",
-                                      rs.cog_base_control_name,
-                                      joint_name,
-                                      world_offset_control_name,
-                                      rs)
+        _setup_control(base_joint_name, joint_name, rs)
+        _setup_control(rs.world_offset_base_control_name, joint_name, rs)
+        control_name = _setup_control(rs.cog_base_control_name, joint_name, rs)
     else:
-        control_name = _setup_control(base_joint_name,
-                                      base_joint_name,
-                                      joint_name,
-                                      parent_control_name,
-                                      rs)
+        control_name = _setup_control(base_joint_name, joint_name, rs)
 
     at_chain_end = False
     in_chain_middle = False
@@ -450,29 +376,29 @@ def _process_joint(rs: RiggingSettings,
             # Create a group to contain the Ik Handle and the controls for the PoleVector and IkHandle
             _create_group("ik system group", rs.derive_ik_system_name(ik_chain), world_offset_control, rs)
 
+        # Create IK/FK controls and support joints
+
+        ik_joint_base_name = rs.derive_ik_joint_base_name(base_joint_name, ik_chain.name)
+        fk_joint_base_name = rs.derive_fk_joint_base_name(base_joint_name, ik_chain.name)
+        ik_parent_joint_name = None
+        fk_parent_joint_name = None
+        if base_parent_joint_name:
+            ik_parent_joint_name = rs.derive_ik_joint_name(base_parent_joint_name, ik_chain.name)
+            fk_parent_joint_name = rs.derive_fk_joint_name(base_parent_joint_name, ik_chain.name)
+
+        # TODO: Create IK/FK joints
+
+        _setup_control(ik_joint_base_name, joint_name, rs)
+        _setup_control(fk_joint_base_name, joint_name, rs)
+
+        if ik_chain.does_chain_end_at_joint(base_joint_name):
+            # TODO: Create IK Handle in ik_system group
+            # TODO: Create PV control in ik_system group
+            # TODO: Create IK Handle control in ik_system group
+            # TODO: Create IK/FK switch control in effector group
+            at_chain_end = True
         else:
-            # Otherwise we create IK/FK controls and support joints
-            # TODO: Create joints
-
-            ik_joint_base_name = rs.derive_ik_joint_base_name(base_joint_name, ik_chain.name)
-            fk_joint_base_name = rs.derive_fk_joint_base_name(base_joint_name, ik_chain.name)
-            ik_parent_joint_name = None
-            fk_parent_joint_name = None
-            if base_parent_joint_name:
-                ik_parent_joint_name = rs.derive_ik_joint_name(base_parent_joint_name, ik_chain.name)
-                fk_parent_joint_name = rs.derive_fk_joint_name(base_parent_joint_name, ik_chain.name)
-
-            _setup_control(ik_joint_base_name, ik_joint_base_name, joint_name, ik_parent_joint_name, rs)
-            _setup_control(fk_joint_base_name, fk_joint_base_name, joint_name, fk_parent_joint_name, rs)
-
-            if ik_chain.does_chain_end_at_joint(base_joint_name):
-                # TODO: Create IK Handle in ik_system group
-                # TODO: Create PV control in ik_system group
-                # TODO: Create IK Handle control in ik_system group
-                # TODO: Create IK/FK switch control in effector group
-                at_chain_end = True
-            else:
-                in_chain_middle = True
+            in_chain_middle = True
 
     child_joints = cmds.listRelatives(joint_name, type="joint")
     if child_joints:
@@ -495,28 +421,76 @@ def _process_joint(rs: RiggingSettings,
             _process_joint(rs, child_joint_name, joint_name, child_parent_control_name, child_ik_chain)
 
 
+def _create_driver_joint(joint_name: str,
+                         base_joint_name: str,
+                         base_parent_joint_name: Optional[str],
+                         rs: RiggingSettings) -> None:
+    driver_joint_name = rs.derive_target_joint_name(base_joint_name)
+    if rs.debug_logging:
+        print(f"Creating driver joint '{driver_joint_name}'")
+    actual_driver_joint_name = cmds.joint(name=driver_joint_name)
+    # Clear selection to avoid unintended selection dependent behaviour
+    cmds.select(clear=True)
+    util.ensure_created_object_name_matches("driver joint", actual_driver_joint_name, driver_joint_name)
+    if base_parent_joint_name:
+        driver_parent_joint_name = rs.derive_target_joint_name(base_parent_joint_name)
+        _safe_parent("driver joint", driver_joint_name, driver_parent_joint_name, rs)
+    elif rs.root_group:
+        _safe_parent("driver joint", driver_joint_name, rs.root_group, rs)
+    cmds.matchTransform(driver_joint_name, joint_name)
+    cmds.makeIdentity(driver_joint_name,
+                      apply=True,
+                      rotate=True,
+                      translate=True,
+                      preserveNormals=True,
+                      scale=True,
+                      normal=False)
+    util.copy_attributes(joint_name,
+                         driver_joint_name,
+                         [
+                             # Joint Attributes
+                             "drawStyle",
+                             "radius",
+                             "jointTypeX", "jointTypeY", "jointTypeZ",
+                             "preferredAngleX", "preferredAngleY", "preferredAngleZ",
+                             "jointOrientX", "jointOrientY", "jointOrientZ",
+                             "segmentScaleCompensate",
+                             # Joint Labelling
+                             "side",
+                             "type",
+                             "drawLabel",
+                             # Drawing Overrides
+                             "overrideEnabled",
+                             "overrideColor",
+                             "overridePlayback",
+                             "overrideShading",
+                             "overrideVisibility",
+                             "overrideTexturing",
+                         ]
+                         )
+    _set_selection_child_highlighting(driver_joint_name, rs)
+    if rs.debug_logging:
+        print(f"Driver joint '{driver_joint_name}' created.")
+    # Clear selection to avoid unintended selection dependent behaviour
+    cmds.select(clear=True)
+
+
 def _set_selection_child_highlighting(object_name: str, rs: RiggingSettings):
     selection_child_highlighting = 1 if rs.selection_child_highlighting else 0
     # noinspection PyTypeChecker
     cmds.setAttr(f"{object_name}.selectionChildHighlighting", selection_child_highlighting)
 
 
-def _setup_control(label: str,
-                   base_control_name: str,
-                   joint_name: str,
-                   parent_control_name: Optional[str],
-                   rs: RiggingSettings) -> str:
+def _setup_control(base_control_name: str, joint_name: str, rs: RiggingSettings) -> str:
     """Create a control offset group and control.
 
-    :param label: the human-readable label indicating the name of the control. (This may differ from base_control_name for some of specialised top-level controls like cog, world offset, root if the user overrides the generated control names)
     :param base_control_name: the base name of the control, offset group etc.
     :param joint_name: the name of the joint that the offset group will match transforms to and derived side-edness from. This is typically the joint in source skeleton that we want to control.
-    :param parent_control_name: the name of the control that this control will be logically parented to (either in direct hierarchy or with constraints depending on configuration)
     :param rs: the settings that drive the rigging process.
     :return: the name of the control.
     """
     if rs.debug_logging:
-        print(f"Creating {label} control with parent '{parent_control_name}'")
+        print(f"Creating {base_control_name} control for joint '{joint_name}'")
 
     offset_group_name = rs.derive_offset_group_name(base_control_name)
     _create_group("offset group", offset_group_name, joint_name, rs)
@@ -548,7 +522,7 @@ def _setup_control(label: str,
         _expect_control_matches_side(side, rs.none_side_name, base_control_name, rs)
 
     control_name = _create_control(base_control_name, rs)
-    _safe_parent(f"{label} control", control_name, offset_group_name, rs)
+    _safe_parent(f"{base_control_name} control", control_name, offset_group_name, rs)
 
     cmds.addAttr(control_name, longName="rfJointSide", niceName="Joint Side", dataType="string")
     cmds.setAttr(f"{control_name}.rfJointSide", side, type="string")
