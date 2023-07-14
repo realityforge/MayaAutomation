@@ -91,6 +91,7 @@ class RiggingSettings:
                  driver_joint_name_pattern: str = "{name}_JDRV",
                  effector_name_pattern: str = "{name}_GRP",
                  ik_system_name_pattern: str = "{name}_IK_SYS",
+                 ik_handle_name_pattern: str = "{name}_IK_handle",
                  ik_joint_base_name_pattern: str = "{name}_{chain}_IK",
                  fk_joint_base_name_pattern: str = "{name}_{chain}_FK",
                  offset_group_name_pattern: str = "{name}_OFF_GRP",
@@ -124,6 +125,7 @@ class RiggingSettings:
         self.driver_joint_name_pattern = driver_joint_name_pattern
         self.effector_name_pattern = effector_name_pattern
         self.ik_system_name_pattern = ik_system_name_pattern
+        self.ik_handle_name_pattern = ik_handle_name_pattern
         self.ik_joint_base_name_pattern = ik_joint_base_name_pattern
         self.fk_joint_base_name_pattern = fk_joint_base_name_pattern
         self.offset_group_name_pattern = offset_group_name_pattern
@@ -142,6 +144,9 @@ class RiggingSettings:
         self.right_side_name = right_side_name
         self.center_side_name = center_side_name
         self.none_side_name = none_side_name
+
+    def derive_ik_handle_name(self, chain_name: str) -> str:
+        return self.ik_handle_name_pattern.format(name=chain_name)
 
     def derive_control_name(self, base_name: str) -> str:
         return self.control_name_pattern.format(name=base_name)
@@ -434,10 +439,24 @@ def _process_joint(rs: RiggingSettings,
         _setup_control(fk_joint_base_name, fk_parent_joint_name, joint_name, rs)
 
         if ik_chain.does_chain_end_at_joint(base_name):
-            # TODO: Create IK Handle in ik_system group
             # TODO: Create PV control in ik_system group
-            # TODO: Create IK Handle control in ik_system group
+            # TODO: Add dual point constraint between ik handler and fk end control and effector group so that is switched between
+            # TODO: Add dual orient constraint between ik handle control/fk end control and effector group that is switched between
+            # TODO: Add nodes to perform switching between
             # TODO: Create IK/FK switch control in effector group
+
+            ik_system_name = rs.derive_ik_system_name(ik_chain)
+            ik_handle_name = rs.derive_ik_handle_name(ik_chain.name)
+
+            # Create ik handle
+            ik_start_joint = rs.derive_ik_joint_name(ik_chain.joints[0], ik_chain.name)
+            result = cmds.ikHandle(name=ik_handle_name, startJoint=ik_start_joint, endEffector=ik_joint_name)
+            util.ensure_created_object_name_matches("ik handle", result[0], ik_handle_name)
+            _safe_parent("ik handle", ik_handle_name, ik_system_name, rs)
+
+            # Create ik handle control
+            _setup_control(ik_handle_name, ik_system_name, joint_name, rs)
+
             at_chain_end = True
         else:
             in_chain_middle = True
