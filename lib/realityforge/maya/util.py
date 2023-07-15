@@ -256,7 +256,7 @@ def ensure_created_object_name_matches(object_description: str,
     """
     if actual_object_name != expected_object_name:
         raise Exception(f"Attempt to create a {object_description} named '{expected_object_name}' resulted in "
-                        f"the creation of a joint named {actual_object_name}'. Possible multiple objects with "
+                        f"the creation of an object named {actual_object_name}'. Possible multiple objects with "
                         f"the same name. Aborting!")
 
 
