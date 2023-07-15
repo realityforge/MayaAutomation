@@ -500,7 +500,7 @@ def _process_joint(rs: RiggingSettings,
         _setup_control(fk_joint_base_name, fk_parent_joint_name, joint_name, rs)
 
         if ik_chain.does_chain_end_at_joint(base_name):
-            # TODO: Add dual point constraint between ik handler and fk end control and effector group so that is switched between
+            # TODO: Add dual point constraint between ik handler and fk end control and end group so that is switched between
             # TODO: Add dual orient constraint between ik handle control/fk end control and effector group that is switched between
             # TODO: Add nodes to perform switching between
 
