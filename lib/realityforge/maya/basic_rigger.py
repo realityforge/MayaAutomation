@@ -841,11 +841,18 @@ def _create_group(label: str, group_name: str, match_transform_object_name: Opti
     :param rs:the RiggingSettings
     """
     if rs.debug_logging:
-        print(f"Creating {label} '{group_name}' matching transform of '{match_transform_object_name}'")
-    util.ensure_single_object_named(None, match_transform_object_name)
+        if match_transform_object_name:
+            print(f"Creating {label} '{group_name}' matching transform of '{match_transform_object_name}'")
+        else:
+            print(f"Creating {label} '{group_name}' at origin.")
+
+    if match_transform_object_name:
+        util.ensure_single_object_named(None, match_transform_object_name)
+    cmds.select(clear=True)
     actual_object_name = cmds.group(name=group_name, empty=True)
     util.ensure_created_object_name_matches(label, actual_object_name, group_name)
-    cmds.matchTransform(group_name, match_transform_object_name)
+    if match_transform_object_name:
+        cmds.matchTransform(group_name, match_transform_object_name)
     _set_selection_child_highlighting(group_name, rs)
 
     _hide_transform_properties(group_name)
