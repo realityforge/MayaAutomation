@@ -512,7 +512,7 @@ def _process_joint(rs: RiggingSettings,
             # Create ik handle
             ik_start_joint = rs.derive_ik_joint_name(ik_chain.joints[0], ik_chain.name)
             actual_ik_handle_name, _ = cmds.ikHandle(name=ik_handle_name,
-                                                     solver="ikRPSolver",
+                                                     solver="ikRPsolver",
                                                      startJoint=ik_start_joint,
                                                      endEffector=ik_joint_name)
             util.ensure_created_object_name_matches("ik handle", actual_ik_handle_name, ik_handle_name)
