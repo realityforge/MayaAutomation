@@ -503,7 +503,6 @@ def _process_joint(rs: RiggingSettings,
             # TODO: Add dual point constraint between ik handler and fk end control and effector group so that is switched between
             # TODO: Add dual orient constraint between ik handle control/fk end control and effector group that is switched between
             # TODO: Add nodes to perform switching between
-            # TODO: Create IK/FK switch control in effector group
 
             ik_system_name = rs.derive_ik_system_name(ik_chain)
             ik_handle_name = rs.derive_ik_handle_name(ik_chain.name)
