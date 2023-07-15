@@ -13,6 +13,7 @@
 from typing import Optional
 
 import maya.cmds as cmds
+import maya.api.OpenMaya as om
 from parse import parse
 
 import realityforge.maya.util as util
@@ -43,10 +44,14 @@ __all__ = ['IkChain', 'RiggingSettings', 'create_rig', 'copy_control_from_select
 #    - rotateAxis of joint MUST be 0 if you want to export cleanly for games
 
 class IkChain:
-    def __init__(self, name: str, joints: list[str], effector_name: Optional[str] = None):
+    def __init__(self, name: str,
+                 joints: list[str],
+                 end_name: Optional[str] = None,
+                 pole_vector_distance: float = 10):
         self.name = name
         self.joints = joints
-        self.effector_name = effector_name if effector_name else f"{name}_end"
+        self.end_name = end_name if end_name else f"{name}_end"
+        self.pole_vector_distance = pole_vector_distance
 
     def __str__(self):
         return f"IkChain[{self.name}]"
@@ -89,6 +94,7 @@ class RiggingSettings:
                  ik_end_name_pattern: str = "{name}_GRP",
                  ik_system_name_pattern: str = "{name}_IK_SYS",
                  ik_handle_name_pattern: str = "{name}_IK_handle",
+                 pole_vector_name_pattern: str = "{name}_PV",
                  ik_joint_base_name_pattern: str = "{name}_{chain}_IK",
                  fk_joint_base_name_pattern: str = "{name}_{chain}_FK",
                  offset_group_name_pattern: str = "{name}_OFF_GRP",
@@ -123,6 +129,7 @@ class RiggingSettings:
         self.ik_end_name_pattern = ik_end_name_pattern
         self.ik_system_name_pattern = ik_system_name_pattern
         self.ik_handle_name_pattern = ik_handle_name_pattern
+        self.pole_vector_name_pattern = pole_vector_name_pattern
         self.ik_joint_base_name_pattern = ik_joint_base_name_pattern
         self.fk_joint_base_name_pattern = fk_joint_base_name_pattern
         self.offset_group_name_pattern = offset_group_name_pattern
@@ -144,6 +151,9 @@ class RiggingSettings:
 
     def derive_ik_handle_name(self, chain_name: str) -> str:
         return self.ik_handle_name_pattern.format(name=chain_name)
+
+    def derive_pole_vector_name(self, chain_name: str) -> str:
+        return self.pole_vector_name_pattern.format(name=chain_name)
 
     def derive_control_name(self, base_name: str) -> str:
         return self.control_name_pattern.format(name=base_name)
@@ -458,7 +468,6 @@ def _process_joint(rs: RiggingSettings,
         _setup_control(fk_joint_base_name, fk_parent_joint_name, joint_name, rs)
 
         if ik_chain.does_chain_end_at_joint(base_name):
-            # TODO: Create PV control in ik_system group
             # TODO: Add dual point constraint between ik handler and fk end control and effector group so that is switched between
             # TODO: Add dual orient constraint between ik handle control/fk end control and effector group that is switched between
             # TODO: Add nodes to perform switching between
@@ -466,12 +475,50 @@ def _process_joint(rs: RiggingSettings,
 
             ik_system_name = rs.derive_ik_system_name(ik_chain)
             ik_handle_name = rs.derive_ik_handle_name(ik_chain.name)
+            pole_vector_base_name = rs.derive_pole_vector_name(ik_chain.name)
 
             # Create ik handle
             ik_start_joint = rs.derive_ik_joint_name(ik_chain.joints[0], ik_chain.name)
-            result = cmds.ikHandle(name=ik_handle_name, startJoint=ik_start_joint, endEffector=ik_joint_name)
-            util.ensure_created_object_name_matches("ik handle", result[0], ik_handle_name)
+            actual_ik_handle_name, _ = cmds.ikHandle(name=ik_handle_name,
+                                                     startJoint=ik_start_joint,
+                                                     endEffector=ik_joint_name)
+            util.ensure_created_object_name_matches("ik handle", actual_ik_handle_name, ik_handle_name)
             _safe_parent("ik handle", ik_handle_name, ik_system_name, rs)
+
+            # This sets up the control but locates it at the end of the ik-chain
+            # We need to unlock the offset group and move it to where the pole-vector should be
+            pole_vector_name = _setup_control(pole_vector_base_name, ik_system_name, joint_name, rs)
+
+            pole_vector_offset_group_name = rs.derive_offset_group_name(pole_vector_base_name)
+            _unlock_transform_properties(pole_vector_offset_group_name)
+
+            ik_mid_joint_name = rs.derive_driven_joint_name(ik_chain.joints[1])
+
+            # Use magical maths to find the plane on which pole control should lie
+
+            # First find 3 points on plane
+            ik_start_pos = cmds.xform(ik_start_joint, query=True, worldSpace=True, translation=True)
+            ik_mid_pos = cmds.xform(ik_mid_joint_name, query=True, worldSpace=True, translation=True)
+            ik_end_pos = cmds.xform(ik_joint_name, query=True, worldSpace=True, translation=True)
+
+            # Convert positions into vectors
+            ik_start_vec = om.MVector(*ik_start_pos)
+            ik_mid_vec = om.MVector(*ik_mid_pos)
+            ik_end_vec = om.MVector(*ik_end_pos)
+
+            # Create vectors from start to each other point to define the plane
+            ik_start_end_vec = ik_end_vec - ik_start_vec
+            ik_start_mid_vec = ik_mid_vec - ik_start_vec
+
+            # Calculate a unit vector from the pole back to handle
+            dot_product = ik_start_mid_vec * ik_start_end_vec
+            projection_vec = ik_start_end_vec.normal() * float(dot_product) / float(ik_start_end_vec.length())
+
+            pole_vec = (ik_start_mid_vec - projection_vec) * ik_chain.pole_vector_distance
+            pv_control_vec = pole_vec + ik_mid_vec
+            cmds.xform(pole_vector_offset_group_name, worldSpace=True, translation=pv_control_vec)
+
+            cmds.poleVectorConstraint(pole_vector_name, ik_handle_name)
 
             # Create ik handle control
             _setup_control(ik_handle_name, ik_system_name, joint_name, rs)
