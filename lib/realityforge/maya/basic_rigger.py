@@ -85,6 +85,7 @@ class RiggingSettings:
     def __init__(self,
                  root_group: Optional[str] = "rig",
                  controls_group: Optional[str] = "controls_GRP",
+                 driver_skeleton_group: Optional[str] = "driver_skeleton_GRP",
                  control_set: Optional[str] = "controlsSet",
                  use_driver_hierarchy: bool = True,
                  use_control_hierarchy: bool = False,
@@ -120,6 +121,7 @@ class RiggingSettings:
                  debug_logging: bool = True):
         self.root_group = root_group
         self.controls_group = controls_group
+        self.driver_skeleton_group = driver_skeleton_group
         self.control_set = control_set
         self.use_driver_hierarchy = use_driver_hierarchy
         self.use_control_hierarchy = use_control_hierarchy
@@ -597,6 +599,8 @@ def _create_joint_from_template(source_joint_name: str,
     util.ensure_created_object_name_matches(label, actual_new_joint_name, new_joint_name)
     if parent_new_joint_name:
         _safe_parent(label, new_joint_name, parent_new_joint_name, rs)
+    elif rs.driver_skeleton_group and rs.use_driver_hierarchy:
+        _safe_parent(label, new_joint_name, rs.driver_skeleton_group, rs)
     elif rs.root_group:
         _safe_parent(label, new_joint_name, rs.root_group, rs)
     cmds.matchTransform(new_joint_name, source_joint_name)
@@ -849,6 +853,7 @@ def _setup_top_level_infrastructure(rs: RiggingSettings) -> None:
     """Create the groups, sets, layers etc. required to organize our rig."""
     _create_top_level_group(rs)
     _create_controls_group(rs)
+    _create_driver_skeleton_group(rs)
     _create_control_sets_if_required(rs)
 
 
@@ -891,6 +896,25 @@ def _create_controls_group(rs: RiggingSettings) -> None:
         cmds.select(clear=True)
         if rs.root_group:
             _safe_parent("controls group", rs.controls_group, rs.root_group, rs)
+
+            # Clear selection to avoid unintended selection dependent behaviour
+            cmds.select(clear=True)
+
+
+def _create_driver_skeleton_group(rs: RiggingSettings) -> None:
+    """
+    Create a group to contain the driver skeleton.
+    This is used for organisational purposes.
+    """
+    if rs.driver_skeleton_group and rs.driver_skeleton_group:
+        actual_group_name = cmds.group(name=rs.driver_skeleton_group, empty=True)
+        util.ensure_created_object_name_matches("driver skeleton group", actual_group_name, rs.driver_skeleton_group)
+        _set_selection_child_highlighting(rs.driver_skeleton_group, rs)
+        _lock_and_hide_transform_properties(rs.driver_skeleton_group)
+        # Clear selection to avoid unintended selection dependent behaviour
+        cmds.select(clear=True)
+        if rs.root_group:
+            _safe_parent("driver skeleton group", rs.driver_skeleton_group, rs.root_group, rs)
 
             # Clear selection to avoid unintended selection dependent behaviour
             cmds.select(clear=True)
