@@ -777,7 +777,7 @@ def _create_control(base_name: str, rs: RiggingSettings) -> str:
 
 
 def _setup_top_level_infrastructure(rs: RiggingSettings) -> None:
-    """Create the groups, sets, layers etc required to organize our rig."""
+    """Create the groups, sets, layers etc. required to organize our rig."""
     _create_top_level_group(rs)
     _create_controls_group(rs)
     _create_control_sets_if_required(rs)
