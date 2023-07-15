@@ -85,6 +85,8 @@ class RiggingSettings:
                  controls_group: Optional[str] = "controls_GRP",
                  driver_skeleton_group: Optional[str] = "driver_skeleton_GRP",
                  control_set: Optional[str] = "controlsSet",
+                 # A mapping of control base name => object from which control will be copied
+                 control_template_mapping: dict[str, str] = None,
                  use_driver_hierarchy: bool = True,
                  use_control_hierarchy: bool = False,
                  use_control_set: bool = True,
@@ -122,6 +124,7 @@ class RiggingSettings:
         self.controls_group = controls_group
         self.driver_skeleton_group = driver_skeleton_group
         self.control_set = control_set
+        self.control_template_mapping = control_template_mapping if control_template_mapping else {}
         self.use_driver_hierarchy = use_driver_hierarchy
         self.use_control_hierarchy = use_control_hierarchy
         self.use_control_set = use_control_set
@@ -865,9 +868,11 @@ def _create_control(base_name: str, rs: RiggingSettings) -> str:
     util.ensure_single_object_named(None, offset_group_name)
 
     # TODO: In the future we should support all sorts of control types (copy from catalog?) and
-    #  scaling based on bone size and all sorts of options. For now we go with random control shape
+    #  scaling based on bone size and all sorts of options. For now we go with simple shape or copying from existing
     actual_control_name = cmds.circle(name=control_name, normalX=1, normalY=0, normalZ=0, radius=1)[0]
     util.ensure_created_object_name_matches("offset group", actual_control_name, control_name)
+    if base_name in rs.control_template_mapping:
+        copy_control(rs.control_template_mapping[base_name], control_name, rs)
     _set_selection_child_highlighting(control_name, rs)
 
     cmds.matchTransform(control_name, offset_group_name)
