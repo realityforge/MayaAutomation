@@ -347,7 +347,7 @@ def create_rig(root_joint_name: str, rigging_settings: RiggingSettings = Rigging
     _validate_ik_chains(rigging_settings)
 
     _setup_top_level_infrastructure(rigging_settings)
-    _process_joint(rigging_settings, root_joint_name)
+    _process_joint(rigging_settings, root_joint_name, True)
 
     if rigging_settings.debug_logging:
         print(f"Rig created for root joint '{root_joint_name}'")
@@ -392,6 +392,7 @@ def _validate_ik_chains(rs: RiggingSettings) -> None:
 
 def _process_joint(rs: RiggingSettings,
                    joint_name: str,
+                   is_root: bool,
                    parent_joint_name: Optional[str] = None,
                    parent_control_name: Optional[str] = None,
                    ik_chain: Optional[IkChain] = None) -> None:
@@ -416,7 +417,7 @@ def _process_joint(rs: RiggingSettings,
     if rs.use_driver_hierarchy:
         _create_driver_joint(joint_name, base_name, base_parent_name, rs)
 
-    if not base_parent_name:
+    if is_root:
         root_control_name = _setup_control(base_name, None, joint_name, rs)
         world_offset_control_name = _setup_control(rs.world_offset_base_control_name, root_control_name, joint_name, rs)
         control_name = _setup_control(rs.cog_base_control_name, world_offset_control_name, joint_name, rs)
@@ -576,7 +577,7 @@ def _process_joint(rs: RiggingSettings,
             if not child_ik_chain:
                 child_ik_chain = rs.get_ik_chain_starting_at_joint(child_base_joint_name)
 
-            _process_joint(rs, child_joint_name, joint_name, child_parent_control_name, child_ik_chain)
+            _process_joint(rs, child_joint_name, False, joint_name, child_parent_control_name, child_ik_chain)
 
 
 def _connect_transform_attributes(driver_object_name: str, driven_object_name: str) -> None:
