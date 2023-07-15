@@ -95,7 +95,8 @@ class RiggingSettings:
                  ik_end_name_pattern: str = "{name}_GRP",
                  ik_system_name_pattern: str = "{name}_IK_SYS",
                  ik_handle_name_pattern: str = "{name}_IK_handle",
-                 pole_vector_name_pattern: str = "{name}_PV",
+                 pole_vector_base_name_pattern: str = "{name}_PV",
+                 ik_switch_base_name_pattern: str = "{name}_settings",
                  ik_joint_base_name_pattern: str = "{name}_{chain}_IK",
                  fk_joint_base_name_pattern: str = "{name}_{chain}_FK",
                  offset_group_name_pattern: str = "{name}_OFF_GRP",
@@ -131,7 +132,8 @@ class RiggingSettings:
         self.ik_end_name_pattern = ik_end_name_pattern
         self.ik_system_name_pattern = ik_system_name_pattern
         self.ik_handle_name_pattern = ik_handle_name_pattern
-        self.pole_vector_name_pattern = pole_vector_name_pattern
+        self.pole_vector_base_name_pattern = pole_vector_base_name_pattern
+        self.ik_switch_base_name_pattern = ik_switch_base_name_pattern
         self.ik_joint_base_name_pattern = ik_joint_base_name_pattern
         self.fk_joint_base_name_pattern = fk_joint_base_name_pattern
         self.offset_group_name_pattern = offset_group_name_pattern
@@ -154,8 +156,14 @@ class RiggingSettings:
     def derive_ik_handle_name(self, chain_name: str) -> str:
         return self.ik_handle_name_pattern.format(name=chain_name)
 
-    def derive_pole_vector_name(self, chain_name: str) -> str:
-        return self.pole_vector_name_pattern.format(name=chain_name)
+    def derive_pole_vector_base_name(self, chain_name: str) -> str:
+        return self.pole_vector_base_name_pattern.format(name=chain_name)
+
+    def derive_ik_switch_base_name(self, chain_name: str) -> str:
+        return self.ik_switch_base_name_pattern.format(name=chain_name)
+
+    def derive_ik_switch_name(self, chain_name: str) -> str:
+        return self.derive_control_name(self.derive_ik_switch_base_name(chain_name))
 
     def derive_control_name(self, base_name: str) -> str:
         return self.control_name_pattern.format(name=base_name)
@@ -448,6 +456,18 @@ def _process_joint(rs: RiggingSettings,
             _parent_group("ik system group", ik_system_name, world_offset_control, rs)
             at_chain_start = True
 
+            # Create Ik/FK switch
+            ik_switch_base_name = rs.derive_ik_switch_base_name(ik_chain.name)
+            ik_switch_name = _setup_control(ik_switch_base_name, ik_end_name, joint_name, rs)
+            _lock_and_hide_transform_properties(ik_switch_name)
+            cmds.addAttr(ik_switch_name,
+                         longName="rfIkFkBlend",
+                         niceName="Ik Fk Blend",
+                         maxValue=1,
+                         minValue=0,
+                         defaultValue=1)
+            cmds.setAttr(f"{ik_switch_name}.rfIkFkBlend", channelBox=True, keyable=True)
+
         # Create IK/FK controls and support joints
 
         fk_joint_base_name = rs.derive_fk_joint_base_name(base_name, ik_chain.name)
@@ -467,6 +487,16 @@ def _process_joint(rs: RiggingSettings,
         _create_joint_from_template(joint_name, "ik joint", ik_joint_name, ik_parent_joint_name, rs)
         _create_joint_from_template(joint_name, "fk joint", fk_joint_name, fk_parent_joint_name, rs)
 
+        target_joint_name = rs.derive_target_joint_name(base_name)
+
+        # Create a parent constraint that attempts to use FK and IK hierarchies to drive target joint (either driver
+        # or original joint depending on whether the use_driver_hierarchy flag is enabled)
+        cmds.parentConstraint(ik_joint_name,
+                              fk_joint_name,
+                              target_joint_name,
+                              name=f"{target_joint_name}_parentConstraint_ik_fk",
+                              weight=1,
+                              maintainOffset=False)
         _setup_control(fk_joint_base_name, fk_parent_joint_name, joint_name, rs)
 
         if ik_chain.does_chain_end_at_joint(base_name):
@@ -477,7 +507,7 @@ def _process_joint(rs: RiggingSettings,
 
             ik_system_name = rs.derive_ik_system_name(ik_chain)
             ik_handle_name = rs.derive_ik_handle_name(ik_chain.name)
-            pole_vector_base_name = rs.derive_pole_vector_name(ik_chain.name)
+            pole_vector_base_name = rs.derive_pole_vector_base_name(ik_chain.name)
 
             # Create ik handle
             ik_start_joint = rs.derive_ik_joint_name(ik_chain.joints[0], ik_chain.name)
