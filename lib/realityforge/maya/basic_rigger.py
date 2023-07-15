@@ -500,6 +500,12 @@ def _process_joint(rs: RiggingSettings,
                               name=f"{target_joint_name}_parentConstraint_ik_fk",
                               weight=1,
                               maintainOffset=False)
+        cmds.scaleConstraint(ik_joint_name,
+                             fk_joint_name,
+                             target_joint_name,
+                             name=f"{target_joint_name}_scaleConstraint_ik_fk",
+                             weight=1,
+                             maintainOffset=False)
         _setup_control(fk_joint_base_name, fk_parent_joint_name, joint_name, rs)
 
         if ik_chain.does_chain_end_at_joint(base_name):
