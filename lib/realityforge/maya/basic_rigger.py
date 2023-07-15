@@ -12,8 +12,8 @@
 
 from typing import Optional
 
-import maya.cmds as cmds
 import maya.api.OpenMaya as om
+import maya.cmds as cmds
 from parse import parse
 
 import realityforge.maya.util as util
