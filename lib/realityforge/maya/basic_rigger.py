@@ -235,6 +235,17 @@ def _lock_and_hide_transform_properties(object_name: str) -> None:
     cmds.setAttr(f"{object_name}.visibility", lock=False, keyable=False, channelBox=False)
 
 
+def _unlock_transform_properties(object_name: str) -> None:
+    """UnLock the attributes of the specified transform object.
+
+    :param object_name: the name of the transform object.
+    """
+    for attr in ["translate", "rotate", "scale"]:
+        for axis in ["X", "Y", "Z"]:
+            cmds.setAttr(f"{object_name}.{attr}{axis}", lock=False)
+    cmds.setAttr(f"{object_name}.visibility", lock=False)
+
+
 def copy_control_from_selection(rs: RiggingSettings = RiggingSettings()) -> None:
     selected = cmds.ls(selection=True)
     if 2 != len(selected):
