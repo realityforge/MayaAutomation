@@ -80,8 +80,8 @@ def lock_and_hide_transform_properties(object_name: str) -> None:
     for attr in ["translate", "rotate", "scale"]:
         for axis in ["X", "Y", "Z"]:
             cmds.setAttr(f"{object_name}.{attr}{axis}", lock=False)
-            cmds.setAttr(f"{object_name}.{attr}{axis}", lock=False, keyable=False, channelBox=False)
-    cmds.setAttr(f"{object_name}.visibility", lock=False, keyable=False, channelBox=False)
+            cmds.setAttr(f"{object_name}.{attr}{axis}", lock=True, keyable=False, channelBox=False)
+    cmds.setAttr(f"{object_name}.visibility", lock=True, keyable=False, channelBox=False)
 
 
 def lock_and_hide_transform_properties_in_hierarchy(object_name: str, object_name_pattern: str) -> int:
