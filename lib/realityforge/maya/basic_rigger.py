@@ -415,7 +415,6 @@ def _process_joint(rs: RiggingSettings,
 
         # Create IK/FK controls and support joints
 
-        ik_joint_base_name = rs.derive_ik_joint_base_name(base_name, ik_chain.name)
         fk_joint_base_name = rs.derive_fk_joint_base_name(base_name, ik_chain.name)
         ik_parent_joint_name = None
         fk_parent_joint_name = None
