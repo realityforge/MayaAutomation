@@ -223,6 +223,18 @@ class RiggingSettings:
         return None
 
 
+def _hide_transform_properties(object_name: str) -> None:
+    """Lock and remove from the channelbox the attributes of the specified transform object.
+
+    :param object_name: the name of the transform object.
+    """
+    for attr in ["translate", "rotate", "scale"]:
+        for axis in ["X", "Y", "Z"]:
+            cmds.setAttr(f"{object_name}.{attr}{axis}", lock=False)
+            cmds.setAttr(f"{object_name}.{attr}{axis}", keyable=False, channelBox=False)
+    cmds.setAttr(f"{object_name}.visibility", keyable=False, channelBox=False)
+
+
 def _lock_and_hide_transform_properties(object_name: str) -> None:
     """Lock and remove from the channelbox the attributes of the specified transform object.
 
@@ -231,8 +243,8 @@ def _lock_and_hide_transform_properties(object_name: str) -> None:
     for attr in ["translate", "rotate", "scale"]:
         for axis in ["X", "Y", "Z"]:
             cmds.setAttr(f"{object_name}.{attr}{axis}", lock=False)
-            cmds.setAttr(f"{object_name}.{attr}{axis}", lock=False, keyable=False, channelBox=False)
-    cmds.setAttr(f"{object_name}.visibility", lock=False, keyable=False, channelBox=False)
+            cmds.setAttr(f"{object_name}.{attr}{axis}", lock=True, keyable=False, channelBox=False)
+    cmds.setAttr(f"{object_name}.visibility", lock=True, keyable=False, channelBox=False)
 
 
 def _unlock_transform_properties(object_name: str) -> None:
@@ -750,7 +762,7 @@ def _create_group(label: str, group_name: str, match_transform_object_name: Opti
     cmds.matchTransform(group_name, match_transform_object_name)
     _set_selection_child_highlighting(group_name, rs)
 
-    _lock_and_hide_transform_properties(group_name)
+    _hide_transform_properties(group_name)
     cmds.select(clear=True)
 
 
