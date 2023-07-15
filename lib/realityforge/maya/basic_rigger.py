@@ -40,6 +40,7 @@ __all__ = ['IkChain', 'RiggingSettings', 'create_rig', 'copy_control_from_select
 #    - has preferred angle set for internal joints in IK chains
 #    - has joint orientations that are world for certain joints chains????
 #    - joints have sides specified as non None unless explicitly overriden
+#    - rotateAxis of joint MUST be 0 if you want to export cleanly for games
 
 class IkChain:
     def __init__(self, name: str, joints: list[str], effector_name: Optional[str] = None):
