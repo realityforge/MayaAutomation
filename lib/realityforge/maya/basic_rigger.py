@@ -291,6 +291,7 @@ def copy_control(source_control_name: str, target_control_name: str, rs: Rigging
     util.ensure_single_object_named("transform", target_control_name)
 
     duplicate_object_name = cmds.duplicate(source_control_name, returnRootsOnly=True)[0]
+    util.unlock_all_attributes(duplicate_object_name)
 
     source_side = None
     target_side = None
