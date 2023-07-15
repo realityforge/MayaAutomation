@@ -722,14 +722,14 @@ def _parent_group(label: str, group_name: str, parent_object_name: Optional[str]
     cmds.select(clear=True)
 
 
-def _create_group(label: str, group_name: str, match_transform_object_name: str, rs: RiggingSettings) -> None:
+def _create_group(label: str, group_name: str, match_transform_object_name: Optional[str], rs: RiggingSettings) -> None:
     """
     Create a group under a parent object.
     The group ensures all the transforms are locked and hidden from channel box.
 
     :param label: the human-readable name used to describe the group
     :param group_name: the name used to create group.
-    :param parent_object_name: the object that this group will be "logically parented under" if specified
+    :param match_transform_object_name: the object that this group will match transform of
     :param rs:the RiggingSettings
     """
     if rs.debug_logging:
