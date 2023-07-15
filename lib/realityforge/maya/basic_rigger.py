@@ -465,7 +465,7 @@ def _process_joint(rs: RiggingSettings,
         fk_joint_name = rs.derive_fk_joint_name(base_name, ik_chain.name)
 
         _create_joint_from_template(joint_name, "ik joint", ik_joint_name, ik_parent_joint_name, rs)
-        _create_joint_from_template(joint_name, "ik joint", fk_joint_name, fk_parent_joint_name, rs)
+        _create_joint_from_template(joint_name, "fk joint", fk_joint_name, fk_parent_joint_name, rs)
 
         _setup_control(fk_joint_base_name, fk_parent_joint_name, joint_name, rs)
 
