@@ -86,7 +86,7 @@ class RiggingSettings:
                  use_control_set: bool = True,
                  driven_joint_name_pattern: str = "{name}_JNT",
                  driver_joint_name_pattern: str = "{name}_JDRV",
-                 effector_name_pattern: str = "{name}_GRP",
+                 ik_end_name_pattern: str = "{name}_GRP",
                  ik_system_name_pattern: str = "{name}_IK_SYS",
                  ik_handle_name_pattern: str = "{name}_IK_handle",
                  ik_joint_base_name_pattern: str = "{name}_{chain}_IK",
@@ -120,7 +120,7 @@ class RiggingSettings:
         self.use_control_set = use_control_set
         self.driven_joint_name_pattern = driven_joint_name_pattern
         self.driver_joint_name_pattern = driver_joint_name_pattern
-        self.effector_name_pattern = effector_name_pattern
+        self.ik_end_name_pattern = ik_end_name_pattern
         self.ik_system_name_pattern = ik_system_name_pattern
         self.ik_handle_name_pattern = ik_handle_name_pattern
         self.ik_joint_base_name_pattern = ik_joint_base_name_pattern
@@ -151,8 +151,8 @@ class RiggingSettings:
     def derive_offset_group_name(self, base_name: str) -> str:
         return self.offset_group_name_pattern.format(name=base_name)
 
-    def derive_effector_name(self, ik_chain: IkChain) -> str:
-        return self.effector_name_pattern.format(name=ik_chain.effector_name, chain=ik_chain.name)
+    def derive_ik_end_name(self, ik_chain: IkChain) -> str:
+        return self.ik_end_name_pattern.format(name=ik_chain.end_name, chain=ik_chain.name)
 
     def derive_ik_system_name(self, ik_chain: IkChain) -> str:
         return self.ik_system_name_pattern.format(name=ik_chain.name)
@@ -403,9 +403,9 @@ def _process_joint(rs: RiggingSettings,
 
             # Create a group for all the controls that are past the end off the ik chain and also
             # contains the IK/FK switch control
-            effector_name = rs.derive_effector_name(ik_chain)
-            _create_group("ik effector group", effector_name, world_offset_control, rs)
-            _parent_group("ik effector group", effector_name, world_offset_control, rs)
+            ik_end_name = rs.derive_ik_end_name(ik_chain)
+            _create_group("ik end group", ik_end_name, world_offset_control, rs)
+            _parent_group("ik end group", ik_end_name, world_offset_control, rs)
 
             # Create a group to contain the Ik Handle and the controls for the PoleVector and IkHandle
             ik_system_name = rs.derive_ik_system_name(ik_chain)
@@ -466,7 +466,7 @@ def _process_joint(rs: RiggingSettings,
             child_ik_chain = None
             if at_chain_end:
                 # If we are at the end of an ik chain then the child controls are placed in another group
-                child_parent_control_name = rs.derive_effector_name(ik_chain)
+                child_parent_control_name = rs.derive_ik_end_name(ik_chain)
                 child_ik_chain = None
             elif in_chain_middle:
                 if ik_chain.does_chain_contain_joint(child_base_joint_name):
