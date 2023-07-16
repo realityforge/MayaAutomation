@@ -464,7 +464,7 @@ def _process_joint(rs: RiggingSettings,
 
             # Create Ik/FK switch
             ik_switch_base_name = rs.derive_ik_switch_base_name(ik_chain.name)
-            ik_switch_name = _setup_control(ik_switch_base_name, ik_end_name, joint_name, rs)
+            ik_switch_name = _setup_control(ik_switch_base_name, ik_end_name, effector_end_ik_joint_name, rs)
             _lock_and_hide_transform_properties(ik_switch_name)
             cmds.addAttr(ik_switch_name,
                          longName="rfIkFkBlend",
