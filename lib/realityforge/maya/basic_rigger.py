@@ -562,6 +562,7 @@ def _process_joint(rs: RiggingSettings,
             pole_vec = (ik_start_mid_vec - projection_vec) * ik_chain.pole_vector_distance
             pv_control_vec = pole_vec + ik_mid_vec
             cmds.xform(pole_vector_offset_group_name, worldSpace=True, translation=pv_control_vec)
+            _hide_transform_properties(pole_vector_offset_group_name)
 
             cmds.poleVectorConstraint(pole_vector_name, ik_handle_name)
 
