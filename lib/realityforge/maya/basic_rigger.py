@@ -453,6 +453,8 @@ def _process_joint(rs: RiggingSettings,
             ik_end_name = rs.derive_ik_end_name(ik_chain)
             _create_group("ik end group", ik_end_name, world_offset_control, rs)
             _parent_group("ik end group", ik_end_name, world_offset_control, rs)
+            effector_end_ik_joint_name = rs.derive_driven_joint_name(ik_chain.joints[-1])
+            cmds.matchTransform(ik_end_name, effector_end_ik_joint_name)
 
             # Create a group to contain the Ik Handle and the controls for the PoleVector and IkHandle
             ik_system_name = rs.derive_ik_system_name(ik_chain)
