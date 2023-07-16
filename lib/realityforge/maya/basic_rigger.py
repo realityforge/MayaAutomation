@@ -420,11 +420,12 @@ def _process_joint(rs: RiggingSettings,
     if rs.use_driver_hierarchy:
         _create_driver_joint(joint_name, base_name, base_parent_name, rs)
 
+    control_name = None
     if is_root:
         root_control_name = _setup_control(base_name, None, joint_name, rs)
         world_offset_control_name = _setup_control(rs.world_offset_base_control_name, root_control_name, joint_name, rs)
         control_name = _setup_control(rs.cog_base_control_name, world_offset_control_name, joint_name, rs)
-    else:
+    elif not ik_chain:
         control_name = _setup_control(base_name, parent_control_name, joint_name, rs)
 
     if ik_chain:
