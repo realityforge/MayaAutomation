@@ -35,7 +35,6 @@ import realityforge.maya.util as util
 
 # TODO: Add validation before creating rig
 # - check that the incoming joint chain is valid in that it
-#    - has 0 jointOrient
 #    - has preferred angle set for internal joints in IK chains
 #    - has joint orientations that are world for certain joints chains????
 #    - joints have sides specified as non None unless explicitly overriden
