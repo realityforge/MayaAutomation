@@ -12,7 +12,7 @@
 
 import maya.cmds as cmds
 from parse import parse
-
+import math
 
 # Note: to use this script you need to run
 # "C:\Program Files\Autodesk\Maya2023\bin\mayapy.exe" -m pip install --user parse
@@ -253,6 +253,13 @@ def analyze_joint(object_name: str) -> bool:
             attr_name = f'{object_name}.{attr}{axis}'
             if 0 != cmds.getAttr(attr_name):
                 print(f"{object_name} BAD - {attr_name} is not 0")
+                return False
+    for attr in ["scale"]:
+        for axis in ["X", "Y", "Z"]:
+            attr_name = f'{object_name}.{attr}{axis}'
+            value = cmds.getAttr(attr_name)
+            if not math.isclose(1., value, rel_tol=1e-6):
+                print(f"{object_name} BAD - {attr_name} is not 1. It is {value}")
                 return False
     return True
 
