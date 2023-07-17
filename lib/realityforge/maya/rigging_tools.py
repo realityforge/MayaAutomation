@@ -248,7 +248,7 @@ def analyze_joint(object_name: str) -> bool:
     :param object_name: the name of the object to check.
     :return: False if the object exists and is invalid, else True.
     """
-    for attr in ["jointOrient"]:
+    for attr in ["rotateAxis", "rotate"]:
         for axis in ["X", "Y", "Z"]:
             attr_name = f'{object_name}.{attr}{axis}'
             if 0 != cmds.getAttr(attr_name):
