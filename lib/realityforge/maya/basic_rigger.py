@@ -722,30 +722,30 @@ def _set_selection_child_highlighting(object_name: str, rs: RiggingSettings):
 
 def _setup_control(base_control_name: str,
                    parent_control_name: Optional[str],
-                   joint_name: str,
+                   match_transform_object_name: Optional[str],
                    rs: RiggingSettings) -> str:
     """Create a control offset group and control.
 
     :param base_control_name: the base name of the control, offset group etc.
     :param parent_control_name: the name of the parent object if any.
-    :param joint_name: the name of the joint that the offset group will match transforms to and derived side-edness from. This is typically the joint in source skeleton that we want to control.
+    :param match_transform_object_name: the name of the object that the offset group will match transforms to and derived side-edness from. This is typically the joint in source skeleton that we want to control.
     :param rs: the settings that drive the rigging process.
     :return: the name of the control.
     """
     if rs.debug_logging:
-        print(f"Creating {base_control_name} control for joint '{joint_name}' under "
+        print(f"Creating {base_control_name} control for joint '{match_transform_object_name}' under "
               f"parent control '{parent_control_name}'")
 
     offset_group_name = rs.derive_offset_group_name(base_control_name)
-    _create_group("offset group", offset_group_name, joint_name, rs)
+    _create_group("offset group", offset_group_name, match_transform_object_name, rs)
     _parent_group("offset group", offset_group_name, parent_control_name, rs)
 
     control_name = _create_control(base_control_name, rs)
     _safe_parent(f"{base_control_name} control", control_name, offset_group_name, rs)
 
     side = "none"
-    if joint_name:
-        joint_side = cmds.getAttr(f"{joint_name}.side")
+    if match_transform_object_name:
+        joint_side = cmds.getAttr(f"{match_transform_object_name}.side")
         if 0 == joint_side:
             side = "center"
             _expect_control_matches_side(side, rs.center_side_name, base_control_name, rs)
