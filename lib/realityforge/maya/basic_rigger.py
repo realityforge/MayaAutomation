@@ -743,7 +743,7 @@ def _setup_control(base_control_name: str,
     control_name = _create_control(base_control_name, rs)
     _safe_parent(f"{base_control_name} control", control_name, offset_group_name, rs)
 
-    side = "center"
+    side = "none"
     if joint_name:
         joint_side = cmds.getAttr(f"{joint_name}.side")
         if 0 == joint_side:
