@@ -84,6 +84,7 @@ class RiggingSettings:
                  use_driver_hierarchy: bool = True,
                  use_control_hierarchy: bool = False,
                  use_control_set: bool = True,
+                 generate_world_offset_control: bool = True,
                  driven_joint_name_pattern: str = "{name}_JNT",
                  driver_joint_name_pattern: str = "{name}_JDRV",
                  ik_end_name_pattern: str = "{name}_GRP",
@@ -446,9 +447,10 @@ def _process_joint(rs: RiggingSettings,
 
     control_name = None
     if is_root:
-        root_control_name = _setup_control(base_name, None, joint_name, rs)
-        world_offset_control_name = _setup_control(rs.world_offset_base_control_name, root_control_name, joint_name, rs)
-        control_name = _setup_control(rs.cog_base_control_name, world_offset_control_name, joint_name, rs)
+        parent_control_name = _setup_control(base_name, None, joint_name, rs)
+        if rs.generate_world_offset_control:
+            parent_control_name = _setup_control(rs.world_offset_base_control_name, parent_control_name, joint_name, rs)
+        control_name = _setup_control(rs.cog_base_control_name, parent_control_name, joint_name, rs)
     elif not ik_chain:
         control_name = _setup_control(base_name, parent_control_name, joint_name, rs)
 
