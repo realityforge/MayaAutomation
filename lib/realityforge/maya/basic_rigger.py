@@ -123,6 +123,7 @@ class RiggingSettings:
         self.use_driver_hierarchy = use_driver_hierarchy
         self.use_control_hierarchy = use_control_hierarchy
         self.use_control_set = use_control_set
+        self.generate_world_offset_control = generate_world_offset_control
         self.driven_joint_name_pattern = driven_joint_name_pattern
         self.driver_joint_name_pattern = driver_joint_name_pattern
         self.ik_end_name_pattern = ik_end_name_pattern
