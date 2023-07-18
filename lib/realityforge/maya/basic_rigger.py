@@ -85,6 +85,7 @@ class RiggingSettings:
                  use_control_hierarchy: bool = False,
                  use_control_set: bool = True,
                  generate_world_offset_control: bool = True,
+                 generate_cog_control: bool = True,
                  driven_joint_name_pattern: str = "{name}_JNT",
                  driver_joint_name_pattern: str = "{name}_JDRV",
                  ik_end_name_pattern: str = "{name}_GRP",
@@ -97,6 +98,7 @@ class RiggingSettings:
                  offset_group_name_pattern: str = "{name}_OFF_GRP",
                  control_name_pattern: str = "{name}_CTRL",
                  sided_name_pattern: str = "{name}_{side}_{seq}",
+                 root_base_control_name: str = "root",
                  world_offset_base_control_name: str = "world_offset",
                  cog_base_control_name: str = "cog",
                  ik_chains: list[IkChain] = None,
@@ -124,6 +126,7 @@ class RiggingSettings:
         self.use_control_hierarchy = use_control_hierarchy
         self.use_control_set = use_control_set
         self.generate_world_offset_control = generate_world_offset_control
+        self.generate_cog_control = generate_cog_control
         self.driven_joint_name_pattern = driven_joint_name_pattern
         self.driver_joint_name_pattern = driver_joint_name_pattern
         self.ik_end_name_pattern = ik_end_name_pattern
@@ -136,6 +139,7 @@ class RiggingSettings:
         self.offset_group_name_pattern = offset_group_name_pattern
         self.control_name_pattern = control_name_pattern
         self.sided_name_pattern = sided_name_pattern
+        self.root_base_control_name = root_base_control_name
         self.world_offset_base_control_name = world_offset_base_control_name
         self.cog_base_control_name = cog_base_control_name
         self.selection_child_highlighting = selection_child_highlighting
@@ -149,6 +153,13 @@ class RiggingSettings:
         self.right_side_name = right_side_name
         self.center_side_name = center_side_name
         self.none_side_name = none_side_name
+
+    # Return the name of the control the positions the character. This is either the world offset control or the
+    def derive_character_offset_control_name(self) -> str:
+        if self.generate_world_offset_control:
+            return self.derive_control_name(self.world_offset_base_control_name)
+        else:
+            return self.derive_control_name(self.root_base_control_name)
 
     def derive_ik_handle_name(self, chain_name: str) -> str:
         return self.ik_handle_name_pattern.format(name=chain_name)
@@ -448,10 +459,13 @@ def _process_joint(rs: RiggingSettings,
 
     control_name = None
     if is_root:
-        parent_control_name = _setup_control(base_name, None, joint_name, rs)
         if rs.generate_world_offset_control:
-            parent_control_name = _setup_control(rs.world_offset_base_control_name, parent_control_name, joint_name, rs)
-        control_name = _setup_control(rs.cog_base_control_name, parent_control_name, joint_name, rs)
+            control_name = _setup_control(rs.root_base_control_name, None, None, rs)
+            control_name = _setup_control(rs.world_offset_base_control_name, control_name, joint_name, rs)
+        else:
+            control_name = _setup_control(rs.root_base_control_name, None, joint_name, rs)
+        if rs.generate_cog_control:
+            control_name = _setup_control(rs.cog_base_control_name, control_name, joint_name, rs)
     elif not ik_chain:
         control_name = _setup_control(base_name, parent_control_name, joint_name, rs)
 
@@ -473,20 +487,20 @@ def _process_joint(rs: RiggingSettings,
 
     if ik_chain:
         if ik_chain.does_chain_start_at_joint(base_name):
-            world_offset_control = rs.derive_control_name(rs.world_offset_base_control_name)
+            character_offset_control = rs.derive_character_offset_control_name()
 
             # Create a group for all the controls that are past the end off the ik chain and also
             # contains the IK/FK switch control
             ik_end_name = rs.derive_ik_end_name(ik_chain)
-            _create_group("ik end group", ik_end_name, world_offset_control, rs)
-            _parent_group("ik end group", ik_end_name, world_offset_control, rs)
+            _create_group("ik end group", ik_end_name, character_offset_control, rs)
+            _parent_group("ik end group", ik_end_name, character_offset_control, rs)
             effector_end_ik_joint_name = rs.derive_driven_joint_name(ik_chain.joints[-1])
             cmds.matchTransform(ik_end_name, effector_end_ik_joint_name)
 
             # Create a group to contain the Ik Handle and the controls for the PoleVector and IkHandle
             ik_system_name = rs.derive_ik_system_name(ik_chain)
-            _create_group("ik system group", ik_system_name, world_offset_control, rs)
-            _parent_group("ik system group", ik_system_name, world_offset_control, rs)
+            _create_group("ik system group", ik_system_name, character_offset_control, rs)
+            _parent_group("ik system group", ik_system_name, character_offset_control, rs)
             at_chain_start = True
 
             # Create Ik/FK switch
