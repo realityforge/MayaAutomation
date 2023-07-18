@@ -338,12 +338,19 @@ def copy_control(source_control_name: str, target_control_name: str, rs: Rigging
     _set_override_colors_based_on_side(target_control_name, rs)
 
 
-def create_rig(root_joint_name: str, rigging_settings: RiggingSettings = RiggingSettings()) -> None:
+def create_rig(root_joint_name: str,
+               rigging_settings: RiggingSettings = RiggingSettings(),
+               validate_only: bool = True) -> None:
     if rigging_settings.debug_logging:
         print(f"Creating rig with root joint '{root_joint_name}'")
 
+    print(f"Validating skeleton with root joint '{root_joint_name}' is ready for rigging.")
     # Check the ik chains are valid
     _validate_ik_chains(rigging_settings)
+
+    if validate_only:
+        print(f"Validation performed. Exiting early as requested.")
+        return
 
     _setup_top_level_infrastructure(rigging_settings)
     _process_joint(rigging_settings, root_joint_name, True)
