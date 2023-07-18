@@ -16,11 +16,18 @@
       <excludeFolder url="file://$MODULE_DIR$/../course-rigging-basics-for-games/sourceimages" />
       <excludeFolder url="file://$MODULE_DIR$/../course-rigging-basics-for-games/vendor" />
     </content>
-    <content url="file://D:/Code/aie_course/modules/5_Character_Pipeline/Assessment/CharacterPipeline_PeterDonald/CharacterPipeline_Game_PeterDonald/Production/Maya">
+    <content url="file://D:/Code/aie_course/modules/5_Character_Pipeline/Assessment">
+      <sourceFolder url="file://D:/Code/aie_course/modules/5_Character_Pipeline/Assessment" isTestSource="false" />
       <sourceFolder url="file://D:/Code/aie_course/modules/5_Character_Pipeline/Assessment/CharacterPipeline_PeterDonald/CharacterPipeline_Game_PeterDonald/Production/Maya/scripts" isTestSource="false" />
+      <excludeFolder url="file://D:/Code/aie_course/modules/5_Character_Pipeline/Assessment/CharacterPipeline_PeterDonald/CharacterPipeline_Game_PeterDonald/CompletedProduction" />
+      <excludeFolder url="file://D:/Code/aie_course/modules/5_Character_Pipeline/Assessment/CharacterPipeline_PeterDonald/CharacterPipeline_Game_PeterDonald/Production/Exports" />
+      <excludeFolder url="file://D:/Code/aie_course/modules/5_Character_Pipeline/Assessment/CharacterPipeline_PeterDonald/CharacterPipeline_Game_PeterDonald/Production/Low" />
       <excludeFolder url="file://D:/Code/aie_course/modules/5_Character_Pipeline/Assessment/CharacterPipeline_PeterDonald/CharacterPipeline_Game_PeterDonald/Production/Maya/images" />
       <excludeFolder url="file://D:/Code/aie_course/modules/5_Character_Pipeline/Assessment/CharacterPipeline_PeterDonald/CharacterPipeline_Game_PeterDonald/Production/Maya/scenes" />
       <excludeFolder url="file://D:/Code/aie_course/modules/5_Character_Pipeline/Assessment/CharacterPipeline_PeterDonald/CharacterPipeline_Game_PeterDonald/Production/Maya/sourceimages" />
+      <excludeFolder url="file://D:/Code/aie_course/modules/5_Character_Pipeline/Assessment/CharacterPipeline_PeterDonald/CharacterPipeline_Game_PeterDonald/Production/SubstancePainter" />
+      <excludeFolder url="file://D:/Code/aie_course/modules/5_Character_Pipeline/Assessment/CharacterPipeline_PeterDonald/CharacterPipeline_Game_PeterDonald/Production/ZBrush" />
+      <excludeFolder url="file://D:/Code/aie_course/modules/5_Character_Pipeline/Assessment/CharacterPipeline_PeterDonald/CharacterPipeline_Game_PeterDonald/Working" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.10 (MayaAutomation)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
