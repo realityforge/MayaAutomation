@@ -853,9 +853,10 @@ def _set_override_color_attributes(object_name: str, color: tuple[float, float, 
         cmds.setAttr(f"{object_name}.overrideColorB", color[2])
 
 
-def _scale_constraint(driven_name: str, driver_name: str):
+def _scale_constraint(driven_name: str, driver_name: str, maintain_offset: bool = False):
     cmds.scaleConstraint(driver_name,
                          driven_name,
+                         maintainOffset=maintain_offset,
                          name=f"{driven_name}_scaleConstraint_{driver_name}")
 
 
