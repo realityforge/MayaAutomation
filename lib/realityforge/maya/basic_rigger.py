@@ -33,7 +33,7 @@ import realityforge.maya.util as util
 # * Generate ik/fk (and stretch???) chains for limbs and switch between them? (See https://www.youtube.com/playlist?list=PLgala72Uap1rtRRi-MAI0RMc7w1fpD2Io
 
 # TODO: Verify IK chains are at least 3 long? (for working out pole vector?)
-
+# TODO: Generate certain controls in world orientation rather than joint orientation (i.e. IK handle for foot should be world)
 
 class IkChain:
     def __init__(self, name: str,
