@@ -895,7 +895,7 @@ def _parent_group(label: str, group_name: str, parent_object_name: Optional[str]
         # If there is a "logical" parent then add constraints so that the group behaves as
         # if it was in a direct hierarchy
         if parent_object_name:
-            _parent_constraint(group_name, parent_object_name, True)
+            _parent_constraint(group_name, parent_object_name)
             _scale_constraint(group_name, parent_object_name)
     cmds.select(clear=True)
 
