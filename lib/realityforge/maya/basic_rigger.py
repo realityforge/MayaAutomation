@@ -15,6 +15,7 @@ from typing import Optional
 import maya.api.OpenMaya as om
 import maya.cmds as cmds
 from parse import parse
+import math
 
 import realityforge.maya.util as util
 
@@ -33,12 +34,6 @@ import realityforge.maya.util as util
 
 # TODO: Verify IK chains are at least 3 long? (for working out pole vector?)
 
-# TODO: Add validation before creating rig
-# - check that the incoming joint chain is valid in that it
-#    - has preferred angle set for internal joints in IK chains
-#    - has joint orientations that are world for certain joints chains????
-#    - joints have sides specified as non None unless explicitly overriden
-#    - rotateAxis of joint MUST be 0 if you want to export cleanly for games
 
 class IkChain:
     def __init__(self, name: str,
@@ -375,6 +370,27 @@ def _validate_ik_chains(rs: RiggingSettings) -> None:
             current_joint_name = rs.derive_source_joint_name(current_joint_base_name)
             expected_previous_joint_name = rs.derive_source_joint_name(chain.joints[index - 1])
             actual_previous_joint_name = util.get_parent(current_joint_name)
+
+            if terminal_joint_index != index:
+                # If we are an internal joint in an ik chain then make sure we have preferredAngle specified
+                p = f'{current_joint_name}.preferredAngle'
+                if 0 == cmds.getAttr(f'{p}X') and 0 == cmds.getAttr(f'{p}Y') and 0 == cmds.getAttr(f'{p}Z'):
+                    raise Exception(f"Ik chain named '{chain.name}' has an internal joint named '{current_joint_name}'"
+                                    f" that has not specified a non-zero preferredAngle.")
+            for attr in ["rotateAxis", "rotate"]:
+                for axis in ["X", "Y", "Z"]:
+                    attr_name = f'{current_joint_name}.{attr}{axis}'
+                    attr_value = cmds.getAttr(attr_name)
+                    if 0 != attr_value:
+                        raise Exception(f"Ik chain named '{chain.name}' has a joint named '{current_joint_name}'"
+                                        f" that has a non-zero value for {attr_name}. Actual value: {attr_value}")
+            for attr in ["scale"]:
+                for axis in ["X", "Y", "Z"]:
+                    attr_name = f'{current_joint_name}.{attr}{axis}'
+                    attr_value = cmds.getAttr(attr_name)
+                    if not math.isclose(1., attr_value, rel_tol=1e-6):
+                        raise Exception(f"Ik chain named '{chain.name}' has a joint named '{current_joint_name}'"
+                                        f" that has a non-one value for {attr_name}. Actual value: {attr_value}")
 
             if actual_previous_joint_name != expected_previous_joint_name:
                 raise Exception(f"Attempted to define invalid ik chain named '{chain.name}' as joint "
