@@ -759,9 +759,15 @@ def _setup_control(base_control_name: str,
         print(f"Creating {base_control_name} control for joint '{match_transform_object_name}' under "
               f"parent control '{parent_control_name}'")
 
+    if match_transform_object_name:
+        util.ensure_single_object_named(None, match_transform_object_name)
+
     offset_group_name = rs.derive_offset_group_name(base_control_name)
     _create_group("offset group", offset_group_name, match_transform_object_name, rs)
     _parent_group("offset group", offset_group_name, parent_control_name, rs)
+
+    if match_transform_object_name:
+        cmds.matchTransform(offset_group_name, match_transform_object_name)
 
     control_name = _create_control(base_control_name, rs)
     _safe_parent(f"{base_control_name} control", control_name, offset_group_name, rs)
