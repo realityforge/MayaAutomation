@@ -97,8 +97,8 @@ class RiggingSettings:
                  offset_group_name_pattern: str = "{name}_OFF_GRP",
                  control_name_pattern: str = "{name}_CTRL",
                  sided_name_pattern: str = "{name}_{side}_{seq}",
-                 cog_base_control_name: str = "cog",
                  world_offset_base_control_name: str = "world_offset",
+                 cog_base_control_name: str = "cog",
                  ik_chains: list[IkChain] = None,
                  left_side_color: Optional[tuple[float, float, float]] = (1, 0, 0),
                  right_side_color: Optional[tuple[float, float, float]] = (0, 0, 1),
@@ -135,8 +135,8 @@ class RiggingSettings:
         self.offset_group_name_pattern = offset_group_name_pattern
         self.control_name_pattern = control_name_pattern
         self.sided_name_pattern = sided_name_pattern
-        self.cog_base_control_name = cog_base_control_name
         self.world_offset_base_control_name = world_offset_base_control_name
+        self.cog_base_control_name = cog_base_control_name
         self.selection_child_highlighting = selection_child_highlighting
         self.debug_logging = debug_logging
         self.ik_chains = ik_chains if ik_chains else []
