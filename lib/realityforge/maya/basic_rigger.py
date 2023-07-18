@@ -101,6 +101,10 @@ class RiggingSettings:
                  root_base_control_name: str = "root",
                  world_offset_base_control_name: str = "world_offset",
                  cog_base_control_name: str = "cog",
+
+                 # A list of joints that will abort further processing
+                 stop_joints: Optional[list[str]] = None,
+
                  ik_chains: list[IkChain] = None,
                  left_side_color: Optional[tuple[float, float, float]] = (1, 0, 0),
                  right_side_color: Optional[tuple[float, float, float]] = (0, 0, 1),
@@ -142,6 +146,7 @@ class RiggingSettings:
         self.root_base_control_name = root_base_control_name
         self.world_offset_base_control_name = world_offset_base_control_name
         self.cog_base_control_name = cog_base_control_name
+        self.stop_joints = stop_joints if stop_joints else []
         self.selection_child_highlighting = selection_child_highlighting
         self.debug_logging = debug_logging
         self.ik_chains = ik_chains if ik_chains else []
@@ -449,6 +454,10 @@ def _process_joint(rs: RiggingSettings,
 
     # Derive the base name
     base_name = rs.extract_source_joint_base_name(joint_name)
+
+    if base_name in rs.stop_joints:
+        print(f"Stopping rig creation at joint '{joint_name}' as it appears in stop_joints list.")
+        return
 
     # Derive the base parent name
     base_parent_name = rs.extract_source_joint_base_name(parent_joint_name) if parent_joint_name else None
