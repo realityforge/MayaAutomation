@@ -358,7 +358,7 @@ def copy_control(source_control_name: str, target_control_name: str, rs: Rigging
 
 def create_rig(root_joint_name: str,
                rigging_settings: RiggingSettings = RiggingSettings(),
-               validate_only: bool = True) -> None:
+               validate_only: bool = False) -> None:
     if rigging_settings.debug_logging:
         print(f"Creating rig with root joint '{root_joint_name}'")
 
