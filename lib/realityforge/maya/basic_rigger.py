@@ -813,7 +813,7 @@ def _setup_control(base_control_name: str,
     control_name = _create_control(base_control_name, rs)
     _safe_parent(f"{base_control_name} control", control_name, offset_group_name, rs)
 
-    side = "none"
+    side = "center"
     if match_transform_object_name and cmds.objExists(f"{match_transform_object_name}.side"):
         joint_side = cmds.getAttr(f"{match_transform_object_name}.side")
         if 0 == joint_side:
