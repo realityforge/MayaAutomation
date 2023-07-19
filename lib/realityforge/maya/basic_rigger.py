@@ -373,6 +373,9 @@ def create_rig(root_joint_name: str,
     # Check the ik chains are valid
     _validate_ik_chains(rigging_settings)
 
+    # TODO: Verify that root control is zero unless generate_cog is null cog_location_strategy is not root
+    # TODO: Suggest that root bone has base name of root?
+
     if validate_only:
         print(f"Validation performed. Exiting early as requested.")
         return
