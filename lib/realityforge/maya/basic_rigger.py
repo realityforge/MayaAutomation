@@ -511,7 +511,7 @@ def _process_joint(rs: RiggingSettings,
     joint_constraining_control_name = None
     if is_root:
         if rs.generate_world_offset_control:
-            control_name = _setup_control(rs.root_base_control_name, None, None, rs)
+            control_name = _setup_control(rs.root_base_control_name, None, joint_name, rs)
             control_name = _setup_control(rs.world_offset_base_control_name, control_name, joint_name, rs)
         else:
             control_name = _setup_control(rs.root_base_control_name, None, joint_name, rs)
@@ -529,12 +529,12 @@ def _process_joint(rs: RiggingSettings,
     else:
         driver_joint_name = rs.derive_driver_joint_name(base_name)
         if rs.use_driver_hierarchy:
-            _parent_constraint(driver_joint_name, joint_constraining_control_name)
-            _scale_constraint(driver_joint_name, joint_constraining_control_name)
+            _parent_constraint(driver_joint_name, joint_constraining_control_name, rs)
+            _scale_constraint(driver_joint_name, joint_constraining_control_name, rs)
             _connect_transform_attributes(driver_joint_name, joint_name)
         else:
-            _parent_constraint(joint_name, joint_constraining_control_name)
-            _scale_constraint(joint_name, joint_constraining_control_name)
+            _parent_constraint(joint_name, joint_constraining_control_name, rs)
+            _scale_constraint(joint_name, joint_constraining_control_name, rs)
 
     at_chain_start = False
     at_chain_end = False
@@ -900,14 +900,20 @@ def _set_override_color_attributes(object_name: str, color: tuple[float, float, 
         cmds.setAttr(f"{object_name}.overrideColorB", color[2])
 
 
-def _scale_constraint(driven_name: str, driver_name: str, maintain_offset: bool = False):
+def _scale_constraint(driven_name: str, driver_name: str, rs: RiggingSettings, maintain_offset: bool = False):
+    if rs.debug_logging:
+        print(f"Adding scale constraint from child '{driven_name}' to parent '{driver_name}'")
+
     cmds.scaleConstraint(driver_name,
                          driven_name,
                          maintainOffset=maintain_offset,
                          name=f"{driven_name}_scaleConstraint_{driver_name}")
 
 
-def _parent_constraint(driven_name: str, driver_name: str, maintain_offset: bool = False):
+def _parent_constraint(driven_name: str, driver_name: str, rs: RiggingSettings, maintain_offset: bool = False):
+    if rs.debug_logging:
+        print(f"Adding parent constraint from child '{driven_name}' to parent '{driver_name}'")
+
     cmds.parentConstraint(driver_name,
                           driven_name,
                           maintainOffset=maintain_offset,
@@ -936,8 +942,8 @@ def _parent_group(label: str, group_name: str, parent_object_name: Optional[str]
         # If there is a "logical" parent then add constraints so that the group behaves as
         # if it was in a direct hierarchy
         if parent_object_name:
-            _parent_constraint(group_name, parent_object_name)
-            _scale_constraint(group_name, parent_object_name)
+            _parent_constraint(group_name, parent_object_name, rs)
+            _scale_constraint(group_name, parent_object_name, rs)
     cmds.select(clear=True)
 
 
