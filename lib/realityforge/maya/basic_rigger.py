@@ -105,6 +105,12 @@ class RiggingSettings:
                  # A list of joints that will abort further processing
                  stop_joints: Optional[list[str]] = None,
 
+                 # This is the strategy for discovering the location of the cog in the rig. Of course this is only
+                 # used if generate_cog_control is True. Possible strategy values include:
+                 # - "root" - use transform of the root joint
+                 # - "child_average" - derive position from the average of child bones.
+                 # - Any other non-None value is the name of the locator to get the position from.
+                 cog_location_strategy: str = "child_average",
                  ik_chains: list[IkChain] = None,
                  left_side_color: Optional[tuple[float, float, float]] = (1, 0, 0),
                  right_side_color: Optional[tuple[float, float, float]] = (0, 0, 1),
@@ -149,6 +155,7 @@ class RiggingSettings:
         self.stop_joints = stop_joints if stop_joints else []
         self.selection_child_highlighting = selection_child_highlighting
         self.debug_logging = debug_logging
+        self.cog_location_strategy = cog_location_strategy
         self.ik_chains = ik_chains if ik_chains else []
         self.left_side_color = left_side_color
         self.right_side_color = right_side_color
@@ -435,6 +442,37 @@ def _validate_ik_chains(rs: RiggingSettings) -> None:
             index -= 1
 
 
+def _find_object_to_match_for_cog(root_joint_name: str, rs: RiggingSettings) -> Optional[str]:
+    print(f"Finding cog position for root bone '{root_joint_name}' via strategy {rs.cog_location_strategy}")
+    if "child_average" == rs.cog_location_strategy:
+        x = 0.0
+        y = 0.0
+        z = 0.0
+        object_count = 0.0
+        child_joints = cmds.listRelatives(root_joint_name, type="joint")
+        if child_joints:
+            for child_joint in child_joints:
+                translation = cmds.xform(child_joint, query=True, worldSpace=True, translation=True)
+                x += translation[0]
+                y += translation[1]
+                z += translation[2]
+                object_count += 1
+        if 0 == object_count:
+            return None
+        else:
+            final_x = x / object_count
+            final_y = y / object_count
+            final_z = z / object_count
+            translation = (final_x, final_y, final_z)
+            locator_name = cmds.spaceLocator(absolute=True, position=translation)[0]
+            cmds.xform(locator_name, worldSpace=True, translation=translation)
+            return locator_name
+    elif "root" == rs.cog_location_strategy:
+        return root_joint_name
+    else:
+        return rs.cog_location_strategy
+
+
 def _process_joint(rs: RiggingSettings,
                    joint_name: str,
                    is_root: bool,
@@ -474,7 +512,10 @@ def _process_joint(rs: RiggingSettings,
         else:
             control_name = _setup_control(rs.root_base_control_name, None, joint_name, rs)
         if rs.generate_cog_control:
-            control_name = _setup_control(rs.cog_base_control_name, control_name, joint_name, rs)
+            cog_locator = _find_object_to_match_for_cog(joint_name, rs)
+            control_name = _setup_control(rs.cog_base_control_name, control_name, cog_locator, rs)
+            if "child_average" == rs.cog_location_strategy:
+                cmds.delete(cog_locator)
     elif not ik_chain:
         control_name = _setup_control(base_name, parent_control_name, joint_name, rs)
 
