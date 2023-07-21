@@ -19,6 +19,11 @@ import math
 
 import realityforge.maya.util as util
 
+# TODO: Rename "Root" control to "world" in code (so we have "world", "world_offset", "cog"
+
+# TODO: When you create a scale/parent/orient Constraint then lock it's parameters except for weights in the case of switching!
+
+# TODO: Default the transforms allowed on controls to orients?
 
 # TODO: Allow/Deny list for which attributes should be locked and removed from channelbox in controls so animators
 #  do not see them. i.e. Remove the ability for any FK controls to scale or translate unless allow listed?
