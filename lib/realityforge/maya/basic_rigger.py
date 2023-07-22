@@ -1027,26 +1027,15 @@ def _setup_top_level_infrastructure(rs: RiggingSettings) -> None:
 def _create_top_level_group(rs: RiggingSettings) -> None:
     """Create a group in which to place our rig and related infrastructure."""
     if rs.root_group_name:
-        root_group_names = cmds.ls(rs.root_group_name, exactType="transform")
-        if 0 == len(root_group_names):
-            if rs.debug_logging:
-                print(f"Creating root group '{rs.root_group_name}'")
-        elif 1 == len(root_group_names):
-            if rs.debug_logging:
-                print(f"Re-creating root group '{rs.root_group_name}'")
-            cmds.delete(rs.root_group_name)
-        else:
-            raise Exception(f"Root group '{rs.root_group_name}' already has multiple instances. Aborting!")
+        _pre_top_level_create("root group", "transform", rs.root_group_name, rs)
 
         actual_root_group_name = cmds.group(name=rs.root_group_name, empty=True)
+
         util.ensure_created_object_name_matches("root group", actual_root_group_name, rs.root_group_name)
         _lock_and_hide_transform_properties(actual_root_group_name)
         _set_selection_child_highlighting(rs.root_group_name, rs)
 
-        # Clear selection to avoid unintended selection dependent behaviour
-        cmds.select(clear=True)
-        if rs.debug_logging:
-            print(f"Created root group '{rs.root_group}'")
+        _post_top_level_create("root group", rs.root_group_name, rs)
 
 
 def _create_controls_group(rs: RiggingSettings) -> None:
@@ -1093,20 +1082,30 @@ def _create_control_sets_if_required(rs: RiggingSettings) -> None:
       The set is intended to make it easier for animators to locate all the controls without trawling the hierarchy.
     """
     if rs.use_control_set:
-        control_sets = cmds.ls(rs.control_set, exactType="objectSet")
-        if 0 == len(control_sets):
-            if rs.debug_logging:
-                print(f"Creating controls set '{rs.root_group_name}'")
-        elif 1 == len(control_sets):
-            if rs.debug_logging:
-                print(f"Re-creating control set '{rs.root_group_name}'")
-            cmds.delete(rs.control_set)
-        else:
-            raise Exception(f"Control set '{rs.control_set}' already has multiple instances. Aborting!")
+        _pre_top_level_create("controls set", "objectSet", rs.control_set, rs)
 
         # TODO: In the future we may want to support multiple (potentially overlapping) control sets.
-
         cmds.sets(name=rs.control_set, empty=True)
 
+        _post_top_level_create("controls set", rs.control_set, rs)
+
+
+def _pre_top_level_create(label: str, maya_type: str, object_name: str, rs: RiggingSettings):
+    existing_object_names = cmds.ls(object_name, exactType=maya_type)
+    if 0 == len(existing_object_names):
         if rs.debug_logging:
-            print(f"Created control set '{rs.control_set}'")
+            print(f"Creating {label} '{object_name}'")
+    elif 1 == len(existing_object_names):
+        if rs.debug_logging:
+            print(f"Re-creating {label} '{object_name}'")
+        cmds.delete(object_name)
+    else:
+        raise Exception(f"The {label} named '{object_name}' already has multiple instances. Aborting!")
+
+
+def _post_top_level_create(label: str, object_name: str, rs: RiggingSettings):
+    # Clear selection to avoid unintended selection dependent behaviour
+    cmds.select(clear=True)
+
+    if rs.debug_logging:
+        print(f"Created {label} '{object_name}'")
