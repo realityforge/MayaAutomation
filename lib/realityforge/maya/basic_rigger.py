@@ -613,18 +613,8 @@ def _process_joint(rs: RiggingSettings,
 
         # Create a parent constraint that attempts to use FK and IK hierarchies to drive target joint (either driver
         # or original joint depending on whether the use_driver_hierarchy flag is enabled)
-        cmds.parentConstraint(ik_joint_name,
-                              fk_joint_name,
-                              target_joint_name,
-                              name=f"{target_joint_name}_parentConstraint_ik_fk",
-                              weight=1,
-                              maintainOffset=False)
-        cmds.scaleConstraint(ik_joint_name,
-                             fk_joint_name,
-                             target_joint_name,
-                             name=f"{target_joint_name}_scaleConstraint_ik_fk",
-                             weight=1,
-                             maintainOffset=False)
+        parent_constraint_name = _fk_parent_constraint(target_joint_name, ik_joint_name, fk_joint_name, rs)
+        scale_constraint_name = _fk_scale_constraint(target_joint_name, ik_joint_name, fk_joint_name, rs)
 
         # TODO: For parent and scale constraints use switch to control how much weight each contributes
 
@@ -923,7 +913,7 @@ def _set_override_color_attributes(object_name: str, color: tuple[float, float, 
         cmds.setAttr(f"{object_name}.overrideColorB", color[2])
 
 
-def _scale_constraint(driven_name: str, driver_name: str, rs: RiggingSettings, maintain_offset: bool = False):
+def _scale_constraint(driven_name: str, driver_name: str, rs: RiggingSettings, maintain_offset: bool = False) -> str:
     if rs.debug_logging:
         print(f"Adding scale constraint from child '{driven_name}' to parent '{driver_name}'")
 
@@ -941,8 +931,37 @@ def _scale_constraint(driven_name: str, driver_name: str, rs: RiggingSettings, m
     # Clear selection to avoid unintended selection dependent behaviour
     cmds.select(clear=True)
 
+    return object_name
 
-def _parent_constraint(driven_name: str, driver_name: str, rs: RiggingSettings, maintain_offset: bool = False):
+
+def _fk_scale_constraint(driven_name: str,
+                         ik_joint_name: str,
+                         fk_joint_name: str,
+                         rs: RiggingSettings,
+                         maintain_offset: bool = False) -> str:
+    if rs.debug_logging:
+        print(f"Adding FK scale constraint for ik joint name '{ik_joint_name}' and fk joint name "
+              f"'{fk_joint_name}' to drive '{driven_name}'")
+
+    object_name = f"{driven_name}_scaleConstraint_ik_fk"
+    actual_object_name = cmds.scaleConstraint(ik_joint_name,
+                                              fk_joint_name,
+                                              driven_name,
+                                              maintainOffset=maintain_offset,
+                                              name=object_name)[0]
+    util.ensure_created_object_name_matches("scaleConstraint", actual_object_name, object_name)
+
+    # Lock and hide attributes on constraint
+    for attr_name in ["nodeState", "offsetX", "offsetY", "offsetZ"]:
+        cmds.setAttr(f"{object_name}.{attr_name}", channelBox=False, keyable=False, lock=True)
+
+    # Clear selection to avoid unintended selection dependent behaviour
+    cmds.select(clear=True)
+
+    return object_name
+
+
+def _parent_constraint(driven_name: str, driver_name: str, rs: RiggingSettings, maintain_offset: bool = False) -> str:
     if rs.debug_logging:
         print(f"Adding parent constraint from child '{driven_name}' to parent '{driver_name}'")
 
@@ -964,6 +983,37 @@ def _parent_constraint(driven_name: str, driver_name: str, rs: RiggingSettings, 
 
     # Clear selection to avoid unintended selection dependent behaviour
     cmds.select(clear=True)
+    return object_name
+
+
+def _fk_parent_constraint(driven_name: str,
+                          ik_joint_name: str,
+                          fk_joint_name: str,
+                          rs: RiggingSettings,
+                          maintain_offset: bool = False) -> str:
+    if rs.debug_logging:
+        print(f"Adding FK parent constraint for ik joint name '{ik_joint_name}' and fk joint name "
+              f"'{fk_joint_name}' to drive '{driven_name}'")
+
+    object_name = f"{driven_name}_parentConstraint_ik_fk"
+    actual_object_name = cmds.parentConstraint(ik_joint_name,
+                                               fk_joint_name,
+                                               driven_name,
+                                               maintainOffset=maintain_offset,
+                                               name=object_name)[0]
+    util.ensure_created_object_name_matches("parentConstraint", actual_object_name, object_name)
+
+    # Lock and hide attributes on constraint
+    for attr_name in ["nodeState",
+                      "interpType",
+                      "rotationDecompositionTargetX",
+                      "rotationDecompositionTargetY",
+                      "rotationDecompositionTargetZ"]:
+        cmds.setAttr(f"{object_name}.{attr_name}", channelBox=False, keyable=False, lock=True)
+
+    # Clear selection to avoid unintended selection dependent behaviour
+    cmds.select(clear=True)
+    return object_name
 
 
 def _safe_parent(label: str, child_name: str, parent_name: str, rs: RiggingSettings):
