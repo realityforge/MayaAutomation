@@ -915,20 +915,43 @@ def _scale_constraint(driven_name: str, driver_name: str, rs: RiggingSettings, m
     if rs.debug_logging:
         print(f"Adding scale constraint from child '{driven_name}' to parent '{driver_name}'")
 
-    cmds.scaleConstraint(driver_name,
-                         driven_name,
-                         maintainOffset=maintain_offset,
-                         name=f"{driven_name}_scaleConstraint_{driver_name}")
+    object_name = f"{driven_name}_scaleConstraint_{driver_name}"
+    actual_object_name = cmds.scaleConstraint(driver_name,
+                                              driven_name,
+                                              maintainOffset=maintain_offset,
+                                              name=object_name)[0]
+    util.ensure_created_object_name_matches("scaleConstraint", actual_object_name, object_name)
+
+    # Lock and hide attributes on constraint
+    for attr_name in ["nodeState", "offsetX", "offsetY", "offsetZ", "w0"]:
+        cmds.setAttr(f"{object_name}.{attr_name}", channelBox=False, keyable=False, lock=True)
+
+    # Clear selection to avoid unintended selection dependent behaviour
+    cmds.select(clear=True)
 
 
 def _parent_constraint(driven_name: str, driver_name: str, rs: RiggingSettings, maintain_offset: bool = False):
     if rs.debug_logging:
         print(f"Adding parent constraint from child '{driven_name}' to parent '{driver_name}'")
 
-    cmds.parentConstraint(driver_name,
-                          driven_name,
-                          maintainOffset=maintain_offset,
-                          name=f"{driven_name}_parentConstraint_{driver_name}")
+    object_name = f"{driven_name}_parentConstraint_{driver_name}"
+    actual_object_name = cmds.parentConstraint(driver_name,
+                                               driven_name,
+                                               maintainOffset=maintain_offset,
+                                               name=object_name)[0]
+    util.ensure_created_object_name_matches("parentConstraint", actual_object_name, object_name)
+
+    # Lock and hide attributes on constraint
+    for attr_name in ["nodeState",
+                      "interpType",
+                      "rotationDecompositionTargetX",
+                      "rotationDecompositionTargetY",
+                      "rotationDecompositionTargetZ",
+                      "w0"]:
+        cmds.setAttr(f"{object_name}.{attr_name}", channelBox=False, keyable=False, lock=True)
+
+    # Clear selection to avoid unintended selection dependent behaviour
+    cmds.select(clear=True)
 
 
 def _safe_parent(label: str, child_name: str, parent_name: str, rs: RiggingSettings):
