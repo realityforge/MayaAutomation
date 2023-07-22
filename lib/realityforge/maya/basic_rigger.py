@@ -22,6 +22,11 @@ import realityforge.maya.util as util
 
 # TODO: Explicitly tag controllers to enable pickkwalking - https://youtu.be/gtm345xR2Ao?t=2287
 
+# TODO: Add option to not create the direct connections between the driver skeleton and the exportable skeleton.
+#  This allows you to reference an existing skeleton into a rig file, generate a rig, de-reference skeleton file
+#  then go to separate scene, reference in the rig and direct connect it to local skeleton. So same rig can be used
+#  for multiple actors with same skeleton
+
 # TODO: When you create a scale/parent/orient Constraint then lock it's parameters except for weights in the case of switching!
 
 # TODO: Default the transforms allowed on controls to orients?
