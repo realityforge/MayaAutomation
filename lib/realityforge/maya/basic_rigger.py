@@ -19,6 +19,9 @@ import math
 
 import realityforge.maya.util as util
 
+
+# TODO: Explicitly tag controllers to enable pickkwalking - https://youtu.be/gtm345xR2Ao?t=2287
+
 # TODO: Rename "Root" control to "world" in code (so we have "world", "world_offset", "cog"
 
 # TODO: When you create a scale/parent/orient Constraint then lock it's parameters except for weights in the case of switching!
