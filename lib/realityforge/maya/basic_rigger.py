@@ -1027,7 +1027,7 @@ def _setup_top_level_infrastructure(rs: RiggingSettings) -> None:
     _create_top_level_group(rs)
     _create_controls_group(rs)
     _create_driver_skeleton_group(rs)
-    _create_control_sets_if_required(rs)
+    _create_control_sets(rs)
 
 
 def _create_top_level_group(rs: RiggingSettings) -> None:
@@ -1076,7 +1076,7 @@ def _create_driver_skeleton_group(rs: RiggingSettings) -> None:
             _safe_parent("driver skeleton group", rs.driver_skeleton_group, rs.root_group_name, rs)
 
 
-def _create_control_sets_if_required(rs: RiggingSettings) -> None:
+def _create_control_sets(rs: RiggingSettings) -> None:
     """
       Create the set containing the controls if rigging settings enables this feature.
       The set is intended to make it easier for animators to locate all the controls without trawling the hierarchy.
