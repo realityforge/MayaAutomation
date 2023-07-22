@@ -384,6 +384,9 @@ def copy_control(source_control_name: str, target_control_name: str, rs: Rigging
 
     _set_override_colors_based_on_side(target_control_name, rs)
 
+    # Clear selection to avoid unintended selection dependent behaviour
+    cmds.select(clear=True)
+
 
 def create_rig(root_joint_name: str,
                rigging_settings: RiggingSettings = RiggingSettings(),
