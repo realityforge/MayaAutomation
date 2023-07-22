@@ -934,6 +934,9 @@ def _safe_parent(label: str, child_name: str, parent_name: str, rs: RiggingSetti
     if 0 == len(parented):
         raise Exception(f"Failed to parent '{child_name}' under '{parent_name}'")
 
+    # Clear selection to avoid unintended selection dependent behaviour
+    cmds.select(clear=True)
+
 
 def _parent_group(label: str, group_name: str, parent_object_name: Optional[str], rs: RiggingSettings) -> None:
     if parent_object_name:
@@ -949,8 +952,6 @@ def _parent_group(label: str, group_name: str, parent_object_name: Optional[str]
         _safe_parent(label, group_name, rs.controls_group, rs)
     elif rs.root_group_name:
         _safe_parent(label, group_name, rs.root_group_name, rs)
-
-    cmds.select(clear=True)
 
 
 def _create_group(label: str, group_name: str, match_transform_object_name: Optional[str], rs: RiggingSettings) -> None:
@@ -1053,9 +1054,6 @@ def _create_controls_group(rs: RiggingSettings) -> None:
         if rs.root_group_name:
             _safe_parent("controls group", rs.controls_group, rs.root_group_name, rs)
 
-            # Clear selection to avoid unintended selection dependent behaviour
-            cmds.select(clear=True)
-
 
 def _create_driver_skeleton_group(rs: RiggingSettings) -> None:
     """
@@ -1071,9 +1069,6 @@ def _create_driver_skeleton_group(rs: RiggingSettings) -> None:
         cmds.select(clear=True)
         if rs.root_group_name:
             _safe_parent("driver skeleton group", rs.driver_skeleton_group, rs.root_group_name, rs)
-
-            # Clear selection to avoid unintended selection dependent behaviour
-            cmds.select(clear=True)
 
 
 def _create_control_sets_if_required(rs: RiggingSettings) -> None:
