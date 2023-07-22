@@ -29,7 +29,7 @@ import realityforge.maya.util as util
 
 # TODO: When you create a scale/parent/orient Constraint then lock it's parameters except for weights in the case of switching!
 
-# TODO: Default the transforms allowed on controls to orients?
+# TODO: Default the transforms allowed on controls to orients? Except maybe root ... and hips?
 
 # TODO: Allow/Deny list for which attributes should be locked and removed from channelbox in controls so animators
 #  do not see them. i.e. Remove the ability for any FK controls to scale or translate unless allow listed?
