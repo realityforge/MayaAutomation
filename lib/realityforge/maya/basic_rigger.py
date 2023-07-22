@@ -325,7 +325,15 @@ def copy_control(source_control_name: str, target_control_name: str, rs: Rigging
 
     duplicate_object_name = cmds.duplicate(source_control_name,
                                            name=f"{target_control_name}_tmp",
+                                           renameChildren=True,
                                            returnRootsOnly=True)[0]
+    # Delete all children that are no nurbs curves as they are probably child offset groups
+    # and will cause duplicate name errors in subsequent unlock call
+    children = cmds.listRelatives(duplicate_object_name)
+    if children:
+        for child in children:
+            if "nurbsCurve" != cmds.objectType(child):
+                cmds.delete(child)
     util.unlock_all_attributes(duplicate_object_name)
 
     source_side = None
