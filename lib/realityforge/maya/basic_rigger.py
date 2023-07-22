@@ -944,19 +944,20 @@ def _safe_parent(label: str, child_name: str, parent_name: str, rs: RiggingSetti
 
 
 def _parent_group(label: str, group_name: str, parent_object_name: Optional[str], rs: RiggingSettings) -> None:
-    if parent_object_name:
-        if rs.use_control_hierarchy:
-            _safe_parent(label, group_name, parent_object_name, rs)
-        else:
+    if parent_object_name and rs.use_control_hierarchy:
+        _safe_parent(label, group_name, parent_object_name, rs)
+    else:
+        # Place the group under one of the administrative groups if enabled
+        if rs.controls_group:
+            _safe_parent(label, group_name, rs.controls_group, rs)
+        elif rs.root_group_name:
+            _safe_parent(label, group_name, rs.root_group_name, rs)
+
+        if parent_object_name:
             # If there is a "logical" parent then add constraints so that the group behaves as
             # if it was in a direct hierarchy
             _parent_constraint(group_name, parent_object_name, rs)
             _scale_constraint(group_name, parent_object_name, rs)
-    # Place the group under one of the administrative groups if enabled
-    elif rs.controls_group:
-        _safe_parent(label, group_name, rs.controls_group, rs)
-    elif rs.root_group_name:
-        _safe_parent(label, group_name, rs.root_group_name, rs)
 
 
 def _create_group(label: str, group_name: str, match_transform_object_name: Optional[str], rs: RiggingSettings) -> None:
