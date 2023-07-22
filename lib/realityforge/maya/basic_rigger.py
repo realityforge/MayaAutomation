@@ -190,6 +190,9 @@ class RiggingSettings:
     def derive_pole_vector_base_name(self, chain_name: str) -> str:
         return self.pole_vector_base_name_pattern.format(name=chain_name)
 
+    def derive_ik_switch_reverse_name(self, chain_name: str) -> str:
+        return f"{self.derive_ik_switch_base_name(chain_name)}_rfIkFkBlend_reverse"
+
     def derive_ik_switch_base_name(self, chain_name: str) -> str:
         return self.ik_switch_base_name_pattern.format(name=chain_name)
 
@@ -596,6 +599,12 @@ def _process_joint(rs: RiggingSettings,
                          defaultValue=1)
             cmds.setAttr(f"{ik_switch_name}.rfIkFkBlend", channelBox=True, keyable=True)
 
+            # Create a reverse node so that it is inverse of ik switch
+            reverse_name = rs.derive_ik_switch_reverse_name(ik_chain.name)
+            actual_reverse_name = cmds.shadingNode("reverse", asUtility=True, name=reverse_name)
+            util.ensure_created_object_name_matches("ik fk reverse", actual_reverse_name, reverse_name)
+            cmds.connectAttr(f"{ik_switch_name}.rfIkFkBlend", f"{reverse_name}.inputX", lock=True, force=True)
+
         # Create IK/FK controls and support joints
 
         fk_joint_base_name = rs.derive_fk_joint_base_name(base_name, ik_chain.name)
@@ -622,7 +631,15 @@ def _process_joint(rs: RiggingSettings,
         parent_constraint_name = _fk_parent_constraint(target_joint_name, ik_joint_name, fk_joint_name, rs)
         scale_constraint_name = _fk_scale_constraint(target_joint_name, ik_joint_name, fk_joint_name, rs)
 
-        # TODO: For parent and scale constraints use switch to control how much weight each contributes
+        ik_switch_name = rs.derive_ik_switch_name(ik_chain.name)
+        reverse_name = rs.derive_ik_switch_reverse_name(ik_chain.name)
+        cmds.setAttr(f"{parent_constraint_name}.w0", lock=False)
+        cmds.connectAttr(f"{ik_switch_name}.rfIkFkBlend", f"{parent_constraint_name}.w0", lock=True, force=True)
+        cmds.connectAttr(f"{reverse_name}.outputX", f"{parent_constraint_name}.w1", lock=True, force=True)
+
+        cmds.setAttr(f"{scale_constraint_name}.w0", lock=False)
+        cmds.connectAttr(f"{ik_switch_name}.rfIkFkBlend", f"{scale_constraint_name}.w0", lock=True, force=True)
+        cmds.connectAttr(f"{reverse_name}.outputX", f"{scale_constraint_name}.w1", lock=True, force=True)
 
         if chain_starts_at_current_joint:
             _setup_control(fk_joint_base_name, parent_control_name, joint_name, rs)
@@ -632,7 +649,6 @@ def _process_joint(rs: RiggingSettings,
         if ik_chain.does_chain_end_at_joint(base_name):
             # TODO: Add dual point constraint between ik handler and fk end control and end group so that is switched between
             # TODO: Add dual orient constraint between ik handle control/fk end control and effector group that is switched between
-            # TODO: Add nodes to perform switching between
 
             ik_system_name = rs.derive_ik_system_name(ik_chain)
             ik_handle_name = rs.derive_ik_handle_name(ik_chain.name)
