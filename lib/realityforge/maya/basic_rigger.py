@@ -371,7 +371,10 @@ def copy_control(source_control_name: str, target_control_name: str, rs: Rigging
         for child in source_children:
             index += 1
             cmds.parent(child, target_control_name, shape=True, relative=True)
-            cmds.rename(child, f"{target_control_name}Shape{index}")
+            if 1 == len(source_children):
+                cmds.rename(child, f"{target_control_name}Shape")
+            else:
+                cmds.rename(child, f"{target_control_name}Shape{index}")
 
     cmds.delete(duplicate_object_name)
     try:
