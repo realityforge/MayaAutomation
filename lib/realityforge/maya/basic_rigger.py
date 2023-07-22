@@ -560,7 +560,8 @@ def _process_joint(rs: RiggingSettings,
     in_chain_middle = False
 
     if ik_chain:
-        if ik_chain.does_chain_start_at_joint(base_name):
+        chain_starts_at_current_joint = ik_chain.does_chain_start_at_joint(base_name)
+        if chain_starts_at_current_joint:
             character_offset_control = rs.derive_character_offset_control_name()
 
             # Create a group for all the controls that are past the end off the ik chain and also
@@ -627,7 +628,10 @@ def _process_joint(rs: RiggingSettings,
 
         # TODO: For parent and scale constraints use switch to control how much weight each contributes
 
-        _setup_control(fk_joint_base_name, fk_parent_joint_name, joint_name, rs)
+        if chain_starts_at_current_joint:
+            _setup_control(fk_joint_base_name, parent_control_name, joint_name, rs)
+        else:
+            _setup_control(fk_joint_base_name, fk_parent_joint_name, joint_name, rs)
 
         if ik_chain.does_chain_end_at_joint(base_name):
             # TODO: Add dual point constraint between ik handler and fk end control and end group so that is switched between
