@@ -624,6 +624,11 @@ def _process_joint(rs: RiggingSettings,
         _create_joint_from_template(joint_name, "ik joint", ik_joint_name, ik_parent_joint_name, rs)
         _create_joint_from_template(joint_name, "fk joint", fk_joint_name, fk_parent_joint_name, rs)
 
+        if chain_starts_at_current_joint:
+            # Hide the IK/FK chains so that we only see the driven chain
+            cmds.setAttr(f"{ik_joint_name}.visibility", 0, lock=True)
+            cmds.setAttr(f"{fk_joint_name}.visibility", 0, lock=True)
+
         target_joint_name = rs.derive_target_joint_name(base_name)
 
         # Create a parent constraint that attempts to use FK and IK hierarchies to drive target joint (either driver
