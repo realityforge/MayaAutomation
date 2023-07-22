@@ -648,10 +648,13 @@ def _process_joint(rs: RiggingSettings,
         cmds.connectAttr(f"{ik_switch_name}.rfIkFkBlend", f"{scale_constraint_name}.w0", lock=True, force=True)
         cmds.connectAttr(f"{reverse_name}.outputX", f"{scale_constraint_name}.w1", lock=True, force=True)
 
+
         if chain_starts_at_current_joint:
-            _setup_control(fk_joint_base_name, parent_control_name, joint_name, rs)
+            fk_joint_control_name = _setup_control(fk_joint_base_name, parent_control_name, joint_name, rs)
         else:
-            _setup_control(fk_joint_base_name, fk_parent_joint_name, joint_name, rs)
+            fk_joint_control_name = _setup_control(fk_joint_base_name, fk_parent_joint_name, joint_name, rs)
+
+        cmds.connectAttr(f"{reverse_name}.outputX", f"{fk_joint_control_name}.visibility", lock=True, force=True)
 
         if ik_chain.does_chain_end_at_joint(base_name):
             # TODO: Add dual point constraint between ik handler and fk end control and end group so that is switched between
@@ -676,6 +679,7 @@ def _process_joint(rs: RiggingSettings,
             # This sets up the control but locates it at the end of the ik-chain
             # We need to unlock the offset group and move it to where the pole-vector should be
             pole_vector_name = _setup_control(pole_vector_base_name, ik_system_name, joint_name, rs)
+            cmds.connectAttr(f"{ik_switch_name}.rfIkFkBlend", f"{pole_vector_name}.visibility", lock=True, force=True)
 
             pole_vector_offset_group_name = rs.derive_offset_group_name(pole_vector_base_name)
             _unlock_transform_properties(pole_vector_offset_group_name)
@@ -710,7 +714,8 @@ def _process_joint(rs: RiggingSettings,
             cmds.poleVectorConstraint(pole_vector_name, ik_handle_name)
 
             # Create ik handle control
-            _setup_control(ik_handle_name, ik_system_name, joint_name, rs)
+            ik_handle_control_name = _setup_control(ik_handle_name, ik_system_name, joint_name, rs)
+            cmds.connectAttr(f"{ik_switch_name}.rfIkFkBlend", f"{ik_handle_control_name}.visibility", lock=True, force=True)
 
             at_chain_end = True
         else:
