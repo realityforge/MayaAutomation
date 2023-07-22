@@ -668,6 +668,9 @@ def _process_joint(rs: RiggingSettings,
                                                      startJoint=ik_start_joint,
                                                      endEffector=ik_joint_name)
             util.ensure_created_object_name_matches("ik handle", actual_ik_handle_name, ik_handle_name)
+            # Ik handle is always hidden as it is driven by a separate control
+            # noinspection PyTypeChecker
+            cmds.setAttr(f"{ik_handle_name}.visibility", 0, lock=True)
             _safe_parent("ik handle", ik_handle_name, ik_system_name, rs)
 
             # This sets up the control but locates it at the end of the ik-chain
