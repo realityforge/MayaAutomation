@@ -626,7 +626,9 @@ def _process_joint(rs: RiggingSettings,
 
         if chain_starts_at_current_joint:
             # Hide the IK/FK chains so that we only see the driven chain
+            # noinspection PyTypeChecker
             cmds.setAttr(f"{ik_joint_name}.visibility", 0, lock=True)
+            # noinspection PyTypeChecker
             cmds.setAttr(f"{fk_joint_name}.visibility", 0, lock=True)
 
         target_joint_name = rs.derive_target_joint_name(base_name)
