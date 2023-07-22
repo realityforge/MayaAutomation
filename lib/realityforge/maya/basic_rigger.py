@@ -22,8 +22,6 @@ import realityforge.maya.util as util
 
 # TODO: Explicitly tag controllers to enable pickkwalking - https://youtu.be/gtm345xR2Ao?t=2287
 
-# TODO: Rename "Root" control to "world" in code (so we have "world", "world_offset", "cog"
-
 # TODO: When you create a scale/parent/orient Constraint then lock it's parameters except for weights in the case of switching!
 
 # TODO: Default the transforms allowed on controls to orients?
@@ -83,7 +81,7 @@ class IkChain:
 
 class RiggingSettings:
     def __init__(self,
-                 root_group: Optional[str] = "rig",
+                 root_group_name: Optional[str] = "rig",
                  controls_group: Optional[str] = "controls_GRP",
                  driver_skeleton_group: Optional[str] = "driver_skeleton_GRP",
                  control_set: Optional[str] = "controlsSet",
@@ -106,7 +104,7 @@ class RiggingSettings:
                  offset_group_name_pattern: str = "{name}_OFF_GRP",
                  control_name_pattern: str = "{name}_CTRL",
                  sided_name_pattern: str = "{name}_{side}_{seq}",
-                 root_base_control_name: str = "root",
+                 world_base_control_name: str = "world",
                  world_offset_base_control_name: str = "world_offset",
                  cog_base_control_name: str = "cog",
 
@@ -135,7 +133,7 @@ class RiggingSettings:
                  # flow down the hierarchy
                  selection_child_highlighting: bool = False,
                  debug_logging: bool = True):
-        self.root_group = root_group
+        self.root_group_name = root_group_name
         self.controls_group = controls_group
         self.driver_skeleton_group = driver_skeleton_group
         self.control_set = control_set
@@ -157,7 +155,7 @@ class RiggingSettings:
         self.offset_group_name_pattern = offset_group_name_pattern
         self.control_name_pattern = control_name_pattern
         self.sided_name_pattern = sided_name_pattern
-        self.root_base_control_name = root_base_control_name
+        self.world_base_control_name = world_base_control_name
         self.world_offset_base_control_name = world_offset_base_control_name
         self.cog_base_control_name = cog_base_control_name
         self.stop_joints = stop_joints if stop_joints else []
@@ -179,7 +177,7 @@ class RiggingSettings:
         if self.generate_world_offset_control:
             return self.derive_control_name(self.world_offset_base_control_name)
         else:
-            return self.derive_control_name(self.root_base_control_name)
+            return self.derive_control_name(self.world_base_control_name)
 
     def derive_ik_handle_name(self, chain_name: str) -> str:
         return self.ik_handle_name_pattern.format(name=chain_name)
@@ -519,10 +517,10 @@ def _process_joint(rs: RiggingSettings,
     joint_constraining_control_name = None
     if is_root:
         if rs.generate_world_offset_control:
-            control_name = _setup_control(rs.root_base_control_name, None, joint_name, rs)
+            control_name = _setup_control(rs.world_base_control_name, None, joint_name, rs)
             control_name = _setup_control(rs.world_offset_base_control_name, control_name, joint_name, rs)
         else:
-            control_name = _setup_control(rs.root_base_control_name, None, joint_name, rs)
+            control_name = _setup_control(rs.world_base_control_name, None, joint_name, rs)
         joint_constraining_control_name = control_name
         if rs.generate_cog_control:
             cog_locator = _find_object_to_match_for_cog(joint_name, rs)
@@ -751,8 +749,8 @@ def _create_joint_from_template(source_joint_name: str,
         _safe_parent(label, new_joint_name, parent_new_joint_name, rs)
     elif rs.driver_skeleton_group and rs.use_driver_hierarchy:
         _safe_parent(label, new_joint_name, rs.driver_skeleton_group, rs)
-    elif rs.root_group:
-        _safe_parent(label, new_joint_name, rs.root_group, rs)
+    elif rs.root_group_name:
+        _safe_parent(label, new_joint_name, rs.root_group_name, rs)
     cmds.matchTransform(new_joint_name, source_joint_name)
     cmds.makeIdentity(new_joint_name,
                       apply=True,
@@ -949,8 +947,8 @@ def _parent_group(label: str, group_name: str, parent_object_name: Optional[str]
     # Place the group under one of the administrative groups if enabled
     elif rs.controls_group:
         _safe_parent(label, group_name, rs.controls_group, rs)
-    elif rs.root_group:
-        _safe_parent(label, group_name, rs.root_group, rs)
+    elif rs.root_group_name:
+        _safe_parent(label, group_name, rs.root_group_name, rs)
 
     cmds.select(clear=True)
 
@@ -1028,22 +1026,22 @@ def _setup_top_level_infrastructure(rs: RiggingSettings) -> None:
 
 def _create_top_level_group(rs: RiggingSettings) -> None:
     """Create a group in which to place our rig and related infrastructure."""
-    if rs.root_group:
-        root_groups = cmds.ls(rs.root_group, exactType="transform")
-        if 0 == len(root_groups):
+    if rs.root_group_name:
+        root_group_names = cmds.ls(rs.root_group_name, exactType="transform")
+        if 0 == len(root_group_names):
             if rs.debug_logging:
-                print(f"Creating root group '{rs.root_group}'")
-        elif 1 == len(root_groups):
+                print(f"Creating root group '{rs.root_group_name}'")
+        elif 1 == len(root_group_names):
             if rs.debug_logging:
-                print(f"Re-creating root group '{rs.root_group}'")
-            cmds.delete(rs.root_group)
+                print(f"Re-creating root group '{rs.root_group_name}'")
+            cmds.delete(rs.root_group_name)
         else:
-            raise Exception(f"Root group '{rs.root_group}' already has multiple instances. Aborting!")
+            raise Exception(f"Root group '{rs.root_group_name}' already has multiple instances. Aborting!")
 
-        actual_root_group_name = cmds.group(name=rs.root_group, empty=True)
-        util.ensure_created_object_name_matches("root group", actual_root_group_name, rs.root_group)
+        actual_root_group_name = cmds.group(name=rs.root_group_name, empty=True)
+        util.ensure_created_object_name_matches("root group", actual_root_group_name, rs.root_group_name)
         _lock_and_hide_transform_properties(actual_root_group_name)
-        _set_selection_child_highlighting(rs.root_group, rs)
+        _set_selection_child_highlighting(rs.root_group_name, rs)
 
         # Clear selection to avoid unintended selection dependent behaviour
         cmds.select(clear=True)
@@ -1063,8 +1061,8 @@ def _create_controls_group(rs: RiggingSettings) -> None:
         _lock_and_hide_transform_properties(actual_controls_group_name)
         # Clear selection to avoid unintended selection dependent behaviour
         cmds.select(clear=True)
-        if rs.root_group:
-            _safe_parent("controls group", rs.controls_group, rs.root_group, rs)
+        if rs.root_group_name:
+            _safe_parent("controls group", rs.controls_group, rs.root_group_name, rs)
 
             # Clear selection to avoid unintended selection dependent behaviour
             cmds.select(clear=True)
@@ -1082,8 +1080,8 @@ def _create_driver_skeleton_group(rs: RiggingSettings) -> None:
         _lock_and_hide_transform_properties(rs.driver_skeleton_group)
         # Clear selection to avoid unintended selection dependent behaviour
         cmds.select(clear=True)
-        if rs.root_group:
-            _safe_parent("driver skeleton group", rs.driver_skeleton_group, rs.root_group, rs)
+        if rs.root_group_name:
+            _safe_parent("driver skeleton group", rs.driver_skeleton_group, rs.root_group_name, rs)
 
             # Clear selection to avoid unintended selection dependent behaviour
             cmds.select(clear=True)
@@ -1098,10 +1096,10 @@ def _create_control_sets_if_required(rs: RiggingSettings) -> None:
         control_sets = cmds.ls(rs.control_set, exactType="objectSet")
         if 0 == len(control_sets):
             if rs.debug_logging:
-                print(f"Creating controls set '{rs.root_group}'")
+                print(f"Creating controls set '{rs.root_group_name}'")
         elif 1 == len(control_sets):
             if rs.debug_logging:
-                print(f"Re-creating control set '{rs.root_group}'")
+                print(f"Re-creating control set '{rs.root_group_name}'")
             cmds.delete(rs.control_set)
         else:
             raise Exception(f"Control set '{rs.control_set}' already has multiple instances. Aborting!")
