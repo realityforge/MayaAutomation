@@ -28,6 +28,7 @@ from realityforge.maya import util as util
 #    does not highlight tree of controllers. Alternatively "selection_child_highlighting" to allow individual
 #    controllers highlighting be an editor setting
 #  * Coloring by side
+#  * Coloring by arbitrary matching on controllers names
 #  * Name patterns for different elements and for extracting sides from joints
 #  * Lock and hide parameters that should not be touched by animator
 
@@ -38,8 +39,6 @@ from realityforge.maya import util as util
 #  for multiple actors with same skeleton
 
 # TODO: Default the transforms allowed on controls to orients? Except maybe root ... and hips?
-
-# TODO: Per controller coloring and per controller type coloring (somebone_l one color, settings different color?)
 
 # TODO: Allow/Deny list for which attributes should be locked and removed from channelbox in controls so animators
 #  do not see them. i.e. Remove the ability for any FK controls to scale or translate unless allow listed?
@@ -95,10 +94,15 @@ class IkChain:
 
 
 class ControllerConfig:
-    def __init__(self, name_pattern: str, priority: int = 10, visibility_mode: str = None):
+    def __init__(self,
+                 name_pattern: str,
+                 priority: int = 10,
+                 visibility_mode: str = None,
+                 color: Optional[tuple[float, float, float]] = None):
         self.name_pattern = name_pattern
         self.priority = priority
         self.visibility_mode = visibility_mode
+        self.color = color
 
 
 class RiggingSettings:
@@ -410,7 +414,7 @@ def copy_control(source_control_name: str, target_control_name: str, rs: Rigging
     if rs.root_group_name:
         util.delete_history(rs.root_group_name)
 
-    _set_override_colors_based_on_side(target_control_name, rs)
+    _set_override_colors(target_control_name, rs)
 
     # Clear selection to avoid unintended selection dependent behaviour
     cmds.select(clear=True)
@@ -933,7 +937,7 @@ def _setup_control(base_control_name: str,
     cmds.addAttr(control_name, longName="rfJointSide", niceName="Joint Side", dataType="string")
     cmds.setAttr(f"{control_name}.rfJointSide", side, type="string")
 
-    _set_override_colors_based_on_side(control_name, rs)
+    _set_override_colors(control_name, rs)
 
     if rs.tag_controls:
         # Tag the control as a controller
@@ -990,20 +994,28 @@ def _expect_control_not_match_side(side: str, side_label: str, base_control_name
                             f"name '{base_control_name}' which un-expectedly matched '{p}'")
 
 
-def _set_override_colors_based_on_side(control_name: str, rs: RiggingSettings) -> None:
+def _set_override_colors(control_name: str, rs: RiggingSettings) -> None:
     side = cmds.getAttr(f"{control_name}.rfJointSide") if cmds.objExists(f"{control_name}.side") else None
     child_shapes = cmds.listRelatives(control_name, type="nurbsCurve")
     if child_shapes:
         for child in child_shapes:
-            if "center" == side:
-                _set_override_color_attributes(child, rs.center_side_color)
-            elif "left" == side:
-                _set_override_color_attributes(child, rs.left_side_color)
-            elif "right" == side:
-                _set_override_color_attributes(child, rs.right_side_color)
-            else:
-                # noinspection DuplicatedCode
-                _set_override_color_attributes(child, rs.none_side_color)
+            color_set = False
+            for c in rs.find_matching_control_config(control_name):
+                if c.color:
+                    _set_override_color_attributes(child, c.color)
+                    color_set = True
+                    break
+
+            if not color_set:
+                if "center" == side:
+                    _set_override_color_attributes(child, rs.center_side_color)
+                elif "left" == side:
+                    _set_override_color_attributes(child, rs.left_side_color)
+                elif "right" == side:
+                    _set_override_color_attributes(child, rs.right_side_color)
+                else:
+                    # noinspection DuplicatedCode
+                    _set_override_color_attributes(child, rs.none_side_color)
 
 
 # noinspection PyTypeChecker
