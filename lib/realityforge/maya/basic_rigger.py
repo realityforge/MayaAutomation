@@ -27,6 +27,8 @@ from realityforge.maya import util as util
 
 # TODO: Default the transforms allowed on controls to orients? Except maybe root ... and hips?
 
+# TODO: Per controller coloring and per controller type coloring (somebone_l one color, settings different color?)
+
 # TODO: Allow/Deny list for which attributes should be locked and removed from channelbox in controls so animators
 #  do not see them. i.e. Remove the ability for any FK controls to scale or translate unless allow listed?
 #  Probably have a default allow state and then an exception list (probably do it per attribute? or per attribute group?
