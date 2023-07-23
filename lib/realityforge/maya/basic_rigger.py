@@ -10,6 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import math
+import re
 from typing import Optional
 
 import maya.api.OpenMaya as om
@@ -83,6 +84,13 @@ class IkChain:
         return joint_base_name == self.joints[-1]
 
 
+class ControllerConfig:
+    def __init__(self, name_pattern: str, priority: int = 10, visibility_mode: str = None):
+        self.name_pattern = name_pattern
+        self.priority = priority
+        self.visibility_mode = visibility_mode
+
+
 class RiggingSettings:
     def __init__(self,
                  root_group_name: Optional[str] = "rig",
@@ -91,6 +99,7 @@ class RiggingSettings:
                  control_set: Optional[str] = "controlsSet",
                  # A mapping of control base name => object from which control will be copied
                  control_template_mapping: dict[str, str] = None,
+                 control_configurations: list[ControllerConfig] = None,
                  use_driver_hierarchy: bool = True,
                  use_control_hierarchy: bool = False,
                  use_control_set: bool = True,
@@ -143,6 +152,10 @@ class RiggingSettings:
         self.driver_skeleton_group = driver_skeleton_group
         self.control_set = control_set
         self.control_template_mapping = control_template_mapping if control_template_mapping else {}
+        if control_configurations:
+            self.control_configurations = sorted(control_configurations, key=lambda x: x.priority)
+        else:
+            self.control_configurations = []
         self.use_driver_hierarchy = use_driver_hierarchy
         self.use_control_hierarchy = use_control_hierarchy
         self.use_control_set = use_control_set
@@ -177,6 +190,9 @@ class RiggingSettings:
         self.right_side_name = right_side_name
         self.center_side_name = center_side_name
         self.none_side_name = none_side_name
+
+    def find_matching_control_config(self, controller_name: str) -> list[ControllerConfig]:
+        return [x for x in self.control_configurations if re.search(x.name_pattern, controller_name)]
 
     # Return the name of the control the positions the character. This is either the world offset control or the
     def derive_character_offset_control_name(self) -> str:
@@ -871,6 +887,11 @@ def _setup_control(base_control_name: str,
     control_name = _create_control(base_control_name, rs)
     _safe_parent(f"{base_control_name} control", control_name, offset_group_name, rs)
 
+    if rs.tag_controls:
+        control_config = rs.find_matching_control_config(control_name)
+    else:
+        control_config = []
+
     side = "center"
     if match_transform_object_name and cmds.objExists(f"{match_transform_object_name}.side"):
         joint_side = cmds.getAttr(f"{match_transform_object_name}.side")
@@ -910,6 +931,31 @@ def _setup_control(base_control_name: str,
             cmds.controller(control_name, parent_control_name, parent=True)
         else:
             cmds.controller(control_name)
+        tag_name = None
+
+        results = cmds.listConnections(control_name, connections=True)
+        if results:
+            for r in results:
+                if r.startswith(f"{control_name}_tag"):
+                    tag_name = r
+        if not tag_name:
+            raise Exception(f"Attempt to create tag for control {control_name} failed to produce a tag with "
+                            f"the name {control_name}_tag. This is possibility due to failure to delete history "
+                            f"before running script or another control with the same name.  Aborting!")
+
+        if control_config:
+            for c in control_config:
+                if c.visibility_mode:
+                    if c.visibility_mode == 'inherit':
+                        # noinspection PyTypeChecker
+                        cmds.setAttr(f"{tag_name}.visibilityMode", 1)
+                    elif c.visibility_mode == 'show_on_proximity':
+                        # noinspection PyTypeChecker
+                        cmds.setAttr(f"{tag_name}.visibilityMode", 2)
+                    else:  # 'default' or bad value
+                        # noinspection PyTypeChecker
+                        cmds.setAttr(f"{tag_name}.visibilityMode", 0)
+                    break
 
     return control_name
 
