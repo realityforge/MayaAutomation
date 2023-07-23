@@ -95,6 +95,7 @@ class RiggingSettings:
                  use_driver_hierarchy: bool = True,
                  use_control_hierarchy: bool = False,
                  use_control_set: bool = True,
+                 tag_controls: bool = True,
                  generate_world_offset_control: bool = True,
                  generate_cog_control: bool = True,
                  driven_joint_name_pattern: str = "{name}_JNT",
@@ -146,6 +147,7 @@ class RiggingSettings:
         self.use_driver_hierarchy = use_driver_hierarchy
         self.use_control_hierarchy = use_control_hierarchy
         self.use_control_set = use_control_set
+        self.tag_controls = tag_controls
         self.generate_world_offset_control = generate_world_offset_control
         self.generate_cog_control = generate_cog_control
         self.driven_joint_name_pattern = driven_joint_name_pattern
@@ -900,6 +902,13 @@ def _setup_control(base_control_name: str,
     cmds.setAttr(f"{control_name}.rfJointSide", side, type="string")
 
     _set_override_colors_based_on_side(control_name, rs)
+
+    if rs.tag_controls:
+        # Tag the control as a controller
+        if parent_control_name and "transform" == cmds.objectType(parent_control_name):
+            cmds.controller(control_name, parent_control_name, parent=True)
+        else:
+            cmds.controller(control_name)
 
     return control_name
 
