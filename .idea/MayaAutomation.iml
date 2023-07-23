@@ -15,6 +15,7 @@
       <excludeFolder url="file://$MODULE_DIR$/../course-rigging-basics-for-games/scenes" />
       <excludeFolder url="file://$MODULE_DIR$/../course-rigging-basics-for-games/sourceimages" />
       <excludeFolder url="file://$MODULE_DIR$/../course-rigging-basics-for-games/vendor" />
+      <excludeFolder url="file://$MODULE_DIR$/../course-rigging-basics-for-games/tmp" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.10 (MayaAutomation)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
