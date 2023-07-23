@@ -19,6 +19,7 @@ from parse import parse
 
 from realityforge.maya import util as util
 
+
 # Feature List:
 #  * Optional: controllers tagged as controllers so can pick walk between controllers correctly
 #  * Optional "visible on proximity" setting
