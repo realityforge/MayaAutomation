@@ -23,10 +23,12 @@ def get_keyframe_times(skip_existing=False, interval=1):
 
     return keyframe_list
 
+
 def get_playback_range():
     range_start = cmds.playbackOptions(q=True, minTime=True)
     range_end = cmds.playbackOptions(q=True, maxTime=True)
     return [range_start, range_end]
+
 
 def get_selected_range():
     main_time_control = mel.eval("$temp = $gPlayBackSlider")
@@ -38,9 +40,11 @@ def get_selected_range():
 
     return None
 
+
 def keyframe_exists(keyframe_time):
     keyframe_count = cmds.keyframe(q=True, keyframeCount=True, time=(keyframe_time,))
     return keyframe_count > 0
+
 
 def insert_keyframes(keyframe_times, force_overwrite=False):
     selection = cmds.ls(sl=True)
@@ -59,5 +63,3 @@ def insert_keyframes(keyframe_times, force_overwrite=False):
 if __name__ == "__main__":
     keyframe_times = get_keyframe_times(interval=1)
     insert_keyframes(keyframe_times, force_overwrite=True)
-
-
