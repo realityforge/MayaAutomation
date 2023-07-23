@@ -1028,10 +1028,7 @@ def _setup_control(base_control_name: str,
     control_name = _create_control(base_control_name, rs)
     _safe_parent(f"{base_control_name} control", control_name, offset_group_name, rs)
 
-    if rs.tag_controls:
-        control_config = rs.find_matching_control_config(control_name)
-    else:
-        control_config = []
+    control_config = rs.find_matching_control_config(control_name)
 
     side = "center"
     if match_transform_object_name and cmds.objExists(f"{match_transform_object_name}.side"):
