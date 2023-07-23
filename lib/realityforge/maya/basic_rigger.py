@@ -25,8 +25,6 @@ from realityforge.maya import util as util
 #  then go to separate scene, reference in the rig and direct connect it to local skeleton. So same rig can be used
 #  for multiple actors with same skeleton
 
-# TODO: When you create a scale/parent/orient Constraint then lock it's parameters except for weights in the case of switching!
-
 # TODO: Default the transforms allowed on controls to orients? Except maybe root ... and hips?
 
 # TODO: Allow/Deny list for which attributes should be locked and removed from channelbox in controls so animators
