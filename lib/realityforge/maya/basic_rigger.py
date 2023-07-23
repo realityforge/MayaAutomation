@@ -411,6 +411,7 @@ def create_rig(root_joint_name: str,
 
     _setup_top_level_infrastructure(rigging_settings)
     _process_joint(rigging_settings, root_joint_name, True)
+    _delete_non_deformer_history()
 
     if rigging_settings.debug_logging:
         print(f"Rig created for root joint '{root_joint_name}'")
@@ -1232,6 +1233,7 @@ def _pre_top_level_create(label: str, maya_type: str, object_name: str, rs: Rigg
         if rs.debug_logging:
             print(f"Re-creating {label} '{object_name}'")
         cmds.delete(object_name)
+        _delete_non_deformer_history()
     else:
         raise Exception(f"The {label} named '{object_name}' already has multiple instances. Aborting!")
 
