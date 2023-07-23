@@ -278,3 +278,31 @@ def copy_attributes(source_object_name: str, target_object_name: str, attribute_
         except Exception:
             raise Exception(f"Failed to set attribute {target_object_name}.{attribute_name} when attempting "
                             f"to copy attribute from {source_object_name}.{attribute_name}")
+
+
+def delete_history(object_name: str) -> int:
+    """Bake preDeformer history for specified object and all child objects.
+    
+    :param object_name: the name of the object.
+    :return: the number of objects that had history baked.
+    """
+    driver = cmds.ls(object_name)
+    if 0 == len(driver):
+        return 0
+    elif 1 != len(driver):
+        raise Exception(f"Multiple objects detected with the name {object_name}. Aborting!")
+
+    shape_children = cmds.listRelatives(object_name, shapes=True)
+    if shape_children and 0 != len(shape_children):
+        cmds.select(object_name, replace=True)
+        cmds.bakePartialHistory(object_name, preDeformers=True)
+        count = 1
+    else:
+        count = 0
+
+    children = cmds.listRelatives(object_name)
+    if children:
+        for child in children:
+            count += delete_history(child)
+
+    return count
