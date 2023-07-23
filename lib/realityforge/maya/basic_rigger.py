@@ -207,7 +207,8 @@ class RiggingSettings:
         self.none_side_name = none_side_name
 
     def find_matching_control_config(self, controller_name: str) -> list[ControllerConfig]:
-        return [x for x in self.control_configurations if re.search(x.name_pattern, controller_name)]
+        configs = [x for x in self.control_configurations if re.search(x.name_pattern, controller_name)]
+        return sorted(configs, key=lambda v: v.priority)
 
     # Return the name of the control the positions the character. This is either the world offset control or the
     def derive_character_offset_control_name(self) -> str:
