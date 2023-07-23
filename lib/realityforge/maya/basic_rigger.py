@@ -16,7 +16,7 @@ import maya.api.OpenMaya as om
 import maya.cmds as cmds
 from parse import parse
 
-import realityforge.maya.util as util
+from realityforge.maya import util as util
 
 
 # TODO: Explicitly tag controllers to enable pickkwalking - https://youtu.be/gtm345xR2Ao?t=2287
