@@ -51,7 +51,6 @@ from realityforge.maya import util as util
 # TODO: Features to add:
 # * a "set" that includes the joints to export as a skeleton
 # * a "set" that includes the joints and mesh to export as a skeletal mesh
-# * Generate ik/fk (and stretch???) chains for limbs and switch between them? (See https://www.youtube.com/playlist?list=PLgala72Uap1rtRRi-MAI0RMc7w1fpD2Io
 
 # TODO: Verify IK chains are at least 3 long? (for working out pole vector?)
 # TODO: Generate certain controls in world orientation rather than joint orientation (i.e. IK handle for foot should be world)
