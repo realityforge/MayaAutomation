@@ -99,11 +99,41 @@ class ControllerConfig:
                  name_pattern: str,
                  priority: int = 10,
                  visibility_mode: str = None,
-                 color: Optional[tuple[float, float, float]] = None):
+                 color: Optional[tuple[float, float, float]] = None,
+                 translate_x: Optional[bool] = None,
+                 translate_y: Optional[bool] = None,
+                 translate_z: Optional[bool] = None,
+                 rotate_x: Optional[bool] = None,
+                 rotate_y: Optional[bool] = None,
+                 rotate_z: Optional[bool] = None,
+                 scale_x: Optional[bool] = None,
+                 scale_y: Optional[bool] = None,
+                 scale_z: Optional[bool] = None):
         self.name_pattern = name_pattern
         self.priority = priority
         self.visibility_mode = visibility_mode
         self.color = color
+        self.translate_x = translate_x
+        self.translate_y = translate_y
+        self.translate_z = translate_z
+        self.rotate_x = rotate_x
+        self.rotate_y = rotate_y
+        self.rotate_z = rotate_z
+        self.scale_x = scale_x
+        self.scale_y = scale_y
+        self.scale_z = scale_z
+
+    def any_translate_axis_control_overrides(self) -> bool:
+        return self.translate_x is not None and self.translate_y is not None and self.translate_z is not None
+
+    def any_rotate_axis_control_overrides(self) -> bool:
+        return self.rotate_x is not None and self.rotate_y is not None and self.rotate_z is not None
+
+    def any_scale_axis_control_overrides(self) -> bool:
+        return self.scale_x is not None and self.scale_y is not None and self.scale_z is not None
+
+    def __str__(self):
+        return f"ControllerConfig[name={self.name}]"
 
 
 class RiggingSettings:
@@ -588,14 +618,17 @@ def _process_joint(rs: RiggingSettings,
     if ik_chain:
         pass
     else:
-        driver_joint_name = rs.derive_driver_joint_name(base_name)
+        control_configs = rs.find_matching_control_config(control_name)
+
+        driver_joint_name = rs.derive_driver_joint_name(base_name) if rs.use_driver_hierarchy else joint_name
+
+        # Setup constraints on axis that should be constrained as defined in configuration
+        _maybe_create_point_constraint(control_configs, driver_joint_name, joint_constraining_control_name, rs)
+        _maybe_create_orient_constraint(control_configs, driver_joint_name, joint_constraining_control_name, rs)
+        _maybe_create_scale_constraint(control_configs, driver_joint_name, joint_constraining_control_name, rs)
+
         if rs.use_driver_hierarchy:
-            _parent_constraint(driver_joint_name, joint_constraining_control_name, rs)
-            _scale_constraint(driver_joint_name, joint_constraining_control_name, rs)
             _connect_transform_attributes(driver_joint_name, joint_name)
-        else:
-            _parent_constraint(joint_name, joint_constraining_control_name, rs)
-            _scale_constraint(joint_name, joint_constraining_control_name, rs)
 
     at_chain_start = False
     at_chain_end = False
@@ -774,6 +807,99 @@ def _process_joint(rs: RiggingSettings,
                 child_ik_chain = rs.get_ik_chain_starting_at_joint(child_base_joint_name)
 
             _process_joint(rs, child_joint_name, False, joint_name, child_parent_control_name, child_ik_chain)
+
+
+def _maybe_create_point_constraint(control_configs: list[ControllerConfig],
+                                   driven_object_name: str,
+                                   driver_object_name: str,
+                                   rs: RiggingSettings) -> None:
+    """Create the point constraint using specified control configs.
+    * If no control configs exist or none have specified rules around translation then add point constraint on all axis.
+    * Take the first config that has specified rules around translations and create the constraint using the rules or
+      skip constraint creation if the rule explicitly indicates no axis are constrained.
+
+    :param control_configs: the configs that match the current control.
+    :param driven_object_name: the object that is driven by constraint.
+    :param driver_object_name: the object that drives the driven object through constraint.
+    :param rs: the associated RiggingSettings
+    """
+    for control_config in control_configs:
+        if control_config.any_translate_axis_control_overrides():
+            include_x = control_config.translate_x is None or control_config.translate_x
+            include_y = control_config.translate_y is None or control_config.translate_y
+            include_z = control_config.translate_z is None or control_config.translate_z
+            if include_x or include_y or include_z:
+                _point_constraint(driven_object_name,
+                                  driver_object_name,
+                                  rs,
+                                  include_x=include_x,
+                                  include_y=include_y,
+                                  include_z=include_z)
+            return
+
+    _point_constraint(driven_object_name, driver_object_name, rs)
+
+
+def _maybe_create_orient_constraint(control_configs: list[ControllerConfig],
+                                    driven_object_name: str,
+                                    driver_object_name: str,
+                                    rs: RiggingSettings) -> None:
+    """Create the orient constraint using specified control configs.
+    * If no control configs exist or none have specified rules around rotation then add orient constraint on all axis.
+    * Take the first config that has specified rules around rotations and create the constraint using the rules or
+      skip constraint creation if the rule explicitly indicates no axis are constrained.
+
+    :param control_configs: the configs that match the current control.
+    :param driven_object_name: the object that is driven by constraint.
+    :param driver_object_name: the object that drives the driven object through constraint.
+    :param rs: the associated RiggingSettings
+    """
+    for control_config in control_configs:
+        if control_config.any_rotate_axis_control_overrides():
+            include_x = control_config.orient_x is None or control_config.orient_x
+            include_y = control_config.orient_y is None or control_config.orient_y
+            include_z = control_config.orient_z is None or control_config.orient_z
+            if include_x or include_y or include_z:
+                _orient_constraint(driven_object_name,
+                                   driver_object_name,
+                                   rs,
+                                   include_x=include_x,
+                                   include_y=include_y,
+                                   include_z=include_z)
+            return
+
+    _orient_constraint(driven_object_name, driver_object_name, rs)
+
+
+def _maybe_create_scale_constraint(control_configs: list[ControllerConfig],
+                                   driven_object_name: str,
+                                   driver_object_name: str,
+                                   rs: RiggingSettings) -> None:
+    """Create the scale constraint using specified control configs.
+    * If no control configs exist or none have specified rules around scale then add scale constraint on all axis.
+    * Take the first config that has specified rules around scales and create the constraint using the rules or
+      skip constraint creation if the rule explicitly indicates no axis are constrained.
+
+    :param control_configs: the configs that match the current control.
+    :param driven_object_name: the object that is driven by constraint.
+    :param driver_object_name: the object that drives the driven object through constraint.
+    :param rs: the associated RiggingSettings
+    """
+    for control_config in control_configs:
+        if control_config.any_scale_axis_control_overrides():
+            include_x = control_config.scale_x is None or control_config.scale_x
+            include_y = control_config.scale_y is None or control_config.scale_y
+            include_z = control_config.scale_z is None or control_config.scale_z
+            if include_x or include_y or include_z:
+                _scale_constraint(driven_object_name,
+                                  driver_object_name,
+                                  rs,
+                                  include_x=include_x,
+                                  include_y=include_y,
+                                  include_z=include_z)
+            return
+
+    _scale_constraint(driven_object_name, driver_object_name, rs)
 
 
 def _connect_transform_attributes(driver_object_name: str, driven_object_name: str) -> None:
