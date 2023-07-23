@@ -650,7 +650,6 @@ def _process_joint(rs: RiggingSettings,
         cmds.connectAttr(f"{ik_switch_name}.rfIkFkBlend", f"{scale_constraint_name}.w0", lock=True, force=True)
         cmds.connectAttr(f"{reverse_name}.outputX", f"{scale_constraint_name}.w1", lock=True, force=True)
 
-
         if chain_starts_at_current_joint:
             fk_joint_control_name = _setup_control(fk_joint_base_name, parent_control_name, joint_name, rs)
         else:
