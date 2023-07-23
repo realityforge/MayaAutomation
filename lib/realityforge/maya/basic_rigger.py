@@ -19,6 +19,18 @@ from parse import parse
 
 from realityforge.maya import util as util
 
+# Feature List:
+#  * Optional: controllers tagged as controllers so can pick walk between controllers correctly
+#  * Optional "visible on proximity" setting
+#  * Optional separate driver hierarchy. Makes exports clean and allows multiple mesh/skeleton combos to be
+#    driven from one rig.
+#  * Optional direct control hierarchy for performance or indirect hierarchy so that selecting one control
+#    does not highlight tree of controllers. Alternatively "selection_child_highlighting" to allow individual
+#    controllers highlighting be an editor setting
+#  * Coloring by side
+#  * Name patterns for different elements and for extracting sides from joints
+#  * Lock and hide parameters that should not be touched by animator
+
 
 # TODO: Add option to not create the direct connections between the driver skeleton and the exportable skeleton.
 #  This allows you to reference an existing skeleton into a rig file, generate a rig, de-reference skeleton file
