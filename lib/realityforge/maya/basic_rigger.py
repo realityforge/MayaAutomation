@@ -21,7 +21,8 @@ from realityforge.maya import util as util
 
 
 # Feature List:
-#  * Optional: controllers tagged as controllers so can pick walk between controllers correctly
+#  * Optional: controllers tagged as controllers so can pick walk between controllers correctly. Also improves
+#    runtime performance ... due to GPU something something
 #  * Optional "visible on proximity" setting
 #  * Optional separate driver hierarchy. Makes exports clean and allows multiple mesh/skeleton combos to be
 #    driven from one rig.
@@ -31,7 +32,8 @@ from realityforge.maya import util as util
 #  * Coloring by side
 #  * Coloring by arbitrary matching on controllers names
 #  * Name patterns for different elements and for extracting sides from joints
-#  * Lock and hide parameters that should not be touched by animator
+#  * Lock and hide parameters that should not be touched by animator. (improves performance and lowers number
+#    of curves in animation)
 
 
 # TODO: Add option to not create the direct connections between the driver skeleton and the exportable skeleton.
