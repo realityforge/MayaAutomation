@@ -887,6 +887,18 @@ def _process_joint(rs: RiggingSettings,
                              f"{ik_handle_control_name}.visibility",
                              lock=True,
                              force=True)
+            # Lock and hide scale transform attributes on the ik handle control
+            _maybe_lock_and_hide_controller_transform_attributes(ik_handle_control_name,
+                                                                 False,
+                                                                 False,
+                                                                 False,
+                                                                 False,
+                                                                 False,
+                                                                 False,
+                                                                 True,
+                                                                 True,
+                                                                 True,
+                                                                 False)
 
             at_chain_end = True
         else:
