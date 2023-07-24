@@ -93,7 +93,6 @@ from realityforge.maya import util as util
 #       - toe_ik_handle
 
 
-
 # TODO: Generate certain controls in world orientation rather than joint orientation (i.e. head, eye, global,
 #  cog, IK handle for foot (and hand?) should be world, head, eye should be world). It is unclear whether it
 #  should just be the control that is in world or whether the joint should also be in world. AntCGI says joint
