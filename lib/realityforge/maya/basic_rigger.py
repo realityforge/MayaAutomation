@@ -811,6 +811,18 @@ def _process_joint(rs: RiggingSettings,
             # noinspection PyTypeChecker
             cmds.setAttr(f"{ik_handle_name}.visibility", 0, lock=True)
             _safe_parent("ik handle", ik_handle_name, ik_system_name, rs)
+            # Lock scale/rotate on handle as they do not do anything
+            _maybe_lock_and_hide_controller_transform_attributes(ik_handle_name,
+                                                                 False,
+                                                                 False,
+                                                                 False,
+                                                                 True,
+                                                                 True,
+                                                                 True,
+                                                                 True,
+                                                                 True,
+                                                                 True,
+                                                                 False)
 
             # This sets up the control but locates it at the end of the ik-chain
             # We need to unlock the offset group and move it to where the pole-vector should be
