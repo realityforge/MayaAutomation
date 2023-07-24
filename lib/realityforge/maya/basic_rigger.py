@@ -850,7 +850,11 @@ def _process_joint(rs: RiggingSettings,
             cmds.poleVectorConstraint(pole_vector_name, ik_handle_name)
 
             # Create ik handle control
-            ik_handle_control_name = _setup_control(ik_handle_name, ik_system_name, joint_name, rs)
+            ik_handle_control_name = _setup_control(ik_handle_name,
+                                                    ik_system_name,
+                                                    joint_name,
+                                                    rs,
+                                                    use_config_to_manage_control_channels=False)
             cmds.connectAttr(f"{reverse_name}.outputX",
                              f"{ik_handle_control_name}.visibility",
                              lock=True,
