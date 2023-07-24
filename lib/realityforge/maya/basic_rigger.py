@@ -1212,8 +1212,91 @@ def _setup_control(base_control_name: str,
                     cmds.setAttr(f"{tag_name}.visibilityMode", 0)
                 break
 
+    # Hide attributes on the controller that we do not want animators to access and/or keyframe
+    if use_config_to_manage_control_channels:
+        _lock_and_hide_controller_transform_attributes_based_on_config(control_name, rs, leave_visibility_unlocked)
 
     return control_name
+
+
+def _lock_and_hide_controller_transform_attributes_based_on_config(control_name: str,
+                                                                   rs: RiggingSettings,
+                                                                   leave_visibility_unlocked: bool = False) -> None:
+    control_configs = rs.find_matching_control_config(control_name)
+
+    translate_x = None
+    translate_y = None
+    translate_z = None
+    rotate_x = None
+    rotate_y = None
+    rotate_z = None
+    scale_x = None
+    scale_y = None
+    scale_z = None
+    for control_config in control_configs:
+        if translate_x is None and control_config.translate_x is not None:
+            translate_x = control_config.translate_x
+        if translate_y is None and control_config.translate_y is not None:
+            translate_y = control_config.translate_y
+        if translate_z is None and control_config.translate_z is not None:
+            translate_z = control_config.translate_z
+        if rotate_x is None and control_config.rotate_x is not None:
+            rotate_x = control_config.rotate_x
+        if rotate_y is None and control_config.rotate_y is not None:
+            rotate_y = control_config.rotate_y
+        if rotate_z is None and control_config.rotate_z is not None:
+            rotate_z = control_config.rotate_z
+        if scale_x is None and control_config.scale_x is not None:
+            scale_x = control_config.scale_x
+        if scale_y is None and control_config.scale_y is not None:
+            scale_y = control_config.scale_y
+        if scale_z is None and control_config.scale_z is not None:
+            scale_z = control_config.scale_z
+
+    _maybe_lock_and_hide_controller_transform_attributes(control_name,
+                                                         translate_x is not None and not translate_x,
+                                                         translate_y is not None and not translate_y,
+                                                         translate_z is not None and not translate_z,
+                                                         rotate_x is not None and not rotate_x,
+                                                         rotate_y is not None and not rotate_y,
+                                                         rotate_z is not None and not rotate_z,
+                                                         scale_x is not None and not scale_x,
+                                                         scale_y is not None and not scale_y,
+                                                         scale_z is not None and not scale_z,
+                                                         not leave_visibility_unlocked)
+
+
+def _maybe_lock_and_hide_controller_transform_attributes(control_name: str,
+                                                         lock_translate_x: bool,
+                                                         lock_translate_y: bool,
+                                                         lock_translate_z: bool,
+                                                         lock_rotate_x: bool,
+                                                         lock_rotate_y: bool,
+                                                         lock_rotate_z: bool,
+                                                         lock_scale_x: bool,
+                                                         lock_scale_y: bool,
+                                                         lock_scale_z: bool,
+                                                         lock_visibility: bool):
+    if lock_translate_x:
+        cmds.setAttr(f"{control_name}.translateX", lock=True, keyable=False, channelBox=False)
+    if lock_translate_y:
+        cmds.setAttr(f"{control_name}.translateY", lock=True, keyable=False, channelBox=False)
+    if lock_translate_z:
+        cmds.setAttr(f"{control_name}.translateZ", lock=True, keyable=False, channelBox=False)
+    if lock_rotate_x:
+        cmds.setAttr(f"{control_name}.rotateX", lock=True, keyable=False, channelBox=False)
+    if lock_rotate_y:
+        cmds.setAttr(f"{control_name}.rotateY", lock=True, keyable=False, channelBox=False)
+    if lock_rotate_z:
+        cmds.setAttr(f"{control_name}.rotateZ", lock=True, keyable=False, channelBox=False)
+    if lock_scale_x:
+        cmds.setAttr(f"{control_name}.scaleX", lock=True, keyable=False, channelBox=False)
+    if lock_scale_y:
+        cmds.setAttr(f"{control_name}.scaleY", lock=True, keyable=False, channelBox=False)
+    if lock_scale_z:
+        cmds.setAttr(f"{control_name}.scaleZ", lock=True, keyable=False, channelBox=False)
+    if lock_visibility:
+        cmds.setAttr(f"{control_name}.visibility", lock=True, keyable=False, channelBox=False)
 
 
 def _expect_control_matches_side(side: str, side_label: str, base_control_name: str, rs: RiggingSettings) -> None:
