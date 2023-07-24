@@ -36,6 +36,8 @@ from realityforge.maya import util as util
 #    of curves in animation)
 
 
+# TODO: Hide all the channels on driver chain? (No locking except if equivalent control has locked? but all hidden)
+
 # TODO: Add option to not create the direct connections between the driver skeleton and the exportable skeleton.
 #  This allows you to reference an existing skeleton into a rig file, generate a rig, de-reference skeleton file
 #  then go to separate scene, reference in the rig and direct connect it to local skeleton. So same rig can be used
