@@ -655,12 +655,34 @@ def _process_joint(rs: RiggingSettings,
         if rs.generate_world_offset_control:
             control_name = _setup_control(rs.global_base_control_name, None, joint_name, rs)
             control_name = _setup_control(rs.world_offset_base_control_name, control_name, joint_name, rs)
+            _maybe_lock_and_hide_controller_transform_attributes(control_name,
+                                                                 False,
+                                                                 False,
+                                                                 False,
+                                                                 False,
+                                                                 False,
+                                                                 False,
+                                                                 True,
+                                                                 True,
+                                                                 True,
+                                                                 True)
         else:
             control_name = _setup_control(rs.global_base_control_name, None, joint_name, rs)
         joint_constraining_control_name = control_name
         if rs.generate_cog_control:
             cog_locator = _find_object_to_match_for_cog(joint_name, rs)
             control_name = _setup_control(rs.cog_base_control_name, control_name, cog_locator, rs)
+            _maybe_lock_and_hide_controller_transform_attributes(control_name,
+                                                                 False,
+                                                                 False,
+                                                                 False,
+                                                                 False,
+                                                                 False,
+                                                                 False,
+                                                                 True,
+                                                                 True,
+                                                                 True,
+                                                                 True)
             if "child_average" == rs.cog_location_strategy:
                 cmds.delete(cog_locator)
     elif not ik_chain:
