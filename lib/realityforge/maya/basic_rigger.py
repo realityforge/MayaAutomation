@@ -827,7 +827,7 @@ def _process_joint(rs: RiggingSettings,
             # This sets up the control but locates it at the end of the ik-chain
             # We need to unlock the offset group and move it to where the pole-vector should be
             pole_vector_name = _setup_control(pole_vector_base_name, ik_system_name, joint_name, rs)
-            cmds.connectAttr(f"{ik_switch_name}.rfIkFkBlend", f"{pole_vector_name}.visibility", lock=True, force=True)
+            cmds.connectAttr(f"{reverse_name}.outputX", f"{pole_vector_name}.visibility", lock=True, force=True)
 
             pole_vector_offset_group_name = rs.derive_offset_group_name(pole_vector_base_name)
             _unlock_transform_properties(pole_vector_offset_group_name)
