@@ -927,9 +927,9 @@ def _maybe_create_orient_constraint(control_configs: list[ControllerConfig],
     """
     for control_config in control_configs:
         if control_config.any_rotate_axis_control_overrides():
-            include_x = control_config.orient_x is None or control_config.orient_x
-            include_y = control_config.orient_y is None or control_config.orient_y
-            include_z = control_config.orient_z is None or control_config.orient_z
+            include_x = control_config.rotate_x is None or control_config.rotate_x
+            include_y = control_config.rotate_y is None or control_config.rotate_y
+            include_z = control_config.rotate_z is None or control_config.rotate_z
             if include_x or include_y or include_z:
                 _orient_constraint(driven_object_name,
                                    driver_object_name,
