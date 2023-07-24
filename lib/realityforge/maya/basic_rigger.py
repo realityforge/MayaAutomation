@@ -851,7 +851,7 @@ def _process_joint(rs: RiggingSettings,
 
             # Create ik handle control
             ik_handle_control_name = _setup_control(ik_handle_name, ik_system_name, joint_name, rs)
-            cmds.connectAttr(f"{ik_switch_name}.rfIkFkBlend",
+            cmds.connectAttr(f"{reverse_name}.outputX",
                              f"{ik_handle_control_name}.visibility",
                              lock=True,
                              force=True)
