@@ -772,8 +772,8 @@ def _process_joint(rs: RiggingSettings,
 
         # Create a parent constraint that attempts to use FK and IK hierarchies to drive target joint (either driver
         # or original joint depending on whether the use_driver_hierarchy flag is enabled)
-        parent_constraint_name = _fk_parent_constraint(target_joint_name, ik_joint_name, fk_joint_name, rs)
-        scale_constraint_name = _fk_scale_constraint(target_joint_name, ik_joint_name, fk_joint_name, rs)
+        ik_fk_parent_constraint_name = _ik_fk_parent_constraint(target_joint_name, ik_joint_name, fk_joint_name, rs)
+        ik_fk_scale_constraint_name = _ik_fk_scale_constraint(target_joint_name, ik_joint_name, fk_joint_name, rs)
 
         ik_switch_name = rs.derive_ik_switch_name(ik_chain.name)
         reverse_name = rs.derive_ik_switch_reverse_name(ik_chain.name)
@@ -1353,11 +1353,11 @@ def _set_override_color_attributes(object_name: str, color: tuple[float, float, 
         cmds.setAttr(f"{object_name}.overrideColorB", color[2])
 
 
-def _fk_scale_constraint(driven_name: str,
-                         ik_joint_name: str,
-                         fk_joint_name: str,
-                         rs: RiggingSettings,
-                         maintain_offset: bool = False) -> str:
+def _ik_fk_scale_constraint(driven_name: str,
+                            ik_joint_name: str,
+                            fk_joint_name: str,
+                            rs: RiggingSettings,
+                            maintain_offset: bool = False) -> str:
     if rs.debug_logging:
         print(f"Adding FK scale constraint for ik joint name '{ik_joint_name}' and fk joint name "
               f"'{fk_joint_name}' to drive '{driven_name}'")
@@ -1519,11 +1519,11 @@ def _scale_constraint(driven_name: str,
     return object_name
 
 
-def _fk_parent_constraint(driven_name: str,
-                          ik_joint_name: str,
-                          fk_joint_name: str,
-                          rs: RiggingSettings,
-                          maintain_offset: bool = False) -> str:
+def _ik_fk_parent_constraint(driven_name: str,
+                             ik_joint_name: str,
+                             fk_joint_name: str,
+                             rs: RiggingSettings,
+                             maintain_offset: bool = False) -> str:
     if rs.debug_logging:
         print(f"Adding FK parent constraint for ik joint name '{ik_joint_name}' and fk joint name "
               f"'{fk_joint_name}' to drive '{driven_name}'")
