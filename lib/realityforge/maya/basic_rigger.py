@@ -1170,7 +1170,7 @@ def _expect_control_not_match_side(side: str, side_label: str, base_control_name
 
 
 def _set_override_colors(control_name: str, rs: RiggingSettings) -> None:
-    side = cmds.getAttr(f"{control_name}.rfJointSide") if cmds.objExists(f"{control_name}.side") else None
+    side = cmds.getAttr(f"{control_name}.rfJointSide") if cmds.objExists(f"{control_name}.rfJointSide") else None
     child_shapes = cmds.listRelatives(control_name, type="nurbsCurve")
     if child_shapes:
         for child in child_shapes:
