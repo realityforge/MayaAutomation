@@ -1073,38 +1073,40 @@ def _set_selection_child_highlighting(object_name: str, rs: RiggingSettings):
 
 def _setup_control(base_control_name: str,
                    parent_control_name: Optional[str],
-                   match_transform_object_name: Optional[str],
-                   rs: RiggingSettings) -> str:
+                   target_object_name: Optional[str],
+                   rs: RiggingSettings,
+                   use_config_to_manage_control_channels: bool = True,
+                   leave_visibility_unlocked: bool = False) -> str:
     """Create a control offset group and control.
 
     :param base_control_name: the base name of the control, offset group etc.
     :param parent_control_name: the name of the parent object if any.
-    :param match_transform_object_name: the name of the object that the offset group will match transforms to and derived side-edness from. This is typically the joint in source skeleton that we want to control.
+    :param target_object_name: the name of the object that the offset group will match transforms to and derived side-edness from. This is typically the joint in source skeleton that we want to control.
     :param rs: the settings that drive the rigging process.
     :return: the name of the control.
     """
     if rs.debug_logging:
-        print(f"Creating {base_control_name} control for joint '{match_transform_object_name}' under "
+        print(f"Creating {base_control_name} control for target '{target_object_name}' under "
               f"parent control '{parent_control_name}'")
 
-    if match_transform_object_name:
-        util.ensure_single_object_named(None, match_transform_object_name)
+    if target_object_name:
+        util.ensure_single_object_named(None, target_object_name)
 
     offset_group_name = rs.derive_offset_group_name(base_control_name)
-    _create_group("offset group", offset_group_name, match_transform_object_name, rs)
+    _create_group("offset group", offset_group_name, target_object_name, rs)
     _parent_group("offset group", offset_group_name, parent_control_name, rs)
 
-    if match_transform_object_name:
-        cmds.matchTransform(offset_group_name, match_transform_object_name)
+    if target_object_name:
+        cmds.matchTransform(offset_group_name, target_object_name)
 
     control_name = _create_control(base_control_name, rs)
     _safe_parent(f"{base_control_name} control", control_name, offset_group_name, rs)
 
-    control_config = rs.find_matching_control_config(control_name)
+    control_configs = rs.find_matching_control_config(control_name)
 
     side = "center"
-    if match_transform_object_name and cmds.objExists(f"{match_transform_object_name}.side"):
-        joint_side = cmds.getAttr(f"{match_transform_object_name}.side")
+    if target_object_name and cmds.objExists(f"{target_object_name}.side"):
+        joint_side = cmds.getAttr(f"{target_object_name}.side")
         if 0 == joint_side:
             side = "center"
             _expect_control_matches_side(side, rs.center_side_name, base_control_name, rs)
@@ -1153,19 +1155,19 @@ def _setup_control(base_control_name: str,
                             f"the name {control_name}_tag. This is possibility due to failure to delete history "
                             f"before running script or another control with the same name.  Aborting!")
 
-        if control_config:
-            for c in control_config:
-                if c.visibility_mode:
-                    if c.visibility_mode == 'inherit':
-                        # noinspection PyTypeChecker
-                        cmds.setAttr(f"{tag_name}.visibilityMode", 1)
-                    elif c.visibility_mode == 'show_on_proximity':
-                        # noinspection PyTypeChecker
-                        cmds.setAttr(f"{tag_name}.visibilityMode", 2)
-                    else:  # 'default' or bad value
-                        # noinspection PyTypeChecker
-                        cmds.setAttr(f"{tag_name}.visibilityMode", 0)
-                    break
+        for control_config in control_configs:
+            if control_config.visibility_mode:
+                if control_config.visibility_mode == 'inherit':
+                    # noinspection PyTypeChecker
+                    cmds.setAttr(f"{tag_name}.visibilityMode", 1)
+                elif control_config.visibility_mode == 'show_on_proximity':
+                    # noinspection PyTypeChecker
+                    cmds.setAttr(f"{tag_name}.visibilityMode", 2)
+                else:  # 'default' or bad value
+                    # noinspection PyTypeChecker
+                    cmds.setAttr(f"{tag_name}.visibilityMode", 0)
+                break
+
 
     return control_name
 
