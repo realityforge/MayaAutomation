@@ -666,9 +666,7 @@ def _process_joint(rs: RiggingSettings,
     elif not ik_chain:
         joint_constraining_control_name = control_name = _setup_control(base_name, parent_control_name, joint_name, rs)
 
-    if ik_chain:
-        pass
-    else:
+    if not ik_chain:
         control_configs = rs.find_matching_control_config(control_name)
 
         driver_joint_name = rs.derive_driver_joint_name(base_name) if rs.use_driver_hierarchy else joint_name
