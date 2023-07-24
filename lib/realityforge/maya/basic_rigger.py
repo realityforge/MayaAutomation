@@ -832,6 +832,18 @@ def _process_joint(rs: RiggingSettings,
                                               rs,
                                               use_config_to_manage_control_channels=False)
             cmds.connectAttr(f"{reverse_name}.outputX", f"{pole_vector_name}.visibility", lock=True, force=True)
+            # Translate is only modifiable constraint on pole vector control
+            _maybe_lock_and_hide_controller_transform_attributes(pole_vector_name,
+                                                                 False,
+                                                                 False,
+                                                                 False,
+                                                                 True,
+                                                                 True,
+                                                                 True,
+                                                                 True,
+                                                                 True,
+                                                                 True,
+                                                                 False)
 
             pole_vector_offset_group_name = rs.derive_offset_group_name(pole_vector_base_name)
             _unlock_transform_properties(pole_vector_offset_group_name)
