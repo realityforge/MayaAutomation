@@ -50,12 +50,61 @@ from realityforge.maya import util as util
 # TODO: Add display layers for groups of controls starting at a root. (so could have layer for LH or RH). Maybe
 #  remove visibility switch from controls? or support both?). See Azri rig for example
 
+# TODO: Pole vector controls only care about translation so lock and hide scale and then add a constraint so that
+#  the pole vector control aims at the knee/elbow/whatevs and then hide
+
+# TODO: Rename global in code back to "world"
+
+# TODO: Color "cog", "world", "world offset" differently from each other and different from center line so easy for
+#  animator to read
+
+# TODO: Lock and hide "visibility" channels on all controls  or at least hide (but may not lock as could be
+#  controlled by other elements). This is to avoid them being "animated"
+
+# TODO: Default elbow to only animate in one rotate channel for "realistic" animation but sometimes animator wants
+#  to break this rule.
+
+# TODO: Some rigs allow scale on primary axis for arms/fingers (i.e. X)
+
 # TODO: Features to add:
 # * a "set" that includes the joints to export as a skeleton
 # * a "set" that includes the joints and mesh to export as a skeletal mesh
 
-# TODO: Verify IK chains are at least 3 long? (for working out pole vector?)
-# TODO: Generate certain controls in world orientation rather than joint orientation (i.e. IK handle for foot should be world)
+# TODO: Support ik chains that are "single chain". These have no pole vector
+# TODO: Verify IK chains that are not single chain are at least 3 long? (for working out pole vector?)
+
+# TODO: Have some way to create reverse feet setup. i.e. SC IK for ankle to ball and ball to toe
+
+# Rotation on Peel_Heel_GRP will move foot correctly
+# peelHeel attribute then rotates an axis in "peel_heel_GRP". This can be done using set driven
+#       keys or maths and direct connection nodes in node editor. 0 = foot resting on ground,
+#       10 = max rotation before have to lift ball
+
+# - foot_OFF_GRP (matched to ball)
+#   - foot_CTRL
+#     # Extra Attribute "peelHeel" float range 0-10 that is in channelBox
+#     - Peel_Heel_Fix_GRP (Matched to ball joint)
+#       - Peel_Heel_GRP (Matched to ball joint)
+#         - Leg_ik_handle (ankle joint positioned, keeps relative offset)
+#     - toe_ik_handles_GRP
+#       - ball_ik_handle
+#       - toe_ik_handle
+
+
+
+# TODO: Generate certain controls in world orientation rather than joint orientation (i.e. head, eye, global,
+#  cog, IK handle for foot (and hand?) should be world, head, eye should be world). It is unclear whether it
+#  should just be the control that is in world or whether the joint should also be in world. AntCGI says joint
+#  and control, others use just control byt sometimes that causes flipping. A lot of these choices are to make
+#  animators lives easier (foot orientation should match world to make it easier for the animator to create walk
+#  animation or game engineer to do foot planting)
+
+# TODO: Add verification that joints are oriented with primary axis down bone unless allow listed to not be that way
+
+# TODO: Add option for primary axis (i.e. down the bone) be y as that is less likely to cause gimbal lock (at least
+#  for humanoid like skeletons with normal animations). So Y primary axis and z forward. However then you typically
+#  need to change rotation order with y first (i.e. yxz or yzx). Of course this should not be done on bones that are
+#  in world coordinates
 
 class IkChain:
     def __init__(self, name: str,
