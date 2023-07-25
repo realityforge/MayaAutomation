@@ -304,6 +304,17 @@ class RiggingSettings:
     def derive_pole_vector_base_name(self, chain_name: str) -> str:
         return self.pole_vector_base_name_pattern.format(name=chain_name)
 
+    # Return attribute that is 1 when in FK mode
+    def derive_fk_enabled_attribute_name(self, chain_name: str) -> str:
+        return self.derive_ik_switch_attribute_name(chain_name)
+
+    # Return attribute that is 1 when in IK mode
+    def derive_ik_enabled_attribute_name(self, chain_name: str) -> str:
+        return f"{self.derive_ik_switch_reverse_name(chain_name)}.outputX"
+
+    def derive_ik_switch_attribute_name(self, chain_name: str) -> str:
+        return f"{self.derive_ik_switch_name(chain_name)}.rfIkFkBlend"
+
     def derive_ik_switch_reverse_name(self, chain_name: str) -> str:
         return f"{self.derive_ik_switch_base_name(chain_name)}_rfIkFkBlend_reverse"
 
@@ -744,6 +755,7 @@ def _process_joint(rs: RiggingSettings,
             reverse_name = rs.derive_ik_switch_reverse_name(ik_chain.name)
             actual_reverse_name = cmds.shadingNode("reverse", asUtility=True, name=reverse_name)
             util.ensure_created_object_name_matches("ik fk reverse", actual_reverse_name, reverse_name)
+
             cmds.connectAttr(f"{ik_switch_name}.rfIkFkBlend", f"{reverse_name}.inputX", lock=True, force=True)
 
         # Create IK/FK controls and support joints
@@ -782,12 +794,14 @@ def _process_joint(rs: RiggingSettings,
         ik_switch_name = rs.derive_ik_switch_name(ik_chain.name)
         reverse_name = rs.derive_ik_switch_reverse_name(ik_chain.name)
         cmds.setAttr(f"{ik_fk_parent_constraint_name}.w0", lock=False)
-        cmds.connectAttr(f"{reverse_name}.outputX", f"{ik_fk_parent_constraint_name}.w0", lock=True, force=True)
-        cmds.connectAttr(f"{ik_switch_name}.rfIkFkBlend", f"{ik_fk_parent_constraint_name}.w1", lock=True, force=True)
+        ik_enabled_attribute_name = rs.derive_ik_enabled_attribute_name(ik_chain.name)
+        fk_enabled_attribute_name = rs.derive_fk_enabled_attribute_name(ik_chain.name)
+        cmds.connectAttr(ik_enabled_attribute_name, f"{ik_fk_parent_constraint_name}.w0", lock=True, force=True)
+        cmds.connectAttr(fk_enabled_attribute_name, f"{ik_fk_parent_constraint_name}.w1", lock=True, force=True)
 
         cmds.setAttr(f"{ik_fk_scale_constraint_name}.w0", lock=False)
-        cmds.connectAttr(f"{reverse_name}.outputX", f"{ik_fk_scale_constraint_name}.w0", lock=True, force=True)
-        cmds.connectAttr(f"{ik_switch_name}.rfIkFkBlend", f"{ik_fk_scale_constraint_name}.w1", lock=True, force=True)
+        cmds.connectAttr(ik_enabled_attribute_name, f"{ik_fk_scale_constraint_name}.w0", lock=True, force=True)
+        cmds.connectAttr(fk_enabled_attribute_name, f"{ik_fk_scale_constraint_name}.w1", lock=True, force=True)
 
         if chain_starts_at_current_joint:
             fk_joint_control_name = _setup_control(fk_joint_base_name,
@@ -802,7 +816,7 @@ def _process_joint(rs: RiggingSettings,
                                                    rs,
                                                    leave_visibility_unlocked=True)
 
-        cmds.connectAttr(f"{ik_switch_name}.rfIkFkBlend", f"{fk_joint_control_name}.visibility", lock=True, force=True)
+        cmds.connectAttr(fk_enabled_attribute_name, f"{fk_joint_control_name}.visibility", lock=True, force=True)
 
         # Ensure that the FK controls constrain the fk joints
         control_configs = rs.find_matching_control_config(fk_joint_control_name)
@@ -811,9 +825,6 @@ def _process_joint(rs: RiggingSettings,
         _maybe_create_scale_constraint(control_configs, fk_joint_name, fk_joint_control_name, rs)
 
         if ik_chain.does_chain_end_at_joint(base_name):
-            # TODO: Add dual point constraint between ik handler and fk end control and end group so that is switched between
-            # TODO: Add dual orient constraint between ik handle control/fk end control and effector group that is switched between
-
             ik_system_name = rs.derive_ik_system_name(ik_chain)
             ik_handle_name = rs.derive_ik_handle_name(ik_chain.name)
             pole_vector_base_name = rs.derive_pole_vector_base_name(ik_chain.name)
@@ -849,7 +860,7 @@ def _process_joint(rs: RiggingSettings,
                                               joint_name,
                                               rs,
                                               use_config_to_manage_control_channels=False)
-            cmds.connectAttr(f"{reverse_name}.outputX", f"{pole_vector_name}.visibility", lock=True, force=True)
+            cmds.connectAttr(ik_enabled_attribute_name, f"{pole_vector_name}.visibility", lock=True, force=True)
             # Translate is only modifiable constraint on pole vector control
             _maybe_lock_and_hide_controller_transform_attributes(pole_vector_name,
                                                                  False,
@@ -901,10 +912,7 @@ def _process_joint(rs: RiggingSettings,
                                                     joint_name,
                                                     rs,
                                                     use_config_to_manage_control_channels=False)
-            cmds.connectAttr(f"{reverse_name}.outputX",
-                             f"{ik_handle_control_name}.visibility",
-                             lock=True,
-                             force=True)
+            cmds.connectAttr(ik_enabled_attribute_name, f"{ik_handle_control_name}.visibility", lock=True, force=True)
             # Lock and hide scale transform attributes on the ik handle control
             _maybe_lock_and_hide_controller_transform_attributes(ik_handle_control_name,
                                                                  False,
