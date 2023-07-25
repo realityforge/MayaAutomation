@@ -1380,7 +1380,7 @@ def _ik_fk_scale_constraint(driven_name: str,
     return object_name
 
 
-def _parent_constraint(driven_name: str, driver_name: str, rs: RiggingSettings, maintain_offset: bool = False) -> str:
+def _parent_constraint(driven_name: str, driver_name: str, rs: RiggingSettings, maintain_offset: bool) -> str:
     if rs.debug_logging:
         print(f"Adding parent constraint from child '{driven_name}' to parent '{driver_name}'")
 
@@ -1574,8 +1574,8 @@ def _parent_group(label: str, group_name: str, parent_object_name: Optional[str]
         if parent_object_name:
             # If there is a "logical" parent then add constraints so that the group behaves as
             # if it was in a direct hierarchy
-            _parent_constraint(group_name, parent_object_name, rs)
-            _scale_constraint(group_name, parent_object_name, rs)
+            _parent_constraint(group_name, parent_object_name, rs, maintain_offset=True)
+            _scale_constraint(group_name, parent_object_name, rs, maintain_offset=True)
 
 
 def _create_group(label: str, group_name: str, match_transform_object_name: Optional[str], rs: RiggingSettings) -> None:
