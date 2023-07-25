@@ -1519,6 +1519,44 @@ def _scale_constraint(driven_name: str,
     return object_name
 
 
+def _scale_constraint(driven_name: str,
+                      driver_name: str,
+                      rs: RiggingSettings,
+                      include_x: bool = True,
+                      include_y: bool = True,
+                      include_z: bool = True,
+                      maintain_offset: bool = False) -> str:
+    if rs.debug_logging:
+        print(f"Adding scale constraint where '{driven_name}' is driven by '{driver_name}' including "
+              f"axis x={include_x}, y={include_y}, z={include_z}")
+
+    skip = []
+    if not include_x:
+        skip.append("x")
+    if not include_y:
+        skip.append("y")
+    if not include_z:
+        skip.append("z")
+    if 0 == len(skip):
+        skip.append("none")
+    object_name = f"{driven_name}_scaleConstraint_{driver_name}"
+    # noinspection PyTypeChecker
+    actual_object_name = cmds.scaleConstraint(driver_name,
+                                              driven_name,
+                                              maintainOffset=maintain_offset,
+                                              skip=skip,
+                                              name=object_name)[0]
+    util.ensure_created_object_name_matches("scaleConstraint", actual_object_name, object_name)
+
+    # Lock and hide attributes on constraint
+    for attr_name in ["nodeState", "offsetX", "offsetY", "offsetZ", "w0"]:
+        cmds.setAttr(f"{object_name}.{attr_name}", channelBox=False, keyable=False, lock=True)
+
+    # Clear selection to avoid unintended selection dependent behaviour
+    cmds.select(clear=True)
+    return object_name
+
+
 def _ik_fk_parent_constraint(driven_name: str,
                              ik_joint_name: str,
                              fk_joint_name: str,
