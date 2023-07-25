@@ -804,6 +804,13 @@ def _process_joint(rs: RiggingSettings,
 
         cmds.connectAttr(f"{ik_switch_name}.rfIkFkBlend", f"{fk_joint_control_name}.visibility", lock=True, force=True)
 
+        # Ensure that the FK controls constrain the fk joints
+        control_configs = rs.find_matching_control_config(fk_joint_control_name)
+        _maybe_create_point_constraint(control_configs, fk_joint_name, fk_joint_control_name, rs)
+        _maybe_create_orient_constraint(control_configs, fk_joint_name, fk_joint_control_name, rs)
+        _maybe_create_scale_constraint(control_configs, fk_joint_name, fk_joint_control_name, rs)
+
+        # TODO: Add parent constraint between ik_joint_name
         if ik_chain.does_chain_end_at_joint(base_name):
             # TODO: Add dual point constraint between ik handler and fk end control and end group so that is switched between
             # TODO: Add dual orient constraint between ik handle control/fk end control and effector group that is switched between
