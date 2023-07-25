@@ -810,7 +810,6 @@ def _process_joint(rs: RiggingSettings,
         _maybe_create_orient_constraint(control_configs, fk_joint_name, fk_joint_control_name, rs)
         _maybe_create_scale_constraint(control_configs, fk_joint_name, fk_joint_control_name, rs)
 
-        # TODO: Add parent constraint between ik_joint_name
         if ik_chain.does_chain_end_at_joint(base_name):
             # TODO: Add dual point constraint between ik handler and fk end control and end group so that is switched between
             # TODO: Add dual orient constraint between ik handle control/fk end control and effector group that is switched between
@@ -918,6 +917,12 @@ def _process_joint(rs: RiggingSettings,
                                                                  True,
                                                                  True,
                                                                  False)
+
+            ik_end_name = rs.derive_ik_end_name(ik_chain)
+            # Ensure that the IK control constrains the ik end joint and end group
+            control_configs = rs.find_matching_control_config(fk_joint_control_name)
+            _maybe_create_point_constraint(control_configs, ik_handle_name, ik_handle_control_name, rs)
+            _maybe_create_orient_constraint(control_configs, ik_end_name, ik_handle_control_name, rs)
 
             at_chain_end = True
         else:
