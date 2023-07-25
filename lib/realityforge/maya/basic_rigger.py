@@ -928,9 +928,8 @@ def _process_joint(rs: RiggingSettings,
 
             ik_end_name = rs.derive_ik_end_name(ik_chain)
             # Ensure that the IK control constrains the ik end joint and end group
-            control_configs = rs.find_matching_control_config(fk_joint_control_name)
-            _maybe_create_point_constraint(control_configs, ik_handle_name, ik_handle_control_name, rs)
-            _maybe_create_orient_constraint(control_configs, ik_end_name, ik_handle_control_name, rs)
+            _point_constraint(ik_handle_name, ik_handle_control_name, rs)
+            _orient_constraint(ik_joint_name, ik_handle_control_name, rs)
 
             at_chain_end = True
         else:
