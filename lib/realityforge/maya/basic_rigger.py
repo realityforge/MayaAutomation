@@ -478,8 +478,11 @@ def copy_control(source_control_name: str, target_control_name: str, rs: Rigging
 
     if source_side != target_side:
         if ("left" == source_side and "right" == target_side) or ("right" == source_side and "left" == target_side):
+            # noinspection PyTypeChecker
             cmds.setAttr(f"{duplicate_object_name}.scaleX", -1)
+            # noinspection PyTypeChecker
             cmds.setAttr(f"{duplicate_object_name}.scaleY", -1)
+            # noinspection PyTypeChecker
             cmds.setAttr(f"{duplicate_object_name}.scaleZ", -1)
             cmds.makeIdentity(duplicate_object_name,
                               apply=True,
@@ -608,9 +611,13 @@ def _find_object_to_match_for_cog(root_joint_name: str, rs: RiggingSettings) -> 
         child_joints = cmds.listRelatives(root_joint_name, type="joint")
         if child_joints:
             for child_joint in child_joints:
+                # noinspection PyArgumentList
                 translation = cmds.xform(child_joint, query=True, worldSpace=True, translation=True)
+                # noinspection PyUnresolvedReferences
                 x += translation[0]
+                # noinspection PyUnresolvedReferences
                 y += translation[1]
+                # noinspection PyUnresolvedReferences
                 z += translation[2]
                 object_count += 1
         if 0 == object_count:
