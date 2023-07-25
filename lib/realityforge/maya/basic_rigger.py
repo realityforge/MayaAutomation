@@ -43,11 +43,19 @@ from realityforge.maya import util as util
 #  then go to separate scene, reference in the rig and direct connect it to local skeleton. So same rig can be used
 #  for multiple actors with same skeleton
 
-# TODO: Default the transforms allowed on controls to orients? Except maybe root ... and hips?
+# TODO: Add "Side" to ControllerConfig and then add "default" rules to set the left, right, center none colors and
+#   remove the left_side_color, right_side_color, center_side_color, none_side_color config
 
-# TODO: Allow/Deny list for which attributes should be locked and removed from channelbox in controls so animators
-#  do not see them. i.e. Remove the ability for any FK controls to scale or translate unless allow listed?
-#  Probably have a default allow state and then an exception list (probably do it per attribute? or per attribute group?
+# TODO: Add "default" ControllerConfig at specific priority level. These are generated unless a boolean flag is
+#  passed to skip them. These will apply rules that are probably generic all over such as:
+#  * color patterns as defined above
+#  * global has visibility_mode="default"
+#  * global/world_offset/cog controls should be allowed translate/rotate
+#  * ik handles allowed translate/rotate
+#  * settings allowed none
+
+# TODO: Perhaps add ability to generate other defaults. i.e. Humanoid defaults would allow hips translate but
+#       the rest are rotate?
 
 # TODO: Add display layers for groups of controls starting at a root. (so could have layer for LH or RH). Maybe
 #  remove visibility switch from controls? or support both?). See Azri rig for example
@@ -915,6 +923,7 @@ def _process_joint(rs: RiggingSettings,
             cmds.xform(pole_vector_offset_group_name, worldSpace=True, translation=pv_control_vec)
             _hide_transform_properties(pole_vector_offset_group_name)
 
+            # TODO: Add support to verify poleVector
             cmds.poleVectorConstraint(pole_vector_name, ik_handle_name)
 
             # Create ik handle control
