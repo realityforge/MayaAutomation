@@ -18,6 +18,7 @@
       <excludeFolder url="file://$MODULE_DIR$/../course-rigging-basics-for-games/vendor" />
       <excludeFolder url="file://$MODULE_DIR$/../course-rigging-basics-for-games/tmp" />
     </content>
+    <content url="file://D:/Code/aie_course/modules/6_Principles_of_Animation/Assessment" />
     <orderEntry type="jdk" jdkName="Python 3.10 (MayaAutomation)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
