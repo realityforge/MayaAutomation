@@ -1071,20 +1071,6 @@ def _create_driver_joint(joint_name: str,
     _create_joint_from_template(joint_name, "driver joint", new_joint_name, parent_new_joint_name, rs)
 
 
-def _create_ik_joint(joint_name: str,
-                     base_joint_name: str,
-                     parent_joint_name: Optional[str],
-                     rs: RiggingSettings) -> None:
-    _create_joint_from_template(joint_name, "ik joint", rs.derive_ik_joint_name(base_joint_name), parent_joint_name, rs)
-
-
-def _create_fk_joint(joint_name: str,
-                     base_joint_name: str,
-                     parent_joint_name: Optional[str],
-                     rs: RiggingSettings) -> None:
-    _create_joint_from_template(joint_name, "ik joint", rs.derive_fk_joint_name(base_joint_name), parent_joint_name, rs)
-
-
 def _create_joint_from_template(source_joint_name: str,
                                 label: str,
                                 new_joint_name: str,
