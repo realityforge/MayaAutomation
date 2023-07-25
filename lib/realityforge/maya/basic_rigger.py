@@ -880,13 +880,19 @@ def _process_joint(rs: RiggingSettings,
             # Use magical maths to find the plane on which pole control should lie
 
             # First find 3 points on plane
+            # noinspection PyArgumentList
             ik_start_pos = cmds.xform(ik_start_joint, query=True, worldSpace=True, translation=True)
+            # noinspection PyArgumentList
             ik_mid_pos = cmds.xform(ik_mid_joint_name, query=True, worldSpace=True, translation=True)
+            # noinspection PyArgumentList
             ik_end_pos = cmds.xform(ik_joint_name, query=True, worldSpace=True, translation=True)
 
             # Convert positions into vectors
+            # noinspection PyArgumentList
             ik_start_vec = om.MVector(*ik_start_pos)
+            # noinspection PyArgumentList
             ik_mid_vec = om.MVector(*ik_mid_pos)
+            # noinspection PyArgumentList
             ik_end_vec = om.MVector(*ik_end_pos)
 
             # Create vectors from start to each other point to define the plane
@@ -1650,6 +1656,7 @@ def _create_control(base_name: str, rs: RiggingSettings) -> str:
     # TODO: At some point we may decide to filter which controls go into the control set
     if rs.use_control_set:
         # Add  control to the control set if configured
+        # noinspection PyArgumentList
         cmds.sets(control_name, edit=True, forceElement=rs.control_set)
 
     return control_name
