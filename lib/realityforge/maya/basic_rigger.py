@@ -791,8 +791,6 @@ def _process_joint(rs: RiggingSettings,
         ik_fk_parent_constraint_name = _ik_fk_parent_constraint(target_joint_name, ik_joint_name, fk_joint_name, rs)
         ik_fk_scale_constraint_name = _ik_fk_scale_constraint(target_joint_name, ik_joint_name, fk_joint_name, rs)
 
-        ik_switch_name = rs.derive_ik_switch_name(ik_chain.name)
-        reverse_name = rs.derive_ik_switch_reverse_name(ik_chain.name)
         cmds.setAttr(f"{ik_fk_parent_constraint_name}.w0", lock=False)
         ik_enabled_attribute_name = rs.derive_ik_enabled_attribute_name(ik_chain.name)
         fk_enabled_attribute_name = rs.derive_fk_enabled_attribute_name(ik_chain.name)
@@ -926,7 +924,6 @@ def _process_joint(rs: RiggingSettings,
                                                                  True,
                                                                  False)
 
-            ik_end_name = rs.derive_ik_end_name(ik_chain)
             # Ensure that the IK control constrains the ik end joint and end group
             _point_constraint(ik_handle_name, ik_handle_control_name, rs)
             _orient_constraint(ik_joint_name, ik_handle_control_name, rs)
