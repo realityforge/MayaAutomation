@@ -726,7 +726,11 @@ def _process_joint(rs: RiggingSettings,
 
             # Create Ik/FK switch
             ik_switch_base_name = rs.derive_ik_switch_base_name(ik_chain.name)
-            ik_switch_name = _setup_control(ik_switch_base_name, ik_end_name, effector_end_ik_joint_name, rs)
+            ik_switch_name = _setup_control(ik_switch_base_name,
+                                            ik_end_name,
+                                            effector_end_ik_joint_name,
+                                            rs,
+                                            use_config_to_manage_control_channels=False)
             _lock_and_hide_transform_properties(ik_switch_name)
             cmds.addAttr(ik_switch_name,
                          longName="rfIkFkBlend",
@@ -777,20 +781,28 @@ def _process_joint(rs: RiggingSettings,
 
         ik_switch_name = rs.derive_ik_switch_name(ik_chain.name)
         reverse_name = rs.derive_ik_switch_reverse_name(ik_chain.name)
-        cmds.setAttr(f"{parent_constraint_name}.w0", lock=False)
-        cmds.connectAttr(f"{ik_switch_name}.rfIkFkBlend", f"{parent_constraint_name}.w0", lock=True, force=True)
-        cmds.connectAttr(f"{reverse_name}.outputX", f"{parent_constraint_name}.w1", lock=True, force=True)
+        cmds.setAttr(f"{ik_fk_parent_constraint_name}.w0", lock=False)
+        cmds.connectAttr(f"{reverse_name}.outputX", f"{ik_fk_parent_constraint_name}.w0", lock=True, force=True)
+        cmds.connectAttr(f"{ik_switch_name}.rfIkFkBlend", f"{ik_fk_parent_constraint_name}.w1", lock=True, force=True)
 
-        cmds.setAttr(f"{scale_constraint_name}.w0", lock=False)
-        cmds.connectAttr(f"{ik_switch_name}.rfIkFkBlend", f"{scale_constraint_name}.w0", lock=True, force=True)
-        cmds.connectAttr(f"{reverse_name}.outputX", f"{scale_constraint_name}.w1", lock=True, force=True)
+        cmds.setAttr(f"{ik_fk_scale_constraint_name}.w0", lock=False)
+        cmds.connectAttr(f"{reverse_name}.outputX", f"{ik_fk_scale_constraint_name}.w0", lock=True, force=True)
+        cmds.connectAttr(f"{ik_switch_name}.rfIkFkBlend", f"{ik_fk_scale_constraint_name}.w1", lock=True, force=True)
 
         if chain_starts_at_current_joint:
-            fk_joint_control_name = _setup_control(fk_joint_base_name, parent_control_name, joint_name, rs)
+            fk_joint_control_name = _setup_control(fk_joint_base_name,
+                                                   parent_control_name,
+                                                   joint_name,
+                                                   rs,
+                                                   leave_visibility_unlocked=True)
         else:
-            fk_joint_control_name = _setup_control(fk_joint_base_name, fk_parent_joint_name, joint_name, rs)
+            fk_joint_control_name = _setup_control(fk_joint_base_name,
+                                                   fk_parent_joint_name,
+                                                   joint_name,
+                                                   rs,
+                                                   leave_visibility_unlocked=True)
 
-        cmds.connectAttr(f"{reverse_name}.outputX", f"{fk_joint_control_name}.visibility", lock=True, force=True)
+        cmds.connectAttr(f"{ik_switch_name}.rfIkFkBlend", f"{fk_joint_control_name}.visibility", lock=True, force=True)
 
         if ik_chain.does_chain_end_at_joint(base_name):
             # TODO: Add dual point constraint between ik handler and fk end control and end group so that is switched between
