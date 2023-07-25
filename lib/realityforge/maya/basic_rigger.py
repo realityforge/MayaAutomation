@@ -184,7 +184,7 @@ class ControllerConfig:
         return self.scale_x is not None and self.scale_y is not None and self.scale_z is not None
 
     def __str__(self):
-        return f"ControllerConfig[name={self.name}]"
+        return f"ControllerConfig[name={self.name_pattern}]"
 
 
 class RiggingSettings:
