@@ -159,6 +159,7 @@ class ControllerConfig:
                  priority: int = 10,
                  visibility_mode: Optional[str] = None,
                  control_set: Optional[str] = None,
+                 control_scale: Optional[float] = None,
                  color: Optional[tuple[float, float, float]] = None,
                  translate_x: Optional[bool] = None,
                  translate_y: Optional[bool] = None,
@@ -173,6 +174,7 @@ class ControllerConfig:
         self.priority = priority
         self.visibility_mode = visibility_mode
         self.control_set = control_set
+        self.control_scale = control_scale
         self.color = color
         self.translate_x = translate_x
         self.translate_y = translate_y
@@ -1184,6 +1186,8 @@ def _setup_control(base_control_name: str,
 
     control_configs = rs.find_matching_control_config(control_name)
 
+    _configure_control_scale(control_name, parent_control_name, control_configs)
+
     _configure_control_set(control_name, control_configs, rs)
     _configure_control_side(base_control_name, control_name, target_object_name, rs)
     _set_override_colors(control_name, rs)
@@ -1194,6 +1198,52 @@ def _setup_control(base_control_name: str,
         _lock_and_hide_controller_transform_attributes_based_on_config(control_name, rs, leave_visibility_unlocked)
 
     return control_name
+
+
+def _configure_control_scale(control_name: str,
+                             parent_control_name: str,
+                             control_configs: list[ControllerConfig]) -> None:
+    scale = None
+    for config in control_configs:
+        if scale is None and config.control_scale:
+            scale = config.control_scale
+            break
+    if not scale and parent_control_name:
+        # If we have a parent then try and make a random guess at what may be a good scale
+
+        # noinspection PyArgumentList
+
+        translation = cmds.xform(parent_control_name, query=True, worldSpace=True, translation=True)
+        # noinspection PyUnresolvedReferences
+        parent_x = translation[0]
+        # noinspection PyUnresolvedReferences
+        parent_y = translation[1]
+        # noinspection PyUnresolvedReferences
+        parent_z = translation[2]
+        # noinspection PyArgumentList
+        translation = cmds.xform(control_name, query=True, worldSpace=True, translation=True)
+        # noinspection PyUnresolvedReferences
+        control_x = translation[0]
+        # noinspection PyUnresolvedReferences
+        control_y = translation[1]
+        # noinspection PyUnresolvedReferences
+        control_z = translation[2]
+
+        x = parent_x - control_x
+        y = parent_y - control_y
+        z = parent_z - control_z
+
+        # length of joint acts as a scale
+        scale = math.sqrt(x * x + y * y + z * z)
+    if scale:
+        cmds.scale(scale, scale, scale, control_name, absolute=True)
+        cmds.makeIdentity(control_name,
+                          apply=True,
+                          translate=False,
+                          rotate=False,
+                          scale=True,
+                          preserveNormals=True,
+                          normal=False)
 
 
 def _tag_controls(control_name: str,
