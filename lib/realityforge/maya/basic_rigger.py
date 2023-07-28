@@ -158,6 +158,7 @@ class ControllerConfig:
                  name_pattern: str,
                  priority: int = 10,
                  visibility_mode: Optional[str] = None,
+                 control_template: Optional[str] = None,
                  control_set: Optional[str] = None,
                  control_scale: Optional[float] = None,
                  color: Optional[tuple[float, float, float]] = None,
@@ -173,6 +174,7 @@ class ControllerConfig:
         self.name_pattern = name_pattern
         self.priority = priority
         self.visibility_mode = visibility_mode
+        self.control_template = control_template
         self.control_set = control_set
         self.control_scale = control_scale
         self.color = color
@@ -204,8 +206,6 @@ class RiggingSettings:
                  root_group_name: Optional[str] = "rig",
                  controls_group: Optional[str] = "controls_GRP",
                  driver_skeleton_group: Optional[str] = "driver_skeleton_GRP",
-                 # A mapping of control base name => object from which control will be copied
-                 control_template_mapping: dict[str, str] = None,
                  control_configurations: list[ControllerConfig] = None,
                  use_driver_hierarchy: bool = True,
                  use_control_hierarchy: bool = False,
@@ -257,7 +257,6 @@ class RiggingSettings:
         self.root_group_name = root_group_name
         self.controls_group = controls_group
         self.driver_skeleton_group = driver_skeleton_group
-        self.control_template_mapping = control_template_mapping if control_template_mapping else {}
         if control_configurations:
             self.control_configurations = sorted(control_configurations, key=lambda x: x.priority)
         else:
@@ -1186,6 +1185,7 @@ def _setup_control(base_control_name: str,
 
     control_configs = rs.find_matching_control_config(control_name)
 
+    _configure_control_shape(control_name, control_configs, rs)
     _configure_control_scale(control_name, parent_control_name, control_configs)
 
     _configure_control_set(control_name, control_configs, rs)
@@ -1198,6 +1198,12 @@ def _setup_control(base_control_name: str,
         _lock_and_hide_controller_transform_attributes_based_on_config(control_name, rs, leave_visibility_unlocked)
 
     return control_name
+
+
+def _configure_control_shape(control_name: str, control_configs: list[ControllerConfig], rs: RiggingSettings) -> None:
+    for control_config in control_configs:
+        if control_config.control_template:
+            copy_control(control_config.control_template, control_name, rs)
 
 
 def _configure_control_scale(control_name: str,
@@ -1739,8 +1745,6 @@ def _create_control(base_name: str, rs: RiggingSettings) -> str:
     #  scaling based on bone size and all sorts of options. For now we go with simple shape or copying from existing
     actual_control_name = cmds.circle(name=control_name, normalX=1, normalY=0, normalZ=0, radius=1)[0]
     util.ensure_created_object_name_matches("offset group", actual_control_name, control_name)
-    if base_name in rs.control_template_mapping:
-        copy_control(rs.control_template_mapping[base_name], control_name, rs)
     _set_selection_child_highlighting(control_name, rs)
 
     cmds.matchTransform(control_name, offset_group_name)
