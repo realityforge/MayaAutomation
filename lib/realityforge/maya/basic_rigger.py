@@ -36,6 +36,8 @@ from realityforge.maya import util as util
 #    of curves in animation)
 
 
+# TODO: Add groups of controls that can be hidden from root control
+
 # TODO: Hide all the channels on driver chain? (No locking except if equivalent control has locked? but all hidden)
 
 # TODO: Add option to not create the direct connections between the driver skeleton and the exportable skeleton.
