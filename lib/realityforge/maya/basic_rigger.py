@@ -158,6 +158,7 @@ class ControllerConfig:
                  name_pattern: str,
                  priority: int = 10,
                  visibility_mode: Optional[str] = None,
+                 control_set: Optional[str] = None,
                  color: Optional[tuple[float, float, float]] = None,
                  translate_x: Optional[bool] = None,
                  translate_y: Optional[bool] = None,
@@ -171,6 +172,7 @@ class ControllerConfig:
         self.name_pattern = name_pattern
         self.priority = priority
         self.visibility_mode = visibility_mode
+        self.control_set = control_set
         self.color = color
         self.translate_x = translate_x
         self.translate_y = translate_y
@@ -200,7 +202,6 @@ class RiggingSettings:
                  root_group_name: Optional[str] = "rig",
                  controls_group: Optional[str] = "controls_GRP",
                  driver_skeleton_group: Optional[str] = "driver_skeleton_GRP",
-                 control_set: Optional[str] = "controlsSet",
                  # A mapping of control base name => object from which control will be copied
                  control_template_mapping: dict[str, str] = None,
                  control_configurations: list[ControllerConfig] = None,
@@ -254,7 +255,6 @@ class RiggingSettings:
         self.root_group_name = root_group_name
         self.controls_group = controls_group
         self.driver_skeleton_group = driver_skeleton_group
-        self.control_set = control_set
         self.control_template_mapping = control_template_mapping if control_template_mapping else {}
         if control_configurations:
             self.control_configurations = sorted(control_configurations, key=lambda x: x.priority)
@@ -1184,6 +1184,8 @@ def _setup_control(base_control_name: str,
 
     control_configs = rs.find_matching_control_config(control_name)
 
+    _configure_control_set(control_name, control_configs, rs)
+
     side = "center"
     if target_object_name and cmds.objExists(f"{target_object_name}.side"):
         joint_side = cmds.getAttr(f"{target_object_name}.side")
@@ -1253,6 +1255,21 @@ def _setup_control(base_control_name: str,
         _lock_and_hide_controller_transform_attributes_based_on_config(control_name, rs, leave_visibility_unlocked)
 
     return control_name
+
+
+def _configure_control_set(control_name: str, control_configs: list[ControllerConfig], rs: RiggingSettings) -> None:
+    if rs.use_control_set:
+        control_set = None
+        for control_config in control_configs:
+            if control_config.control_set:
+                control_set = control_config.control_set
+                break
+
+        # Add control to the control set if configured
+        if control_set:
+            _maybe_create_set(control_set, rs)
+            # noinspection PyArgumentList
+            cmds.sets(control_name, edit=True, forceElement=control_set)
 
 
 def _lock_and_hide_controller_transform_attributes_based_on_config(control_name: str,
@@ -1683,7 +1700,6 @@ def _setup_top_level_infrastructure(rs: RiggingSettings) -> None:
     _create_top_level_group(rs)
     _create_controls_group(rs)
     _create_driver_skeleton_group(rs)
-    _create_control_sets(rs)
 
 
 def _create_top_level_group(rs: RiggingSettings) -> None:
@@ -1732,18 +1748,17 @@ def _create_driver_skeleton_group(rs: RiggingSettings) -> None:
             _safe_parent("driver skeleton group", rs.driver_skeleton_group, rs.root_group_name, rs)
 
 
-def _create_control_sets(rs: RiggingSettings) -> None:
+def _maybe_create_set(set_name: str, rs: RiggingSettings) -> None:
     """
-      Create the set containing the controls if rigging settings enables this feature.
-      The set is intended to make it easier for animators to locate all the controls without trawling the hierarchy.
+      Create the set if it does not already exist.
     """
-    if rs.use_control_set:
-        _pre_top_level_create("controls set", "objectSet", rs.control_set, rs)
 
-        # TODO: In the future we may want to support multiple (potentially overlapping) control sets.
-        cmds.sets(name=rs.control_set, empty=True)
+    if rs.use_control_set and 0 == len(cmds.ls(set_name, exactType="objectSet")):
+        _pre_top_level_create("set", "objectSet", set_name, rs)
 
-        _post_top_level_create("controls set", rs.control_set, rs)
+        cmds.sets(name=set_name, empty=True)
+
+        _post_top_level_create("set", set_name, rs)
 
 
 def _pre_top_level_create(label: str, maya_type: str, object_name: str, rs: RiggingSettings):
