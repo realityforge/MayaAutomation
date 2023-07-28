@@ -1185,38 +1185,7 @@ def _setup_control(base_control_name: str,
     control_configs = rs.find_matching_control_config(control_name)
 
     _configure_control_set(control_name, control_configs, rs)
-
-    side = "center"
-    if target_object_name and cmds.objExists(f"{target_object_name}.side"):
-        joint_side = cmds.getAttr(f"{target_object_name}.side")
-        if 0 == joint_side:
-            side = "center"
-            _expect_control_matches_side(side, rs.center_side_name, base_control_name, rs)
-            _expect_control_not_match_side(side, rs.left_side_name, base_control_name, rs)
-            _expect_control_not_match_side(side, rs.right_side_name, base_control_name, rs)
-            _expect_control_not_match_side(side, rs.none_side_name, base_control_name, rs)
-        elif 1 == joint_side:
-            side = "left"
-            _expect_control_not_match_side(side, rs.center_side_name, base_control_name, rs)
-            _expect_control_matches_side(side, rs.left_side_name, base_control_name, rs)
-            _expect_control_not_match_side(side, rs.right_side_name, base_control_name, rs)
-            _expect_control_not_match_side(side, rs.none_side_name, base_control_name, rs)
-        elif 2 == joint_side:
-            side = "right"
-            _expect_control_not_match_side(side, rs.center_side_name, base_control_name, rs)
-            _expect_control_not_match_side(side, rs.left_side_name, base_control_name, rs)
-            _expect_control_matches_side(side, rs.right_side_name, base_control_name, rs)
-            _expect_control_not_match_side(side, rs.none_side_name, base_control_name, rs)
-        else:
-            side = "none"
-            _expect_control_not_match_side(side, rs.center_side_name, base_control_name, rs)
-            _expect_control_not_match_side(side, rs.left_side_name, base_control_name, rs)
-            _expect_control_not_match_side(side, rs.right_side_name, base_control_name, rs)
-            _expect_control_matches_side(side, rs.none_side_name, base_control_name, rs)
-
-    cmds.addAttr(control_name, longName="rfJointSide", niceName="Joint Side", dataType="string")
-    cmds.setAttr(f"{control_name}.rfJointSide", side, type="string")
-
+    _configure_control_side(base_control_name, control_name, target_object_name, rs)
     _set_override_colors(control_name, rs)
 
     if rs.tag_controls:
@@ -1255,6 +1224,41 @@ def _setup_control(base_control_name: str,
         _lock_and_hide_controller_transform_attributes_based_on_config(control_name, rs, leave_visibility_unlocked)
 
     return control_name
+
+
+def _configure_control_side(base_control_name: str,
+                            control_name: str,
+                            target_object_name: str,
+                            rs: RiggingSettings) -> None:
+    side = "center"
+    if target_object_name and cmds.objExists(f"{target_object_name}.side"):
+        joint_side = cmds.getAttr(f"{target_object_name}.side")
+        if 0 == joint_side:
+            side = "center"
+            _expect_control_matches_side(side, rs.center_side_name, base_control_name, rs)
+            _expect_control_not_match_side(side, rs.left_side_name, base_control_name, rs)
+            _expect_control_not_match_side(side, rs.right_side_name, base_control_name, rs)
+            _expect_control_not_match_side(side, rs.none_side_name, base_control_name, rs)
+        elif 1 == joint_side:
+            side = "left"
+            _expect_control_not_match_side(side, rs.center_side_name, base_control_name, rs)
+            _expect_control_matches_side(side, rs.left_side_name, base_control_name, rs)
+            _expect_control_not_match_side(side, rs.right_side_name, base_control_name, rs)
+            _expect_control_not_match_side(side, rs.none_side_name, base_control_name, rs)
+        elif 2 == joint_side:
+            side = "right"
+            _expect_control_not_match_side(side, rs.center_side_name, base_control_name, rs)
+            _expect_control_not_match_side(side, rs.left_side_name, base_control_name, rs)
+            _expect_control_matches_side(side, rs.right_side_name, base_control_name, rs)
+            _expect_control_not_match_side(side, rs.none_side_name, base_control_name, rs)
+        else:
+            side = "none"
+            _expect_control_not_match_side(side, rs.center_side_name, base_control_name, rs)
+            _expect_control_not_match_side(side, rs.left_side_name, base_control_name, rs)
+            _expect_control_not_match_side(side, rs.right_side_name, base_control_name, rs)
+            _expect_control_matches_side(side, rs.none_side_name, base_control_name, rs)
+    cmds.addAttr(control_name, longName="rfJointSide", niceName="Joint Side", dataType="string")
+    cmds.setAttr(f"{control_name}.rfJointSide", side, type="string")
 
 
 def _configure_control_set(control_name: str, control_configs: list[ControllerConfig], rs: RiggingSettings) -> None:
