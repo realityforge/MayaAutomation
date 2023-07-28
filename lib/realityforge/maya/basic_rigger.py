@@ -1696,12 +1696,6 @@ def _create_control(base_name: str, rs: RiggingSettings) -> str:
     cmds.matchTransform(control_name, offset_group_name)
     cmds.select(clear=True)
 
-    # TODO: At some point we may decide to filter which controls go into the control set
-    if rs.use_control_set:
-        # Add  control to the control set if configured
-        # noinspection PyArgumentList
-        cmds.sets(control_name, edit=True, forceElement=rs.control_set)
-
     return control_name
 
 
