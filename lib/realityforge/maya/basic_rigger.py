@@ -157,7 +157,7 @@ class ControllerConfig:
     def __init__(self,
                  name_pattern: str,
                  priority: int = 10,
-                 visibility_mode: str = None,
+                 visibility_mode: Optional[str] = None,
                  color: Optional[tuple[float, float, float]] = None,
                  translate_x: Optional[bool] = None,
                  translate_y: Optional[bool] = None,
