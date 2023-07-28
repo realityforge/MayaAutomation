@@ -1187,7 +1187,19 @@ def _setup_control(base_control_name: str,
     _configure_control_set(control_name, control_configs, rs)
     _configure_control_side(base_control_name, control_name, target_object_name, rs)
     _set_override_colors(control_name, rs)
+    _tag_controls(control_name, parent_control_name, control_configs, rs)
 
+    # Hide attributes on the controller that we do not want animators to access and/or keyframe
+    if use_config_to_manage_control_channels:
+        _lock_and_hide_controller_transform_attributes_based_on_config(control_name, rs, leave_visibility_unlocked)
+
+    return control_name
+
+
+def _tag_controls(control_name: str,
+                  parent_control_name: str,
+                  control_configs: list[ControllerConfig],
+                  rs: RiggingSettings) -> None:
     if rs.tag_controls:
         # Tag the control as a controller
         if parent_control_name and "transform" == cmds.objectType(parent_control_name):
@@ -1218,12 +1230,6 @@ def _setup_control(base_control_name: str,
                     # noinspection PyTypeChecker
                     cmds.setAttr(f"{tag_name}.visibilityMode", 0)
                 break
-
-    # Hide attributes on the controller that we do not want animators to access and/or keyframe
-    if use_config_to_manage_control_channels:
-        _lock_and_hide_controller_transform_attributes_based_on_config(control_name, rs, leave_visibility_unlocked)
-
-    return control_name
 
 
 def _configure_control_side(base_control_name: str,
