@@ -12,7 +12,6 @@
 
 import maya.cmds as cmds
 from parse import parse
-import math
 
 
 # Note: to use this script you need to run
