@@ -43,7 +43,7 @@ from realityforge.maya import util as util
 # TODO: Set visibility=False for all constraints
 # TODO: Set visibility=False for all constraints
 # TODO: Make sure Scale of a control never gets below a certain threshold
-# TODO: Add offset for controls so cna be translated in place
+# TODO: Add offset for control config so can be translated in place (i.e. place head control above head)
 # TODO: Add FK/IK text on switch control
 # TODO: Add attribute to root control to hide the "driven" skeleton
 # TODO: Add attribute to root control to hide the "driver" skeleton (if present)
