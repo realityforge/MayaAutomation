@@ -717,10 +717,10 @@ def _process_joint(rs: RiggingSettings,
     elif not ik_chain:
         joint_constraining_control_name = control_name = _setup_control(base_name, parent_control_name, joint_name, rs)
 
+    driver_joint_name = rs.derive_driver_joint_name(base_name) if rs.use_driver_hierarchy else joint_name
+
     if not ik_chain:
         control_configs = rs.find_matching_control_config(control_name)
-
-        driver_joint_name = rs.derive_driver_joint_name(base_name) if rs.use_driver_hierarchy else joint_name
 
         # Setup constraints on axis that should be constrained as defined in configuration
         if force_point_constraint:
@@ -736,8 +736,8 @@ def _process_joint(rs: RiggingSettings,
         else:
             force_scale_constraint = _maybe_create_scale_constraint(control_configs, driver_joint_name, joint_constraining_control_name, rs)
 
-        if rs.use_driver_hierarchy:
-            _connect_transform_attributes(driver_joint_name, joint_name)
+    if rs.use_driver_hierarchy:
+        _connect_transform_attributes(driver_joint_name, joint_name)
 
     at_chain_start = False
     at_chain_end = False
