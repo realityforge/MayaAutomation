@@ -40,8 +40,6 @@ from realityforge.maya import util as util
 #    with the same skeleton.
 
 # TODO: Remove control tag from arm_r_IK_SYS
-# TODO: Set visibility=False for all constraints
-# TODO: Set visibility=False for all constraints
 # TODO: Make sure Scale of a control never gets below a certain threshold
 # TODO: Add offset for control config so can be translated in place (i.e. place head control above head)
 # TODO: Add FK/IK text on switch control
@@ -1528,6 +1526,8 @@ def _ik_fk_scale_constraint(driven_name: str,
     for attr_name in ["nodeState", "offsetX", "offsetY", "offsetZ"]:
         cmds.setAttr(f"{object_name}.{attr_name}", channelBox=False, keyable=False, lock=True)
 
+    cmds.setAttr(f"{object_name}.visibility", 0, channelBox=False, keyable=False, lock=True)
+
     # Clear selection to avoid unintended selection dependent behaviour
     cmds.select(clear=True)
 
@@ -1553,6 +1553,8 @@ def _parent_constraint(driven_name: str, driver_name: str, rs: RiggingSettings, 
                       "rotationDecompositionTargetZ",
                       "w0"]:
         cmds.setAttr(f"{object_name}.{attr_name}", channelBox=False, keyable=False, lock=True)
+
+    cmds.setAttr(f"{object_name}.visibility", 0, channelBox=False, keyable=False, lock=True)
 
     # Clear selection to avoid unintended selection dependent behaviour
     cmds.select(clear=True)
@@ -1592,6 +1594,8 @@ def _point_constraint(driven_name: str,
     for attr_name in ["nodeState", "offsetX", "offsetY", "offsetZ", "w0"]:
         cmds.setAttr(f"{object_name}.{attr_name}", channelBox=False, keyable=False, lock=True)
 
+    cmds.setAttr(f"{object_name}.visibility", 0, channelBox=False, keyable=False, lock=True)
+
     # Clear selection to avoid unintended selection dependent behaviour
     cmds.select(clear=True)
     return object_name
@@ -1629,6 +1633,8 @@ def _orient_constraint(driven_name: str,
     # Lock and hide attributes on constraint
     for attr_name in ["nodeState", "interpType", "offsetX", "offsetY", "offsetZ", "w0"]:
         cmds.setAttr(f"{object_name}.{attr_name}", channelBox=False, keyable=False, lock=True)
+
+    cmds.setAttr(f"{object_name}.visibility", 0, channelBox=False, keyable=False, lock=True)
 
     # Clear selection to avoid unintended selection dependent behaviour
     cmds.select(clear=True)
@@ -1668,6 +1674,8 @@ def _scale_constraint(driven_name: str,
     for attr_name in ["nodeState", "offsetX", "offsetY", "offsetZ", "w0"]:
         cmds.setAttr(f"{object_name}.{attr_name}", channelBox=False, keyable=False, lock=True)
 
+    cmds.setAttr(f"{object_name}.visibility", 0, channelBox=False, keyable=False, lock=True)
+
     # Clear selection to avoid unintended selection dependent behaviour
     cmds.select(clear=True)
     return object_name
@@ -1697,6 +1705,8 @@ def _ik_fk_parent_constraint(driven_name: str,
                       "rotationDecompositionTargetY",
                       "rotationDecompositionTargetZ"]:
         cmds.setAttr(f"{object_name}.{attr_name}", channelBox=False, keyable=False, lock=True)
+
+    cmds.setAttr(f"{object_name}.visibility", 0, channelBox=False, keyable=False, lock=True)
 
     # Clear selection to avoid unintended selection dependent behaviour
     cmds.select(clear=True)
