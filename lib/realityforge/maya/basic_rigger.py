@@ -35,6 +35,15 @@ from realityforge.maya import util as util
 #  * Lock and hide parameters that should not be touched by animator. (improves performance and lowers number
 #    of curves in animation)
 
+# TODO: Remove control tag from arm_r_IK_SYS
+# TODO: Set visibility=False for all constraints
+# TODO: Set visibility=False for all constraints
+# TODO: Make sure Scale of a control never gets below a certain threshold
+# TODO: Add offset for controls so cna be translated in place
+# TODO: Add FK/IK text on switch control
+# TODO: Add attribute to root control to hide the "driven" skeleton
+# TODO: Add attribute to root control to hide the "driver" skeleton (if present)
+
 
 # TODO: Add groups of controls that can be hidden from root control
 
