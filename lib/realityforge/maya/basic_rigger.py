@@ -34,6 +34,10 @@ from realityforge.maya import util as util
 #  * Name patterns for different elements and for extracting sides from joints
 #  * Lock and hide parameters that should not be touched by animator. (improves performance and lowers number
 #    of curves in animation)
+#  * Supports creating a driver skeleton but not connecting it to driven skeleton. This allows you to reference an
+#    existing skeleton into a rig file, generate a rig, de-reference skeleton file then go to separate scene,
+#    reference in the rig and direct connect it to local skeleton. So same rig can be used for multiple actors
+#    with the same skeleton.
 
 # TODO: Remove control tag from arm_r_IK_SYS
 # TODO: Set visibility=False for all constraints
@@ -48,11 +52,6 @@ from realityforge.maya import util as util
 # TODO: Add groups of controls that can be hidden from root control
 
 # TODO: Hide all the channels on driver chain? (No locking except if equivalent control has locked? but all hidden)
-
-# TODO: Add option to not create the direct connections between the driver skeleton and the exportable skeleton.
-#  This allows you to reference an existing skeleton into a rig file, generate a rig, de-reference skeleton file
-#  then go to separate scene, reference in the rig and direct connect it to local skeleton. So same rig can be used
-#  for multiple actors with same skeleton
 
 # TODO: Add "Side" to ControllerConfig and then add "default" rules to set the left, right, center none colors and
 #   remove the left_side_color, right_side_color, center_side_color, none_side_color config
@@ -219,6 +218,7 @@ class RiggingSettings:
                  driver_skeleton_group: Optional[str] = "driver_skeleton_GRP",
                  control_configurations: list[ControllerConfig] = None,
                  use_driver_hierarchy: bool = True,
+                 connect_driver_hierarchy: bool = True,
                  use_control_hierarchy: bool = False,
                  use_control_set: bool = True,
                  tag_controls: bool = True,
@@ -273,6 +273,7 @@ class RiggingSettings:
         else:
             self.control_configurations = []
         self.use_driver_hierarchy = use_driver_hierarchy
+        self.connect_driver_hierarchy = connect_driver_hierarchy
         self.use_control_hierarchy = use_control_hierarchy
         self.use_control_set = use_control_set
         self.tag_controls = tag_controls
@@ -745,7 +746,7 @@ def _process_joint(rs: RiggingSettings,
         else:
             force_scale_constraint = _maybe_create_scale_constraint(control_configs, driver_joint_name, joint_constraining_control_name, rs)
 
-    if rs.use_driver_hierarchy:
+    if rs.use_driver_hierarchy and rs.connect_driver_hierarchy:
         _connect_transform_attributes(driver_joint_name, joint_name)
 
     at_chain_start = False
