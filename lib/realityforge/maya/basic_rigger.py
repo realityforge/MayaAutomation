@@ -649,7 +649,10 @@ def _process_joint(rs: RiggingSettings,
                    is_root: bool,
                    parent_joint_name: Optional[str] = None,
                    parent_control_name: Optional[str] = None,
-                   ik_chain: Optional[IkChain] = None) -> None:
+                   ik_chain: Optional[IkChain] = None,
+                   force_point_constraint: bool = False,
+                   force_orient_constraint: bool = False,
+                   force_scale_constraint: bool = False) -> None:
     if rs.debug_logging:
         print(f"Attempting to process joint '{joint_name}' with parent joint named '{parent_joint_name}', "
               f"parent control named '{parent_control_name}' and ik chain {ik_chain}")
@@ -720,9 +723,18 @@ def _process_joint(rs: RiggingSettings,
         driver_joint_name = rs.derive_driver_joint_name(base_name) if rs.use_driver_hierarchy else joint_name
 
         # Setup constraints on axis that should be constrained as defined in configuration
-        _maybe_create_point_constraint(control_configs, driver_joint_name, joint_constraining_control_name, rs)
-        _maybe_create_orient_constraint(control_configs, driver_joint_name, joint_constraining_control_name, rs)
-        _maybe_create_scale_constraint(control_configs, driver_joint_name, joint_constraining_control_name, rs)
+        if force_point_constraint:
+            _point_constraint(driver_joint_name, joint_constraining_control_name, rs)
+        else:
+            force_point_constraint = _maybe_create_point_constraint(control_configs, driver_joint_name, joint_constraining_control_name, rs)
+        if force_orient_constraint:
+            _orient_constraint(driver_joint_name, joint_constraining_control_name, rs)
+        else:
+            force_orient_constraint = _maybe_create_orient_constraint(control_configs, driver_joint_name, joint_constraining_control_name, rs)
+        if force_scale_constraint:
+            _scale_constraint(driver_joint_name, joint_constraining_control_name, rs)
+        else:
+            force_scale_constraint = _maybe_create_scale_constraint(control_configs, driver_joint_name, joint_constraining_control_name, rs)
 
         if rs.use_driver_hierarchy:
             _connect_transform_attributes(driver_joint_name, joint_name)
@@ -971,13 +983,21 @@ def _process_joint(rs: RiggingSettings,
             if not child_ik_chain:
                 child_ik_chain = rs.get_ik_chain_starting_at_joint(child_base_joint_name)
 
-            _process_joint(rs, child_joint_name, False, joint_name, child_parent_control_name, child_ik_chain)
+            _process_joint(rs,
+                           child_joint_name,
+                           False,
+                           joint_name,
+                           child_parent_control_name,
+                           child_ik_chain,
+                           force_point_constraint,
+                           force_orient_constraint,
+                           force_scale_constraint)
 
 
 def _maybe_create_point_constraint(control_configs: list[ControllerConfig],
                                    driven_object_name: str,
                                    driver_object_name: str,
-                                   rs: RiggingSettings) -> None:
+                                   rs: RiggingSettings) -> bool:
     """Create the point constraint using specified control configs.
     * If no control configs exist or none have specified rules around translation then add point constraint on all axis.
     * Take the first config that has specified rules around translations and create the constraint using the rules or
@@ -1000,15 +1020,17 @@ def _maybe_create_point_constraint(control_configs: list[ControllerConfig],
                                   include_x=include_x,
                                   include_y=include_y,
                                   include_z=include_z)
-            return
+                return True
+            return False
 
     _point_constraint(driven_object_name, driver_object_name, rs)
+    return True
 
 
 def _maybe_create_orient_constraint(control_configs: list[ControllerConfig],
                                     driven_object_name: str,
                                     driver_object_name: str,
-                                    rs: RiggingSettings) -> None:
+                                    rs: RiggingSettings) -> bool:
     """Create the orient constraint using specified control configs.
     * If no control configs exist or none have specified rules around rotation then add orient constraint on all axis.
     * Take the first config that has specified rules around rotations and create the constraint using the rules or
@@ -1031,15 +1053,17 @@ def _maybe_create_orient_constraint(control_configs: list[ControllerConfig],
                                    include_x=include_x,
                                    include_y=include_y,
                                    include_z=include_z)
-            return
+                return True
+            return False
 
     _orient_constraint(driven_object_name, driver_object_name, rs)
+    return True
 
 
 def _maybe_create_scale_constraint(control_configs: list[ControllerConfig],
                                    driven_object_name: str,
                                    driver_object_name: str,
-                                   rs: RiggingSettings) -> None:
+                                   rs: RiggingSettings) -> bool:
     """Create the scale constraint using specified control configs.
     * If no control configs exist or none have specified rules around scale then add scale constraint on all axis.
     * Take the first config that has specified rules around scales and create the constraint using the rules or
@@ -1062,9 +1086,11 @@ def _maybe_create_scale_constraint(control_configs: list[ControllerConfig],
                                   include_x=include_x,
                                   include_y=include_y,
                                   include_z=include_z)
-            return
+                return True
+            return False
 
     _scale_constraint(driven_object_name, driver_object_name, rs)
+    return True
 
 
 def _connect_transform_attributes(driver_object_name: str, driven_object_name: str) -> None:
