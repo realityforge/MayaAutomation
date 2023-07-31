@@ -769,10 +769,10 @@ def _process_joint(rs: RiggingSettings,
             # Create a group for all the controls that are past the end off the ik chain and also
             # contains the IK/FK switch control
             ik_end_name = rs.derive_ik_end_name(ik_chain)
-            _create_group("ik end group", ik_end_name, character_offset_control, rs)
-            _parent_group("ik end group", ik_end_name, character_offset_control, rs)
+
             effector_end_ik_joint_name = rs.derive_driven_joint_name(ik_chain.joints[-1])
-            cmds.matchTransform(ik_end_name, effector_end_ik_joint_name)
+
+            _create_group("ik end group", ik_end_name, effector_end_ik_joint_name, rs)
 
             # Create a group to contain the Ik Handle and the controls for the PoleVector and IkHandle
             ik_system_name = rs.derive_ik_system_name(ik_chain)
@@ -869,6 +869,12 @@ def _process_joint(rs: RiggingSettings,
         _maybe_create_scale_constraint(control_configs, fk_joint_name, fk_joint_control_name, rs)
 
         if ik_chain.does_chain_end_at_joint(base_name):
+            # Make sure the end groups is correctly parented
+            ik_end_name = rs.derive_ik_end_name(ik_chain)
+            effector_end_ik_joint_name = rs.derive_driver_joint_name(
+                ik_chain.joints[-1]) if rs.use_driver_hierarchy else rs.derive_driven_joint_name(ik_chain.joints[-1])
+            _parent_group("ik end group", ik_end_name, effector_end_ik_joint_name, rs)
+
             ik_system_name = rs.derive_ik_system_name(ik_chain)
             ik_handle_name = rs.derive_ik_handle_name(ik_chain.name)
             pole_vector_base_name = rs.derive_pole_vector_base_name(ik_chain.name)
