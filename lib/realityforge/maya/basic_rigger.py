@@ -735,15 +735,24 @@ def _process_joint(rs: RiggingSettings,
         if force_point_constraint:
             _point_constraint(driver_joint_name, joint_constraining_control_name, rs)
         else:
-            force_point_constraint = _maybe_create_point_constraint(control_configs, driver_joint_name, joint_constraining_control_name, rs)
+            force_point_constraint = _maybe_create_point_constraint(control_configs,
+                                                                    driver_joint_name,
+                                                                    joint_constraining_control_name,
+                                                                    rs)
         if force_orient_constraint:
             _orient_constraint(driver_joint_name, joint_constraining_control_name, rs)
         else:
-            force_orient_constraint = _maybe_create_orient_constraint(control_configs, driver_joint_name, joint_constraining_control_name, rs)
+            force_orient_constraint = _maybe_create_orient_constraint(control_configs,
+                                                                      driver_joint_name,
+                                                                      joint_constraining_control_name,
+                                                                      rs)
         if force_scale_constraint:
             _scale_constraint(driver_joint_name, joint_constraining_control_name, rs)
         else:
-            force_scale_constraint = _maybe_create_scale_constraint(control_configs, driver_joint_name, joint_constraining_control_name, rs)
+            force_scale_constraint = _maybe_create_scale_constraint(control_configs,
+                                                                    driver_joint_name,
+                                                                    joint_constraining_control_name,
+                                                                    rs)
 
     if rs.use_driver_hierarchy and rs.connect_driver_hierarchy:
         _connect_transform_attributes(driver_joint_name, joint_name)
