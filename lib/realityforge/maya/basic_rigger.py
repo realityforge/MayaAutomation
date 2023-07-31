@@ -41,7 +41,6 @@ from realityforge.maya import util as util
 #  * Optionally add a control to the root control to show/hide the skeleton
 #  * Optionally add a control to the root control to show/hide the driver skeleton (if present)
 
-# TODO: Make sure Scale of a control never gets below a certain threshold
 # TODO: Add offset for control config so can be translated in place (i.e. place head control above head)
 # TODO: Add FK/IK text on switch control
 # TODO: Add sideways traversal to controller tags ... how?
