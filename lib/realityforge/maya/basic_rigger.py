@@ -72,9 +72,6 @@ from realityforge.maya import util as util
 # TODO: Pole vector controls only care about translation so lock and hide scale and then add a constraint so that
 #  the pole vector control aims at the knee/elbow/whatevs and then hide
 
-# TODO: Color "cog", "world", "world offset" differently from each other and different from center line so easy for
-#  animator to read
-
 # TODO: Lock and hide "visibility" channels on all controls  or at least hide (but may not lock as could be
 #  controlled by other elements). This is to avoid them being "animated"
 
