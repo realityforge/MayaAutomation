@@ -38,6 +38,7 @@ from realityforge.maya import util as util
 #    existing skeleton into a rig file, generate a rig, de-reference skeleton file then go to separate scene,
 #    reference in the rig and direct connect it to local skeleton. So same rig can be used for multiple actors
 #    with the same skeleton.
+#  * Optionally add a control to the root control to show/hide the skeleton
 
 # TODO: Make sure Scale of a control never gets below a certain threshold
 # TODO: Add offset for control config so can be translated in place (i.e. place head control above head)
@@ -214,6 +215,7 @@ class RiggingSettings:
                  controls_group: Optional[str] = "controls_GRP",
                  driver_skeleton_group: Optional[str] = "driver_skeleton_GRP",
                  control_configurations: list[ControllerConfig] = None,
+                 generate_skeleton_visibility_control: bool = True,
                  use_driver_hierarchy: bool = True,
                  connect_driver_hierarchy: bool = True,
                  use_control_hierarchy: bool = False,
@@ -269,6 +271,7 @@ class RiggingSettings:
             self.control_configurations = sorted(control_configurations, key=lambda x: x.priority)
         else:
             self.control_configurations = []
+        self.generate_skeleton_visibility_control = generate_skeleton_visibility_control
         self.use_driver_hierarchy = use_driver_hierarchy
         self.connect_driver_hierarchy = connect_driver_hierarchy
         self.use_control_hierarchy = use_control_hierarchy
@@ -690,6 +693,7 @@ def _process_joint(rs: RiggingSettings,
     if is_root:
         if rs.generate_world_offset_control:
             control_name, _ = _setup_control(rs.world_base_control_name, None, joint_name, rs)
+            root_control_name = control_name
             control_name, _ = _setup_control(rs.world_offset_base_control_name, control_name, joint_name, rs)
             _maybe_lock_and_hide_controller_transform_attributes(control_name,
                                                                  False,
@@ -704,7 +708,17 @@ def _process_joint(rs: RiggingSettings,
                                                                  True)
         else:
             control_name, _ = _setup_control(rs.world_base_control_name, None, joint_name, rs)
+            root_control_name = control_name
         joint_constraining_control_name = control_name
+        if rs.generate_skeleton_visibility_control and is_root:
+            cmds.addAttr(root_control_name,
+                         longName="rfShowSkeleton",
+                         niceName="Show Skeleton",
+                         attributeType="bool",
+                         defaultValue=0)
+            cmds.setAttr(f"{root_control_name}.rfShowSkeleton", channelBox=True, keyable=False)
+            cmds.connectAttr(f"{root_control_name}.rfShowSkeleton", f"{joint_name}.visibility", lock=True, force=True)
+
         if rs.generate_cog_control:
             cog_locator = _find_object_to_match_for_cog(joint_name, rs)
             control_name, _ = _setup_control(rs.cog_base_control_name, control_name, cog_locator, rs)
