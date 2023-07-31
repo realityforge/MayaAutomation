@@ -39,7 +39,6 @@ from realityforge.maya import util as util
 #    reference in the rig and direct connect it to local skeleton. So same rig can be used for multiple actors
 #    with the same skeleton.
 
-# TODO: Remove control tag from arm_r_IK_SYS
 # TODO: Make sure Scale of a control never gets below a certain threshold
 # TODO: Add offset for control config so can be translated in place (i.e. place head control above head)
 # TODO: Add FK/IK text on switch control
@@ -910,7 +909,8 @@ def _process_joint(rs: RiggingSettings,
                                                  ik_system_name,
                                                  joint_name,
                                                  rs,
-                                                 use_config_to_manage_control_channels=False)
+                                                 use_config_to_manage_control_channels=False,
+                                                 omit_control_tag=True)
             cmds.connectAttr(ik_enabled_attribute_name, f"{pole_vector_name}.visibility", lock=True, force=True)
             # Translate is only modifiable constraint on pole vector control
             _maybe_lock_and_hide_controller_transform_attributes(pole_vector_name,
