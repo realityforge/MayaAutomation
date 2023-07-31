@@ -690,8 +690,8 @@ def _process_joint(rs: RiggingSettings,
     joint_constraining_control_name = None
     if is_root:
         if rs.generate_world_offset_control:
-            control_name = _setup_control(rs.global_base_control_name, None, joint_name, rs)
-            control_name = _setup_control(rs.world_offset_base_control_name, control_name, joint_name, rs)
+            control_name, _ = _setup_control(rs.global_base_control_name, None, joint_name, rs)
+            control_name, _ = _setup_control(rs.world_offset_base_control_name, control_name, joint_name, rs)
             _maybe_lock_and_hide_controller_transform_attributes(control_name,
                                                                  False,
                                                                  False,
@@ -704,11 +704,11 @@ def _process_joint(rs: RiggingSettings,
                                                                  True,
                                                                  True)
         else:
-            control_name = _setup_control(rs.global_base_control_name, None, joint_name, rs)
+            control_name, _ = _setup_control(rs.global_base_control_name, None, joint_name, rs)
         joint_constraining_control_name = control_name
         if rs.generate_cog_control:
             cog_locator = _find_object_to_match_for_cog(joint_name, rs)
-            control_name = _setup_control(rs.cog_base_control_name, control_name, cog_locator, rs)
+            control_name, _ = _setup_control(rs.cog_base_control_name, control_name, cog_locator, rs)
             _maybe_lock_and_hide_controller_transform_attributes(control_name,
                                                                  False,
                                                                  False,
@@ -723,7 +723,8 @@ def _process_joint(rs: RiggingSettings,
             if "child_average" == rs.cog_location_strategy:
                 cmds.delete(cog_locator)
     elif not ik_chain:
-        joint_constraining_control_name = control_name = _setup_control(base_name, parent_control_name, joint_name, rs)
+        control_name, _ = _setup_control(base_name, parent_control_name, joint_name, rs)
+        joint_constraining_control_name = control_name
 
     driver_joint_name = rs.derive_driver_joint_name(base_name) if rs.use_driver_hierarchy else joint_name
 
@@ -772,11 +773,12 @@ def _process_joint(rs: RiggingSettings,
 
             # Create Ik/FK switch
             ik_switch_base_name = rs.derive_ik_switch_base_name(ik_chain.name)
-            ik_switch_name = _setup_control(ik_switch_base_name,
-                                            ik_end_name,
-                                            effector_end_ik_joint_name,
-                                            rs,
-                                            use_config_to_manage_control_channels=False)
+            ik_switch_name, _ = _setup_control(ik_switch_base_name,
+                                               ik_end_name,
+                                               effector_end_ik_joint_name,
+                                               rs,
+                                               use_config_to_manage_control_channels=False,
+                                               omit_control_tag=True)
             _lock_and_hide_transform_properties(ik_switch_name)
             cmds.addAttr(ik_switch_name,
                          longName="rfIkFkBlend",
@@ -837,17 +839,17 @@ def _process_joint(rs: RiggingSettings,
         cmds.connectAttr(fk_enabled_attribute_name, f"{ik_fk_scale_constraint_name}.w1", lock=True, force=True)
 
         if chain_starts_at_current_joint:
-            fk_joint_control_name = _setup_control(fk_joint_base_name,
-                                                   parent_control_name,
-                                                   joint_name,
-                                                   rs,
-                                                   leave_visibility_unlocked=True)
+            fk_joint_control_name, _ = _setup_control(fk_joint_base_name,
+                                                      parent_control_name,
+                                                      joint_name,
+                                                      rs,
+                                                      leave_visibility_unlocked=True)
         else:
-            fk_joint_control_name = _setup_control(fk_joint_base_name,
-                                                   fk_parent_joint_name,
-                                                   joint_name,
-                                                   rs,
-                                                   leave_visibility_unlocked=True)
+            fk_joint_control_name, _ = _setup_control(fk_joint_base_name,
+                                                      fk_parent_joint_name,
+                                                      joint_name,
+                                                      rs,
+                                                      leave_visibility_unlocked=True)
 
         cmds.connectAttr(fk_enabled_attribute_name, f"{fk_joint_control_name}.visibility", lock=True, force=True)
 
@@ -888,11 +890,11 @@ def _process_joint(rs: RiggingSettings,
 
             # This sets up the control but locates it at the end of the ik-chain
             # We need to unlock the offset group and move it to where the pole-vector should be
-            pole_vector_name = _setup_control(pole_vector_base_name,
-                                              ik_system_name,
-                                              joint_name,
-                                              rs,
-                                              use_config_to_manage_control_channels=False)
+            pole_vector_name, _ = _setup_control(pole_vector_base_name,
+                                                 ik_system_name,
+                                                 joint_name,
+                                                 rs,
+                                                 use_config_to_manage_control_channels=False)
             cmds.connectAttr(ik_enabled_attribute_name, f"{pole_vector_name}.visibility", lock=True, force=True)
             # Translate is only modifiable constraint on pole vector control
             _maybe_lock_and_hide_controller_transform_attributes(pole_vector_name,
@@ -947,11 +949,12 @@ def _process_joint(rs: RiggingSettings,
             cmds.poleVectorConstraint(pole_vector_name, ik_handle_name)
 
             # Create ik handle control
-            ik_handle_control_name = _setup_control(ik_handle_name,
-                                                    ik_system_name,
-                                                    joint_name,
-                                                    rs,
-                                                    use_config_to_manage_control_channels=False)
+            ik_handle_control_name, _ = _setup_control(ik_handle_name,
+                                                       ik_system_name,
+                                                       joint_name,
+                                                       rs,
+                                                       use_config_to_manage_control_channels=False,
+                                                       omit_control_tag=True)
             cmds.connectAttr(ik_enabled_attribute_name, f"{ik_handle_control_name}.visibility", lock=True, force=True)
             # Lock and hide scale transform attributes on the ik handle control
             _maybe_lock_and_hide_controller_transform_attributes(ik_handle_control_name,
@@ -1230,7 +1233,7 @@ def _setup_control(base_control_name: str,
     if use_config_to_manage_control_channels:
         _lock_and_hide_controller_transform_attributes_based_on_config(control_name, rs, leave_visibility_unlocked)
 
-    return control_name
+    return control_name, offset_group_name
 
 
 def _configure_control_shape(control_name: str, control_configs: list[ControllerConfig], rs: RiggingSettings) -> None:
