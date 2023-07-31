@@ -1295,6 +1295,9 @@ def _configure_control_scale(control_name: str,
         # length of joint acts as a scale
         scale = math.sqrt(x * x + y * y + z * z)
     if scale:
+        if scale < 0.2:
+            # Make sure the scale has a minimum value to avoid controls being scaled too small
+            scale = 0.2
         cmds.scale(scale, scale, scale, control_name, absolute=True)
         cmds.makeIdentity(control_name,
                           apply=True,
