@@ -45,6 +45,7 @@ from realityforge.maya import util as util
 # TODO: Add attribute to root control to hide the "driven" skeleton
 # TODO: Add attribute to root control to hide the "driver" skeleton (if present)
 # TODO: Add sideways traversal to controller tags ... how?
+# TODO: When traversing up Pole or ikHandle, which control to go to?
 
 
 # TODO: Add groups of controls that can be hidden from root control
