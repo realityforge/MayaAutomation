@@ -72,8 +72,6 @@ from realityforge.maya import util as util
 # TODO: Pole vector controls only care about translation so lock and hide scale and then add a constraint so that
 #  the pole vector control aims at the knee/elbow/whatevs and then hide
 
-# TODO: Rename global in code back to "world"
-
 # TODO: Color "cog", "world", "world offset" differently from each other and different from center line so easy for
 #  animator to read
 
@@ -235,7 +233,7 @@ class RiggingSettings:
                  offset_group_name_pattern: str = "{name}_OFF_GRP",
                  control_name_pattern: str = "{name}_CTRL",
                  sided_name_pattern: str = "{name}_{side}_{seq}",
-                 global_base_control_name: str = "global",
+                 world_base_control_name: str = "global",
                  world_offset_base_control_name: str = "world_offset",
                  cog_base_control_name: str = "cog",
 
@@ -290,7 +288,7 @@ class RiggingSettings:
         self.offset_group_name_pattern = offset_group_name_pattern
         self.control_name_pattern = control_name_pattern
         self.sided_name_pattern = sided_name_pattern
-        self.global_base_control_name = global_base_control_name
+        self.world_base_control_name = world_base_control_name
         self.world_offset_base_control_name = world_offset_base_control_name
         self.cog_base_control_name = cog_base_control_name
         self.stop_joints = stop_joints if stop_joints else []
@@ -316,7 +314,7 @@ class RiggingSettings:
         if self.generate_world_offset_control:
             return self.derive_control_name(self.world_offset_base_control_name)
         else:
-            return self.derive_control_name(self.global_base_control_name)
+            return self.derive_control_name(self.world_base_control_name)
 
     def derive_ik_handle_name(self, chain_name: str) -> str:
         return self.ik_handle_name_pattern.format(name=chain_name)
@@ -691,7 +689,7 @@ def _process_joint(rs: RiggingSettings,
     joint_constraining_control_name = None
     if is_root:
         if rs.generate_world_offset_control:
-            control_name, _ = _setup_control(rs.global_base_control_name, None, joint_name, rs)
+            control_name, _ = _setup_control(rs.world_base_control_name, None, joint_name, rs)
             control_name, _ = _setup_control(rs.world_offset_base_control_name, control_name, joint_name, rs)
             _maybe_lock_and_hide_controller_transform_attributes(control_name,
                                                                  False,
@@ -705,7 +703,7 @@ def _process_joint(rs: RiggingSettings,
                                                                  True,
                                                                  True)
         else:
-            control_name, _ = _setup_control(rs.global_base_control_name, None, joint_name, rs)
+            control_name, _ = _setup_control(rs.world_base_control_name, None, joint_name, rs)
         joint_constraining_control_name = control_name
         if rs.generate_cog_control:
             cog_locator = _find_object_to_match_for_cog(joint_name, rs)
