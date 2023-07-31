@@ -159,7 +159,7 @@ class IkChain:
 
 class ControllerConfig:
     def __init__(self,
-                 name_pattern: str,
+                 name_matcher: str,
                  priority: int = 10,
                  visibility_mode: Optional[str] = None,
                  control_template: Optional[str] = None,
@@ -175,7 +175,7 @@ class ControllerConfig:
                  scale_x: Optional[bool] = None,
                  scale_y: Optional[bool] = None,
                  scale_z: Optional[bool] = None):
-        self.name_pattern = name_pattern
+        self.name_matcher = name_matcher
         self.priority = priority
         self.visibility_mode = visibility_mode
         self.control_template = control_template
@@ -202,7 +202,7 @@ class ControllerConfig:
         return self.scale_x is not None and self.scale_y is not None and self.scale_z is not None
 
     def __str__(self):
-        return f"ControllerConfig[name={self.name_pattern}]"
+        return f"ControllerConfig[name={self.name_matcher}]"
 
 
 class RiggingSettings:
@@ -307,7 +307,7 @@ class RiggingSettings:
         self.none_side_name = none_side_name
 
     def find_matching_control_config(self, controller_name: str) -> list[ControllerConfig]:
-        configs = [x for x in self.control_configurations if re.search(x.name_pattern, controller_name)]
+        configs = [x for x in self.control_configurations if re.search(x.name_matcher, controller_name)]
         return sorted(configs, key=lambda v: v.priority)
 
     # Return the name of the control the positions the character. This is either the world offset control or the
