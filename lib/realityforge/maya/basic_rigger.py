@@ -39,12 +39,11 @@ from realityforge.maya import util as util
 #    reference in the rig and direct connect it to local skeleton. So same rig can be used for multiple actors
 #    with the same skeleton.
 #  * Optionally add a control to the root control to show/hide the skeleton
+#  * Optionally add a control to the root control to show/hide the driver skeleton (if present)
 
 # TODO: Make sure Scale of a control never gets below a certain threshold
 # TODO: Add offset for control config so can be translated in place (i.e. place head control above head)
 # TODO: Add FK/IK text on switch control
-# TODO: Add attribute to root control to hide the "driven" skeleton
-# TODO: Add attribute to root control to hide the "driver" skeleton (if present)
 # TODO: Add sideways traversal to controller tags ... how?
 # TODO: When traversing up Pole or ikHandle, which control to go to?
 
@@ -218,6 +217,7 @@ class RiggingSettings:
                  generate_skeleton_visibility_control: bool = True,
                  use_driver_hierarchy: bool = True,
                  connect_driver_hierarchy: bool = True,
+                 generate_driver_visibility_control: bool = True,
                  use_control_hierarchy: bool = False,
                  use_control_set: bool = True,
                  tag_controls: bool = True,
@@ -274,6 +274,7 @@ class RiggingSettings:
         self.generate_skeleton_visibility_control = generate_skeleton_visibility_control
         self.use_driver_hierarchy = use_driver_hierarchy
         self.connect_driver_hierarchy = connect_driver_hierarchy
+        self.generate_driver_visibility_control = generate_driver_visibility_control
         self.use_control_hierarchy = use_control_hierarchy
         self.use_control_set = use_control_set
         self.tag_controls = tag_controls
@@ -718,6 +719,18 @@ def _process_joint(rs: RiggingSettings,
                          defaultValue=0)
             cmds.setAttr(f"{root_control_name}.rfShowSkeleton", channelBox=True, keyable=False)
             cmds.connectAttr(f"{root_control_name}.rfShowSkeleton", f"{joint_name}.visibility", lock=True, force=True)
+
+        if rs.use_driver_hierarchy and rs.generate_driver_visibility_control and is_root:
+            cmds.addAttr(root_control_name,
+                         longName="rfShowDriverSkeleton",
+                         niceName="Show Driver Skeleton",
+                         attributeType="bool",
+                         defaultValue=0)
+            cmds.setAttr(f"{root_control_name}.rfShowDriverSkeleton", channelBox=True, keyable=False)
+            cmds.connectAttr(f"{root_control_name}.rfShowDriverSkeleton",
+                             f"{rs.derive_driver_joint_name(base_name)}.visibility",
+                             lock=True,
+                             force=True)
 
         if rs.generate_cog_control:
             cog_locator = _find_object_to_match_for_cog(joint_name, rs)
