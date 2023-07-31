@@ -49,8 +49,6 @@ from realityforge.maya import util as util
 
 # TODO: Add groups of controls that can be hidden from root control
 
-# TODO: Hide all the channels on driver chain? (No locking except if equivalent control has locked? but all hidden)
-
 # TODO: Add "Side" to ControllerConfig and then add "default" rules to set the left, right, center none colors and
 #   remove the left_side_color, right_side_color, center_side_color, none_side_color config
 
