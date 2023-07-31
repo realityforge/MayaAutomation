@@ -29,8 +29,7 @@ from realityforge.maya import util as util
 #  * Optional direct control hierarchy for performance or indirect hierarchy so that selecting one control
 #    does not highlight tree of controllers. Alternatively "selection_child_highlighting" to allow individual
 #    controllers highlighting be an editor setting
-#  * Coloring by side
-#  * Coloring by arbitrary matching on controllers names
+#  * Coloring by arbitrary matching on controllers names and/or sides
 #  * Name patterns for different elements and for extracting sides from joints
 #  * Lock and hide parameters that should not be touched by animator. (improves performance and lowers number
 #    of curves in animation)
@@ -46,11 +45,7 @@ from realityforge.maya import util as util
 # TODO: Add sideways traversal to controller tags ... how?
 # TODO: When traversing up Pole or ikHandle, which control to go to?
 
-
 # TODO: Add groups of controls that can be hidden from root control
-
-# TODO: Add "Side" to ControllerConfig and then add "default" rules to set the left, right, center none colors and
-#   remove the left_side_color, right_side_color, center_side_color, none_side_color config
 
 # TODO: Add "default" ControllerConfig at specific priority level. These are generated unless a boolean flag is
 #  passed to skip them. These will apply rules that are probably generic all over such as:
@@ -156,7 +151,8 @@ class IkChain:
 
 class ControllerConfig:
     def __init__(self,
-                 name_matcher: str,
+                 name_matcher: Optional[str],
+                 side_matcher: Optional[str] = None,
                  priority: int = 10,
                  visibility_mode: Optional[str] = None,
                  control_template: Optional[str] = None,
@@ -173,6 +169,7 @@ class ControllerConfig:
                  scale_y: Optional[bool] = None,
                  scale_z: Optional[bool] = None):
         self.name_matcher = name_matcher
+        self.side_matcher = side_matcher
         self.priority = priority
         self.visibility_mode = visibility_mode
         self.control_template = control_template
@@ -199,7 +196,7 @@ class ControllerConfig:
         return self.scale_x is not None and self.scale_y is not None and self.scale_z is not None
 
     def __str__(self):
-        return f"ControllerConfig[name={self.name_matcher}]"
+        return f"ControllerConfig[name={self.name_matcher}, side={self.side_matcher}]"
 
 
 class RiggingSettings:
@@ -243,10 +240,6 @@ class RiggingSettings:
                  # - Any other non-None value is the name of the locator to get the position from.
                  cog_location_strategy: str = "child_average",
                  ik_chains: list[IkChain] = None,
-                 left_side_color: Optional[tuple[float, float, float]] = (1, 0, 0),
-                 right_side_color: Optional[tuple[float, float, float]] = (0, 0, 1),
-                 center_side_color: Optional[tuple[float, float, float]] = (1, 1, 0),
-                 none_side_color: Optional[tuple[float, float, float]] = None,
                  left_side_name: Optional[str] = "l",
                  right_side_name: Optional[str] = "r",
                  center_side_name: Optional[str] = None,
@@ -294,17 +287,19 @@ class RiggingSettings:
         self.debug_logging = debug_logging
         self.cog_location_strategy = cog_location_strategy
         self.ik_chains = ik_chains if ik_chains else []
-        self.left_side_color = left_side_color
-        self.right_side_color = right_side_color
-        self.center_side_color = center_side_color
-        self.none_side_color = none_side_color
         self.left_side_name = left_side_name
         self.right_side_name = right_side_name
         self.center_side_name = center_side_name
         self.none_side_name = none_side_name
 
     def find_matching_control_config(self, controller_name: str) -> list[ControllerConfig]:
-        configs = [x for x in self.control_configurations if re.search(x.name_matcher, controller_name)]
+        attr_name = f"{controller_name}.rfJointSide"
+        side = cmds.getAttr(attr_name) if cmds.objExists(attr_name) else None
+        configs = []
+        for cc in self.control_configurations:
+            if not cc.name_matcher or re.search(cc.name_matcher, controller_name):
+                if not cc.side_matcher or (side and re.search(cc.side_matcher, side)):
+                    configs.append(cc)
         return sorted(configs, key=lambda v: v.priority)
 
     # Return the name of the control the positions the character. This is either the world offset control or the
@@ -1516,27 +1511,13 @@ def _expect_control_not_match_side(side: str, side_label: str, base_control_name
 
 
 def _set_override_colors(control_name: str, rs: RiggingSettings) -> None:
-    side = cmds.getAttr(f"{control_name}.rfJointSide") if cmds.objExists(f"{control_name}.rfJointSide") else None
     child_shapes = cmds.listRelatives(control_name, type="nurbsCurve")
     if child_shapes:
         for child in child_shapes:
-            color_set = False
             for c in rs.find_matching_control_config(control_name):
                 if c.color:
                     _set_override_color_attributes(child, c.color)
-                    color_set = True
                     break
-
-            if not color_set:
-                if "center" == side:
-                    _set_override_color_attributes(child, rs.center_side_color)
-                elif "left" == side:
-                    _set_override_color_attributes(child, rs.left_side_color)
-                elif "right" == side:
-                    _set_override_color_attributes(child, rs.right_side_color)
-                else:
-                    # noinspection DuplicatedCode
-                    _set_override_color_attributes(child, rs.none_side_color)
 
 
 # noinspection PyTypeChecker
