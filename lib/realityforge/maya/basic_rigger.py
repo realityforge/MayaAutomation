@@ -1215,7 +1215,7 @@ def _setup_control(base_control_name: str,
     :param parent_control_name: the name of the parent object if any.
     :param target_object_name: the name of the object that the offset group will match transforms to and derived side-edness from. This is typically the joint in source skeleton that we want to control.
     :param rs: the settings that drive the rigging process.
-    :return: the name of the control.
+    :return: the name of the control and the name of the offset group.
     """
     if rs.debug_logging:
         print(f"Creating {base_control_name} control for target '{target_object_name}' under "
