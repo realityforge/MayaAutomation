@@ -64,9 +64,6 @@ from realityforge.maya import util as util
 # TODO: Pole vector controls only care about translation so lock and hide scale and then add a constraint so that
 #  the pole vector control aims at the knee/elbow/whatevs and then hide
 
-# TODO: Lock and hide "visibility" channels on all controls  or at least hide (but may not lock as could be
-#  controlled by other elements). This is to avoid them being "animated"
-
 # TODO: Default elbow to only animate in one rotate channel for "realistic" animation but sometimes animator wants
 #  to break this rule.
 
