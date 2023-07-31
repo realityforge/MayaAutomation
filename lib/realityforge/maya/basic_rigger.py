@@ -45,6 +45,7 @@ from realityforge.maya import util as util
 # TODO: Add FK/IK text on switch control
 # TODO: Add attribute to root control to hide the "driven" skeleton
 # TODO: Add attribute to root control to hide the "driver" skeleton (if present)
+# TODO: Add sideways traversal to controller tags ... how?
 
 
 # TODO: Add groups of controls that can be hidden from root control
