@@ -1209,7 +1209,8 @@ def _setup_control(base_control_name: str,
                    target_object_name: Optional[str],
                    rs: RiggingSettings,
                    use_config_to_manage_control_channels: bool = True,
-                   leave_visibility_unlocked: bool = False) -> str:
+                   leave_visibility_unlocked: bool = False,
+                   omit_control_tag: bool = False) -> tuple[str, str]:
     """Create a control offset group and control.
 
     :param base_control_name: the base name of the control, offset group etc.
@@ -1243,7 +1244,8 @@ def _setup_control(base_control_name: str,
     _configure_control_set(control_name, control_configs, rs)
     _configure_control_side(base_control_name, control_name, target_object_name, rs)
     _set_override_colors(control_name, rs)
-    _tag_controls(control_name, parent_control_name, control_configs, rs)
+    if not omit_control_tag:
+        _tag_controls(control_name, parent_control_name, control_configs, rs)
 
     # Hide attributes on the controller that we do not want animators to access and/or keyframe
     if use_config_to_manage_control_channels:
