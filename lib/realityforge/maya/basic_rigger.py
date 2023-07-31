@@ -41,11 +41,15 @@ from realityforge.maya import util as util
 #  * Optionally add a control to the root control to show/hide the driver skeleton (if present)
 
 # TODO: Add offset for control config so can be translated in place (i.e. place head control above head)
+
 # TODO: Add FK/IK text on switch control
+
 # TODO: Add sideways traversal to controller tags ... how?
 # TODO: When traversing up Pole or ikHandle, which control to go to?
 
 # TODO: Add groups of controls that can be hidden from root control
+# TODO: Add display layers for groups of controls starting at a root. (so could have layer for LH or RH). Maybe
+#  remove visibility switch from controls? or support both?). See Azri rig for example
 
 # TODO: Add "default" ControllerConfig at specific priority level. These are generated unless a boolean flag is
 #  passed to skip them. These will apply rules that are probably generic all over such as:
@@ -58,9 +62,6 @@ from realityforge.maya import util as util
 # TODO: Perhaps add ability to generate other defaults. i.e. Humanoid defaults would allow hips translate but
 #       the rest are rotate?
 
-# TODO: Add display layers for groups of controls starting at a root. (so could have layer for LH or RH). Maybe
-#  remove visibility switch from controls? or support both?). See Azri rig for example
-
 # TODO: Pole vector controls only care about translation so lock and hide scale and then add a constraint so that
 #  the pole vector control aims at the knee/elbow/whatevs and then hide
 
@@ -70,8 +71,8 @@ from realityforge.maya import util as util
 # TODO: Some rigs allow scale on primary axis for arms/fingers (i.e. X)
 
 # TODO: Features to add:
-# * a "set" that includes the joints to export as a skeleton
-# * a "set" that includes the joints and mesh to export as a skeletal mesh
+#  * a "set" that includes the joints to export as a skeleton
+#  * a "set" that includes the joints and mesh to export as a skeletal mesh
 
 # TODO: Support ik chains that are "single chain". These have no pole vector
 # TODO: Verify IK chains that are not single chain are at least 3 long? (for working out pole vector?)
