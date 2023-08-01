@@ -42,6 +42,14 @@ from realityforge.maya import util as util
 
 # TODO: Add offset for control config so can be translated in place (i.e. place head control above head)
 
+# TODO: Add control to root that hides geometry (this involves passing geometry to rigging process, possibly can
+#  also flag joints that are not to be skinned in same process?)
+
+# TODO: Everywhere there is Ik Blend add the option to have Ik-Enabled and FK Enabled driven attributes (makes
+#   it easy to drive other things without referencing reverse.
+# TODO: Could also add these ik/fk controls to every control in the group (i.e. FK controls each have same - like
+#  in Azri and pole/ik handle have same attributes)
+
 # TODO: Add FK/IK text on switch control
 
 # TODO: Add sideways traversal to controller tags ... how?
@@ -73,6 +81,7 @@ from realityforge.maya import util as util
 # TODO: Features to add:
 #  * a "set" that includes the joints to export as a skeleton
 #  * a "set" that includes the joints and mesh to export as a skeletal mesh
+#  * A "set" that includes bones to rig (and controls match bones that are not? - so root bone in OldLena is not rigged)
 
 # TODO: Support ik chains that are "single chain". These have no pole vector
 # TODO: Verify IK chains that are not single chain are at least 3 long? (for working out pole vector?)
