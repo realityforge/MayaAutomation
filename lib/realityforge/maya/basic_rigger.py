@@ -233,7 +233,7 @@ class RiggingSettings:
                  offset_group_name_pattern: str = "{name}_OFF_GRP",
                  control_name_pattern: str = "{name}_CTRL",
                  sided_name_pattern: str = "{name}_{side}_{seq}",
-                 world_base_control_name: str = "global",
+                 world_base_control_name: str = "world",
                  world_offset_base_control_name: str = "world_offset",
                  cog_base_control_name: str = "cog",
 
