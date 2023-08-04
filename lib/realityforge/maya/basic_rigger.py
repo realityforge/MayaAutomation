@@ -104,6 +104,10 @@ from realityforge.maya import util as util
 #       - toe_ik_handle
 
 
+# TODO: Add automatching infrastructure between IK and FK to ease transitions ala https://www.youtube.com/watch?v=7R_0omGY-Ms
+
+# TODO: Review an incorporate any rigging infrastructure from AntCGI videos starting from https://www.youtube.com/watch?v=O6BZt_GZg7Q&list=PLgala72Uap1rtRRi-MAI0RMc7w1fpD2Io&index=9
+
 # TODO: Generate certain controls in world orientation rather than joint orientation (i.e. head, eye, global,
 #  cog, IK handle for foot (and hand?) should be world, head, eye should be world). It is unclear whether it
 #  should just be the control that is in world or whether the joint should also be in world. AntCGI says joint
