@@ -548,6 +548,8 @@ def create_rig(root_joint_name: str,
     print(f"Validating skeleton with root joint '{root_joint_name}' is ready for rigging.")
     # Check the ik chains are valid
     _validate_ik_chains(rigging_settings)
+    if 0 != _analyze_joints_in_hierarchy(root_joint_name, rigging_settings):
+        raise Exception(f"Invalid driven joints detected. Aborting!")
 
     if validate_only:
         print(f"Validation performed. Exiting early as requested.")
@@ -560,6 +562,53 @@ def create_rig(root_joint_name: str,
 
     if rigging_settings.debug_logging:
         print(f"Rig created for root joint '{root_joint_name}'")
+
+
+def _analyze_joint(object_name: str) -> bool:
+    """Check that the joint conforms to expected shape and conventions.
+
+    :param object_name: the name of the object to check.
+    :return: False if the object exists and is invalid, else True.
+    """
+    for attr in ["rotateAxis", "rotate"]:
+        for axis in ["X", "Y", "Z"]:
+            attr_name = f'{object_name}.{attr}{axis}'
+            value = cmds.getAttr(attr_name)
+            if not math.isclose(0., value, abs_tol=1e-6):
+                print(f"Invalid joint {object_name} as {attr_name} is not 0")
+                return False
+    for attr in ["scale"]:
+        for axis in ["X", "Y", "Z"]:
+            attr_name = f'{object_name}.{attr}{axis}'
+            value = cmds.getAttr(attr_name)
+            if not math.isclose(1., value, abs_tol=1e-6):
+                print(f"Invalid joint {object_name} as {attr_name} is not 1. It is {value}")
+                return False
+    return True
+
+
+def _analyze_joints_in_hierarchy(object_name: str, rs: RiggingSettings) -> int:
+    """Check that the joints in object hierarchy conform to expected shape and conventions.
+
+    :param object_name: The root object name.
+    :param object_name_pattern: the f-string pattern used to match joint.
+    :return: The number of invalid joints.
+    """
+    bad_joints = 0
+    matched_object_names = cmds.ls(object_name, exactType="joint")
+    if 1 == len(matched_object_names):
+        if parse(rs.driven_joint_name_pattern, object_name):
+            if not _analyze_joint(object_name):
+                bad_joints += 1
+    elif 0 != len(matched_object_names):
+        raise Exception(f"Multiple objects detected with the name {object_name}. Aborting!")
+
+    children = cmds.listRelatives(object_name)
+    if children:
+        for child in children:
+            bad_joints += _analyze_joints_in_hierarchy(child, rs)
+
+    return bad_joints
 
 
 def _validate_ik_chains(rs: RiggingSettings) -> None:
