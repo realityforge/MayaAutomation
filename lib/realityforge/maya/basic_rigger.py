@@ -500,6 +500,8 @@ def copy_control(source_control_name: str, target_control_name: str, rs: Rigging
 
     if source_side != target_side:
         if ("left" == source_side and "right" == target_side) or ("right" == source_side and "left" == target_side):
+            # TODO: We need to set origin as 0, reflect it on Y axis otherwise
+            #  below will only work if behaviour mirror joint copy was used
             # noinspection PyTypeChecker
             cmds.setAttr(f"{duplicate_object_name}.scaleX", -1)
             # noinspection PyTypeChecker
