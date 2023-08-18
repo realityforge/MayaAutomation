@@ -986,16 +986,23 @@ def _process_joint(rs: RiggingSettings,
                                                                  True,
                                                                  False)
 
+            ik_parent_object_name = rs.derive_character_offset_control_name()
+
             # This sets up the control but locates it at the end of the ik-chain
             # We need to unlock the offset group and move it to where the pole-vector should be
-            pole_vector_name, pole_vector_offset_group_name = _setup_control(pole_vector_base_name,
-                                                                             ik_system_name,
-                                                                             joint_name,
-                                                                             rs,
-                                                                             use_config_to_manage_control_channels=False,
-                                                                             omit_control_tag=True)
+            pole_vector_name, pole_vector_offset_group_name = \
+                _setup_control(pole_vector_base_name,
+                               None,
+                               joint_name,
+                               rs,
+                               use_config_to_manage_control_channels=False,
+                               omit_control_tag=True)
             cmds.setAttr(f"{pole_vector_name}.visibility", channelBox=False, keyable=False)
             cmds.connectAttr(ik_enabled_attribute_name, f"{pole_vector_name}.visibility", lock=True, force=True)
+
+            _parent_constraint(pole_vector_offset_group_name, ik_parent_object_name, rs, maintain_offset=True)
+            _scale_constraint(pole_vector_offset_group_name, ik_parent_object_name, rs, maintain_offset=True)
+
             # Translate is only modifiable constraint on pole vector control
             _maybe_lock_and_hide_controller_transform_attributes(pole_vector_name,
                                                                  False,
@@ -1047,14 +1054,19 @@ def _process_joint(rs: RiggingSettings,
             _pole_vector_constraint(ik_handle_name, pole_vector_name, rs)
 
             # Create ik handle control
-            ik_handle_control_name, _ = _setup_control(ik_handle_name,
-                                                       ik_system_name,
-                                                       joint_name,
-                                                       rs,
-                                                       use_config_to_manage_control_channels=False,
-                                                       omit_control_tag=True)
+            ik_handle_control_name, ik_handle_control_offset_group_name \
+                = _setup_control(ik_handle_name,
+                                 None,
+                                 joint_name,
+                                 rs,
+                                 use_config_to_manage_control_channels=False,
+                                 omit_control_tag=True)
             cmds.setAttr(f"{ik_handle_control_name}.visibility", channelBox=False, keyable=False)
             cmds.connectAttr(ik_enabled_attribute_name, f"{ik_handle_control_name}.visibility", lock=True, force=True)
+
+            _parent_constraint(ik_handle_control_offset_group_name, ik_parent_object_name, rs, maintain_offset=True)
+            _scale_constraint(ik_handle_control_offset_group_name, ik_parent_object_name, rs, maintain_offset=True)
+
             # Lock and hide scale transform attributes on the ik handle control
             _maybe_lock_and_hide_controller_transform_attributes(ik_handle_control_name,
                                                                  False,
