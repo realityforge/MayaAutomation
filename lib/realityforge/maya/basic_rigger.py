@@ -769,6 +769,7 @@ def _process_joint(rs: RiggingSettings,
                          attributeType="bool",
                          defaultValue=0)
             cmds.setAttr(f"{root_control_name}.rfShowSkeleton", channelBox=True, keyable=False)
+            cmds.setAttr(f"{joint_name}.visibility", channelBox=False, keyable=False)
             cmds.connectAttr(f"{root_control_name}.rfShowSkeleton", f"{joint_name}.visibility", lock=True, force=True)
 
         if rs.use_driver_hierarchy and rs.generate_driver_visibility_control and is_root:
@@ -778,6 +779,7 @@ def _process_joint(rs: RiggingSettings,
                          attributeType="bool",
                          defaultValue=0)
             cmds.setAttr(f"{root_control_name}.rfShowDriverSkeleton", channelBox=True, keyable=False)
+            cmds.setAttr(f"{rs.derive_driver_joint_name(base_name)}.visibility", channelBox=False, keyable=False)
             cmds.connectAttr(f"{root_control_name}.rfShowDriverSkeleton",
                              f"{rs.derive_driver_joint_name(base_name)}.visibility",
                              lock=True,
@@ -903,9 +905,9 @@ def _process_joint(rs: RiggingSettings,
         if chain_starts_at_current_joint:
             # Hide the IK/FK chains so that we only see the driven chain
             # noinspection PyTypeChecker
-            cmds.setAttr(f"{ik_joint_name}.visibility", 0, lock=True)
+            cmds.setAttr(f"{ik_joint_name}.visibility", 0, channelBox=False, lock=True)
             # noinspection PyTypeChecker
-            cmds.setAttr(f"{fk_joint_name}.visibility", 0, lock=True)
+            cmds.setAttr(f"{fk_joint_name}.visibility", 0, channelBox=False, lock=True)
 
         target_joint_name = rs.derive_target_joint_name(base_name)
 
@@ -937,6 +939,7 @@ def _process_joint(rs: RiggingSettings,
                                                       rs,
                                                       leave_visibility_unlocked=True)
 
+        cmds.setAttr(f"{fk_joint_control_name}.visibility", channelBox=False, keyable=False)
         cmds.connectAttr(fk_enabled_attribute_name, f"{fk_joint_control_name}.visibility", lock=True, force=True)
 
         # Ensure that the FK controls constrain the fk joints
@@ -965,7 +968,7 @@ def _process_joint(rs: RiggingSettings,
             util.ensure_created_object_name_matches("ik handle", actual_ik_handle_name, ik_handle_name)
             # Ik handle is always hidden as it is driven by a separate control
             # noinspection PyTypeChecker
-            cmds.setAttr(f"{ik_handle_name}.visibility", 0, lock=True)
+            cmds.setAttr(f"{ik_handle_name}.visibility", 0, channelBox=False, lock=True)
             _safe_parent("ik handle", ik_handle_name, ik_system_name, rs)
             # Lock scale/rotate on handle as they do not do anything
             _maybe_lock_and_hide_controller_transform_attributes(ik_handle_name,
@@ -988,6 +991,7 @@ def _process_joint(rs: RiggingSettings,
                                                  rs,
                                                  use_config_to_manage_control_channels=False,
                                                  omit_control_tag=True)
+            cmds.setAttr(f"{pole_vector_name}.visibility", channelBox=False, keyable=False)
             cmds.connectAttr(ik_enabled_attribute_name, f"{pole_vector_name}.visibility", lock=True, force=True)
             # Translate is only modifiable constraint on pole vector control
             _maybe_lock_and_hide_controller_transform_attributes(pole_vector_name,
@@ -1048,6 +1052,7 @@ def _process_joint(rs: RiggingSettings,
                                                        rs,
                                                        use_config_to_manage_control_channels=False,
                                                        omit_control_tag=True)
+            cmds.setAttr(f"{ik_handle_control_name}.visibility", channelBox=False, keyable=False)
             cmds.connectAttr(ik_enabled_attribute_name, f"{ik_handle_control_name}.visibility", lock=True, force=True)
             # Lock and hide scale transform attributes on the ik handle control
             _maybe_lock_and_hide_controller_transform_attributes(ik_handle_control_name,
