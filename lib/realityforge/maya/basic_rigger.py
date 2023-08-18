@@ -882,6 +882,9 @@ def _process_joint(rs: RiggingSettings,
             util.ensure_created_object_name_matches("ik fk reverse", actual_reverse_name, reverse_name)
 
             cmds.connectAttr(f"{ik_switch_name}.rfIkFkBlend", f"{reverse_name}.inputX", lock=True, force=True)
+            # Lock and hide attributes on node
+            for attr_name in ["inputX", "inputY", "inputZ"]:
+                cmds.setAttr(f"{reverse_name}.{attr_name}", channelBox=False, keyable=False, lock=True)
 
         # Create IK/FK controls and support joints
 
