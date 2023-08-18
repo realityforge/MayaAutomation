@@ -52,6 +52,22 @@ from realityforge.maya import util as util
 
 # TODO: Add FK/IK text on switch control
 
+# TODO: Generate Character set and Subcharacter sets based on hierarchies and configurations
+
+# TODO: Define sections of character that can be "space switched". So head/arm/whatever can follow
+#  - World space - no matter what the character does, arm will remain constant relative to the world.
+#  - COG (center of gravity control) space - if torso or shoulder are rotated arm will remain static. If COG is rotated arm will follow.
+#  - Hips - if COG or hips are rotated, arm will follow. If torso or shoulder are rotated then arm will remain static.
+#  - Torso space - if COG, hips or torso are rotated, arm will follow. If shoulder is rotated the arm will remain static.
+#  - Shoulder space - if COG, hips, torso or shoulder are rotated then the arm will follow.
+#  Implement this by adding configuration for spaces and a control to switch between them (and/or match to source space)
+#  This involves a new group above control and below offset group that parents each of the spaces and control will flip the
+#  weight between spaces. (Alternative if we need to match correctly maybe a separate chain for each space?)
+
+# TODO: Define space switching/sockets. So a weapon/prob can be space switched between multiple locators that are
+#   parent bound to  places in body. i.e. Locator can be just inside characters hands so can grab prop. These spaces
+#   should be defined via configuration.
+
 # TODO: Add sideways traversal to controller tags ... how?
 # TODO: When traversing up Pole or ikHandle, which control to go to?
 
