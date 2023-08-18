@@ -1044,8 +1044,7 @@ def _process_joint(rs: RiggingSettings,
             cmds.xform(pole_vector_offset_group_name, worldSpace=True, translation=pv_control_vec)
             _hide_transform_properties(pole_vector_offset_group_name)
 
-            # TODO: Add support to verify poleVector
-            cmds.poleVectorConstraint(pole_vector_name, ik_handle_name)
+            _pole_vector_constraint(ik_handle_name, pole_vector_name, rs)
 
             # Create ik handle control
             ik_handle_control_name, _ = _setup_control(ik_handle_name,
@@ -1625,6 +1624,27 @@ def _ik_fk_scale_constraint(driven_name: str,
     # Clear selection to avoid unintended selection dependent behaviour
     cmds.select(clear=True)
 
+    return object_name
+
+
+def _pole_vector_constraint(driven_name: str, driver_name: str, rs: RiggingSettings) -> str:
+    if rs.debug_logging:
+        print(f"Adding pole vector constraint from child '{driven_name}' to parent '{driver_name}'")
+
+    object_name = f"{driven_name}_poleVectorConstraint_{driver_name}"
+    actual_object_name = cmds.poleVectorConstraint(driver_name,
+                                                   driven_name,
+                                                   name=object_name)[0]
+    util.ensure_created_object_name_matches("poleVectorConstraint", actual_object_name, object_name)
+
+    # Lock and hide attributes on constraint
+    for attr_name in ["nodeState", "offsetX", "offsetY", "offsetZ", "w0"]:
+        cmds.setAttr(f"{object_name}.{attr_name}", channelBox=False, keyable=False, lock=True)
+
+    cmds.setAttr(f"{object_name}.visibility", 0, channelBox=False, keyable=False, lock=True)
+
+    # Clear selection to avoid unintended selection dependent behaviour
+    cmds.select(clear=True)
     return object_name
 
 
