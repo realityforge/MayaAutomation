@@ -985,12 +985,12 @@ def _process_joint(rs: RiggingSettings,
 
             # This sets up the control but locates it at the end of the ik-chain
             # We need to unlock the offset group and move it to where the pole-vector should be
-            pole_vector_name, _ = _setup_control(pole_vector_base_name,
-                                                 ik_system_name,
-                                                 joint_name,
-                                                 rs,
-                                                 use_config_to_manage_control_channels=False,
-                                                 omit_control_tag=True)
+            pole_vector_name, pole_vector_offset_group_name = _setup_control(pole_vector_base_name,
+                                                                             ik_system_name,
+                                                                             joint_name,
+                                                                             rs,
+                                                                             use_config_to_manage_control_channels=False,
+                                                                             omit_control_tag=True)
             cmds.setAttr(f"{pole_vector_name}.visibility", channelBox=False, keyable=False)
             cmds.connectAttr(ik_enabled_attribute_name, f"{pole_vector_name}.visibility", lock=True, force=True)
             # Translate is only modifiable constraint on pole vector control
@@ -1006,7 +1006,6 @@ def _process_joint(rs: RiggingSettings,
                                                                  True,
                                                                  False)
 
-            pole_vector_offset_group_name = rs.derive_offset_group_name(pole_vector_base_name)
             _unlock_transform_properties(pole_vector_offset_group_name)
 
             ik_mid_joint_name = rs.derive_driven_joint_name(ik_chain.joints[1])
