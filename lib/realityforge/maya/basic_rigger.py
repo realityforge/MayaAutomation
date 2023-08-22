@@ -176,12 +176,50 @@ class IkChain:
         return joint_base_name == self.joints[-1]
 
 
+class AuxControlConfig:
+    """
+    Represents a transform between the offset group and the control that additional controls can influence.
+    The typical example is having a curl control for fingers or a grasp control for entire hand. The animator
+    can still move each individual joint, but they can also change attribute values (i.e. on hand) that will
+    transform the AuxControl in some manner (set driven keys, utility nodes etc).
+    """
+
+    def __init__(self,
+                 name_pattern: str,
+                 priority: int = 10,
+                 control_set: Optional[str] = None,
+
+                 # The following parameters indicate transform attributes that will be
+                 # left un-locked and should be manipulated by other elements
+                 translate_x: bool = False,
+                 translate_y: bool = False,
+                 translate_z: bool = False,
+                 rotate_x: bool = False,
+                 rotate_y: bool = False,
+                 rotate_z: bool = False,
+                 scale_x: bool = False,
+                 scale_y: bool = False,
+                 scale_z: bool = False):
+        self.name_pattern = name_pattern
+        self.priority = priority
+        self.control_set = control_set
+        self.translate_x = translate_x
+        self.translate_y = translate_y
+        self.translate_z = translate_z
+        self.rotate_x = rotate_x
+        self.rotate_y = rotate_y
+        self.rotate_z = rotate_z
+        self.scale_x = scale_x
+        self.scale_y = scale_y
+        self.scale_z = scale_z
+
+
 class ControllerConfig:
     def __init__(self,
                  name_matcher: Optional[str],
                  side_matcher: Optional[str] = None,
                  priority: int = 10,
-                 generate_aux_control: Optional[bool] = None,
+                 aux_controls: Optional[list[AuxControlConfig]] = None,
                  visibility_mode: Optional[str] = None,
                  control_template: Optional[str] = None,
                  control_set: Optional[str] = None,
@@ -199,10 +237,10 @@ class ControllerConfig:
         self.name_matcher = name_matcher
         self.side_matcher = side_matcher
         self.priority = priority
-        # The aux_control sits below the offset group and above the control. This is often used to support additional
-        # controls (like finger curl) while still allowing the animator to tweak the controls (to adjust finger
-        # position post finger curl).
-        self.generate_aux_control = generate_aux_control
+        if aux_controls:
+            self.aux_controls = sorted(aux_controls, key=lambda x: x.priority)
+        else:
+            self.aux_controls = []
         self.visibility_mode = visibility_mode
         self.control_template = control_template
         self.control_set = control_set
@@ -256,7 +294,6 @@ class RiggingSettings:
                  ik_joint_base_name_pattern: str = "{name}_{chain}_IK",
                  fk_joint_base_name_pattern: str = "{name}_{chain}_FK",
                  offset_group_name_pattern: str = "{name}_OFF_GRP",
-                 aux_control_group_name_pattern: str = "{name}_AUX_GRP",
                  control_name_pattern: str = "{name}_CTRL",
                  sided_name_pattern: str = "{name}_{side}_{seq}",
                  world_base_control_name: str = "world",
@@ -310,7 +347,6 @@ class RiggingSettings:
         self.ik_joint_base_name_pattern = ik_joint_base_name_pattern
         self.fk_joint_base_name_pattern = fk_joint_base_name_pattern
         self.offset_group_name_pattern = offset_group_name_pattern
-        self.aux_control_group_name_pattern = aux_control_group_name_pattern
         self.control_name_pattern = control_name_pattern
         self.sided_name_pattern = sided_name_pattern
         self.world_base_control_name = world_base_control_name
@@ -374,9 +410,6 @@ class RiggingSettings:
 
     def derive_offset_group_name(self, base_name: str) -> str:
         return self.offset_group_name_pattern.format(name=base_name)
-
-    def derive_aux_control_group_name(self, base_name: str) -> str:
-        return self.aux_control_group_name_pattern.format(name=base_name)
 
     def derive_ik_end_name(self, ik_chain: IkChain) -> str:
         return self.ik_end_name_pattern.format(name=ik_chain.end_name, chain=ik_chain.name)
@@ -1357,19 +1390,30 @@ def _setup_control(base_control_name: str,
     control_name = rs.derive_control_name(base_control_name)
     control_configs = rs.find_matching_control_config(control_name)
 
-    generate_aux_control = False
+    aux_controls = None
     for control_config in control_configs:
-        if control_config.generate_aux_control is not None:
-            generate_aux_control = control_config.generate_aux_control
+        if control_config.aux_controls is not None:
+            aux_controls = control_config.aux_controls
             break
 
     control_parent = offset_group_name
 
-    if generate_aux_control:
-        aux_control_group_name = rs.derive_aux_control_group_name(base_control_name)
-        _create_group("aux control group", aux_control_group_name, control_parent, rs)
-        _safe_parent("aux control group", aux_control_group_name, control_parent, rs)
-        control_parent = aux_control_group_name
+    if aux_controls:
+        for acc in aux_controls:
+            ac_group_name = acc.name_pattern.format(name=base_control_name)
+            _create_group("aux control group", ac_group_name, control_parent, rs)
+            _safe_parent("aux control group", ac_group_name, control_parent, rs)
+            cmds.setAttr(f"{ac_group_name}.translateX", lock=not acc.translate_x, keyable=False, channelBox=False)
+            cmds.setAttr(f"{ac_group_name}.translateY", lock=not acc.translate_y, keyable=False, channelBox=False)
+            cmds.setAttr(f"{ac_group_name}.translateZ", lock=not acc.translate_z, keyable=False, channelBox=False)
+            cmds.setAttr(f"{ac_group_name}.rotateX", lock=not acc.rotate_x, keyable=False, channelBox=False)
+            cmds.setAttr(f"{ac_group_name}.rotateY", lock=not acc.rotate_y, keyable=False, channelBox=False)
+            cmds.setAttr(f"{ac_group_name}.rotateZ", lock=not acc.rotate_z, keyable=False, channelBox=False)
+            cmds.setAttr(f"{ac_group_name}.scaleX", lock=not acc.scale_x, keyable=False, channelBox=False)
+            cmds.setAttr(f"{ac_group_name}.scaleY", lock=not acc.scale_y, keyable=False, channelBox=False)
+            cmds.setAttr(f"{ac_group_name}.scaleZ", lock=not acc.scale_z, keyable=False, channelBox=False)
+            cmds.setAttr(f"{ac_group_name}.visibility", lock=True, keyable=False, channelBox=False)
+            control_parent = ac_group_name
 
     _create_control(control_name, offset_group_name, rs)
 
