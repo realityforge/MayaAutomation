@@ -181,6 +181,7 @@ class ControllerConfig:
                  name_matcher: Optional[str],
                  side_matcher: Optional[str] = None,
                  priority: int = 10,
+                 generate_aux_control: Optional[bool] = None,
                  visibility_mode: Optional[str] = None,
                  control_template: Optional[str] = None,
                  control_set: Optional[str] = None,
@@ -198,6 +199,10 @@ class ControllerConfig:
         self.name_matcher = name_matcher
         self.side_matcher = side_matcher
         self.priority = priority
+        # The aux_control sits below the offset group and above the control. This is often used to support additional
+        # controls (like finger curl) while still allowing the animator to tweak the controls (to adjust finger
+        # position post finger curl).
+        self.generate_aux_control = generate_aux_control
         self.visibility_mode = visibility_mode
         self.control_template = control_template
         self.control_set = control_set
@@ -251,6 +256,7 @@ class RiggingSettings:
                  ik_joint_base_name_pattern: str = "{name}_{chain}_IK",
                  fk_joint_base_name_pattern: str = "{name}_{chain}_FK",
                  offset_group_name_pattern: str = "{name}_OFF_GRP",
+                 aux_control_group_name_pattern: str = "{name}_AUX_GRP",
                  control_name_pattern: str = "{name}_CTRL",
                  sided_name_pattern: str = "{name}_{side}_{seq}",
                  world_base_control_name: str = "world",
@@ -304,6 +310,7 @@ class RiggingSettings:
         self.ik_joint_base_name_pattern = ik_joint_base_name_pattern
         self.fk_joint_base_name_pattern = fk_joint_base_name_pattern
         self.offset_group_name_pattern = offset_group_name_pattern
+        self.aux_control_group_name_pattern = aux_control_group_name_pattern
         self.control_name_pattern = control_name_pattern
         self.sided_name_pattern = sided_name_pattern
         self.world_base_control_name = world_base_control_name
@@ -367,6 +374,9 @@ class RiggingSettings:
 
     def derive_offset_group_name(self, base_name: str) -> str:
         return self.offset_group_name_pattern.format(name=base_name)
+
+    def derive_aux_control_group_name(self, base_name: str) -> str:
+        return self.aux_control_group_name_pattern.format(name=base_name)
 
     def derive_ik_end_name(self, ik_chain: IkChain) -> str:
         return self.ik_end_name_pattern.format(name=ik_chain.end_name, chain=ik_chain.name)
@@ -1345,11 +1355,26 @@ def _setup_control(base_control_name: str,
         cmds.matchTransform(offset_group_name, target_object_name)
 
     control_name = rs.derive_control_name(base_control_name)
-    _safe_parent(f"{base_control_name} control", control_name, offset_group_name, rs)
-
     control_configs = rs.find_matching_control_config(control_name)
 
+    generate_aux_control = False
+    for control_config in control_configs:
+        if control_config.generate_aux_control is not None:
+            generate_aux_control = control_config.generate_aux_control
+            break
+
+    control_parent = offset_group_name
+
+    if generate_aux_control:
+        aux_control_group_name = rs.derive_aux_control_group_name(base_control_name)
+        _create_group("aux control group", aux_control_group_name, control_parent, rs)
+        _safe_parent("aux control group", aux_control_group_name, control_parent, rs)
+        control_parent = aux_control_group_name
+
     _create_control(control_name, offset_group_name, rs)
+
+    _safe_parent(f"{base_control_name} control", control_name, control_parent, rs)
+
     _configure_control_shape(control_name, control_configs, rs)
     _configure_control_scale(control_name, parent_control_name, control_configs)
 
