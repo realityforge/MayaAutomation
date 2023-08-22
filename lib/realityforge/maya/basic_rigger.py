@@ -1344,11 +1344,12 @@ def _setup_control(base_control_name: str,
     if target_object_name:
         cmds.matchTransform(offset_group_name, target_object_name)
 
-    control_name = _create_control(base_control_name, rs)
+    control_name = rs.derive_control_name(base_control_name)
     _safe_parent(f"{base_control_name} control", control_name, offset_group_name, rs)
 
     control_configs = rs.find_matching_control_config(control_name)
 
+    _create_control(control_name, offset_group_name, rs)
     _configure_control_shape(control_name, control_configs, rs)
     _configure_control_scale(control_name, parent_control_name, control_configs)
 
@@ -1913,17 +1914,15 @@ def _create_group(label: str, group_name: str, match_transform_object_name: Opti
     cmds.select(clear=True)
 
 
-def _create_control(base_name: str, rs: RiggingSettings) -> str:
+def _create_control(control_name: str, offset_group_name: str, rs: RiggingSettings) -> None:
     """
     Create a control with the specified base name.
     It is expected that the offset group has already been created. The control will be moved to the offset group
 
-    :param base_name: the base name.
+    :param control_name: the name of the control.
+    :param offset_group_name: the name of the offset group.
     :param rs: the RiggingSettings.
-    :return: the name of the control.
     """
-    control_name = rs.derive_control_name(base_name)
-    offset_group_name = rs.derive_offset_group_name(base_name)
     if rs.debug_logging:
         print(f"Creating control '{control_name}' in offset group '{offset_group_name}'")
     util.ensure_single_object_named(None, offset_group_name)
@@ -1936,8 +1935,6 @@ def _create_control(base_name: str, rs: RiggingSettings) -> str:
 
     cmds.matchTransform(control_name, offset_group_name)
     cmds.select(clear=True)
-
-    return control_name
 
 
 def _setup_top_level_infrastructure(rs: RiggingSettings) -> None:
