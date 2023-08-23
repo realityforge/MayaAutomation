@@ -40,6 +40,10 @@ from realityforge.maya import util as util
 #  * Optionally add a control to the root control to show/hide the skeleton
 #  * Optionally add a control to the root control to show/hide the driver skeleton (if present)
 
+
+# TODO: Add Red9 integration (Extra attributes for side and control id). This makes pose mirroring easier.
+
+
 # TODO: Add offset for control config so can be translated in place (i.e. place head control above head)
 
 # TODO: Add control to root that hides geometry (this involves passing geometry to rigging process, possibly can
