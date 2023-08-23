@@ -1402,6 +1402,8 @@ def _setup_control(base_control_name: str,
 
     control_parent = offset_group_name
 
+    # TODO: Create space switching group here
+
     if aux_controls:
         for acc in aux_controls:
             ac_group_name = acc.name_pattern.format(name=base_control_name)
