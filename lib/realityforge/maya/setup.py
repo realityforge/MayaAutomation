@@ -14,9 +14,23 @@ import pathlib
 import sys
 
 
+def _add_sys_path(relative_path: str) -> None:
+    base_dir = pathlib.Path(__file__).parent.parent.parent.parent.resolve()
+    path = pathlib.Path(f'{base_dir}/{relative_path}').resolve()
+    sys.path.append(f"{path}")
+
+
 def setup():
-    base_dir = pathlib.Path(__file__).parent.parent.resolve()
+    base_dir = pathlib.Path(__file__).parent.parent.parent.parent.resolve()
+
+    # Tween Machines used for setting up breakdown poses
 
     # Add the path for TweenMachine library
-    sys.path.append(f'{base_dir}/vendor/tweenMachine/python')
-    print(f'Added {base_dir}/vendor/tweenMachine/python to the system path')
+    _add_sys_path('vendor/tweenMachine/python')
+    import tweenMachine
+
+    # Red 9 plugin primarily used for pose mirroring
+
+    _add_sys_path('vendor/Red9_StudioPack_Python3')
+    import Red9
+    Red9.start()

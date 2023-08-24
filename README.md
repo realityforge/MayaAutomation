@@ -65,3 +65,7 @@ import tweenMachine
 
 tweenMachine.start()
 ```
+
+## Red 9 Studio Pack Tools
+
+The [Red 9 Studio Pack Tools](https://github.com/markj3d/Red9_StudioPack_Python3) have been vendored into this project to simplify installation across sites. The plugin is primarily used for mirroring poses. A [YouTube Tutorial](https://www.youtube.com/watch?v=26GfTXKm_ZU) exists to guide you through the process of installation. However it has been auto-enabled when these scripts are added.
