@@ -1,0 +1,10 @@
+{
+  "config_version": 1,
+  "mirrors": {
+    "vendor/weenMachine": {
+      "url": "https://github.com/The-Maize/tweenMachine",
+      "branch": "master",
+      "revision": "f53e2ac3e8531b42c3de5a80d955d11f8c3e7f9b"
+    }
+  }
+}
