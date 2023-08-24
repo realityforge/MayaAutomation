@@ -8,6 +8,10 @@ To make these available you need to add the following snippet to `userSetup.py` 
 import sys
 
 sys.path.append("/path/to/this/repository/lib")
+
+from realityforge.maya import setup
+
+setup.setup()
 ```
 
 The correct location to put this file is:
@@ -46,4 +50,18 @@ sys.path.pop(sys.path.index(project_scripts_dir))
 
   
 local_module_in_scripts.my_function()
+```
+
+## TweenMachine
+
+The [TweenMachine](https://github.com/The-Maize/tweenMachine) plugin has been vendored into this repository to make installation easier. This plugin is used to create breakdown poses.
+
+You may also need to copy the icons from  `vendor/tweenMachine/python/icons/` into your maya directory `prefs/icon`. 
+
+To install to your shelf add a button with the following snippet with the icon `vendor/tweenMachine/python/icons/tm3-ShelfIcon.png`.
+
+```python
+import tweenMachine
+
+tweenMachine.start()
 ```
