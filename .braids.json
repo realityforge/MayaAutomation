@@ -6,6 +6,11 @@
       "branch": "main",
       "revision": "a9b2f7d81dae95edf865083bbbedb25024e2eaea"
     },
+    "vendor/studiolibrary": {
+      "url": "https://github.com/krathjen/studiolibrary",
+      "branch": "main",
+      "revision": "0c0c2ff6158910dea92afb583ceb8efb11dbb908"
+    },
     "vendor/tweenMachine": {
       "url": "https://github.com/The-Maize/tweenMachine",
       "branch": "master",
