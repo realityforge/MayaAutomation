@@ -3,6 +3,10 @@
 *.swp
 *~
 
+# Ruby support files
+############################
+Gemfile.lock
+
 # Python compiled files
 ############################
 **/__pycache__/*
