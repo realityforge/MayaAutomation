@@ -1,6 +1,11 @@
 {
   "config_version": 1,
   "mirrors": {
+    "vendor/Red9_StudioPack_Python3/Red9": {
+      "url": "https://github.com/markj3d/Red9_StudioPack_Python3",
+      "branch": "main",
+      "revision": "a9b2f7d81dae95edf865083bbbedb25024e2eaea"
+    },
     "vendor/tweenMachine": {
       "url": "https://github.com/The-Maize/tweenMachine",
       "branch": "master",
