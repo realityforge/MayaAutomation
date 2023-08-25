@@ -43,6 +43,7 @@ from realityforge.maya import util as util
 
 # TODO: Add Red9 integration (Extra attributes for side and control id). This makes pose mirroring easier.
 
+# TODO: Add a python utility node so space switching can stay in the same place
 
 # TODO: Add offset for control config so can be translated in place (i.e. place head control above head)
 
