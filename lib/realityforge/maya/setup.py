@@ -13,6 +13,8 @@
 import pathlib
 import sys
 
+import maya.cmds as cmds
+import maya.mel as mel
 
 
 def _workspace_path(relative_path: str) -> str:
@@ -37,6 +39,10 @@ def setup():
     _add_sys_path('vendor/Red9_StudioPack_Python3')
     import Red9
     Red9.start()
+
+    # StudioLibrary plugin
+    _add_sys_path('vendor/studiolibrary/src')
+
     # Assume for now that all commands go to Custom shelf
     parent = 'Custom'
 
@@ -56,3 +62,15 @@ def setup():
             parent=parent
         )
 
+    # Add Button for StudioLibrary
+    if 'StudioLibrary' not in labels:
+        icon_path = _workspace_path('vendor/studiolibrary/src/studiolibrary/resource/icons/icon.png')
+        cmds.shelfButton(
+            command="import studiolibrary\nstudiolibrary.main()",
+            annotation='Studio Library',
+            sourceType='Python',
+            label='StudioLibrary',
+            image=icon_path,
+            image1=icon_path,
+            parent=parent
+        )
