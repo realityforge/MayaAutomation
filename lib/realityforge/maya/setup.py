@@ -14,15 +14,18 @@ import pathlib
 import sys
 
 
-def _add_sys_path(relative_path: str) -> None:
+
+def _workspace_path(relative_path: str) -> str:
     base_dir = pathlib.Path(__file__).parent.parent.parent.parent.resolve()
     path = pathlib.Path(f'{base_dir}/{relative_path}').resolve()
-    sys.path.append(f"{path}")
+    return f"{path}"
+
+
+def _add_sys_path(relative_path: str) -> None:
+    sys.path.append(_workspace_path(relative_path))
 
 
 def setup():
-    base_dir = pathlib.Path(__file__).parent.parent.parent.parent.resolve()
-
     # Tween Machines used for setting up breakdown poses
 
     # Add the path for TweenMachine library
