@@ -56,16 +56,6 @@ local_module_in_scripts.my_function()
 
 The [TweenMachine](https://github.com/The-Maize/tweenMachine) plugin has been vendored into this repository to make installation easier. This plugin is used to create breakdown poses.
 
-You may also need to copy the icons from  `vendor/tweenMachine/python/icons/` into your maya directory `prefs/icon`. 
-
-To install to your shelf add a button with the following snippet with the icon `vendor/tweenMachine/python/icons/tm3-ShelfIcon.png`.
-
-```python
-import tweenMachine
-
-tweenMachine.start()
-```
-
 ## Red 9 Studio Pack Tools
 
 The [Red 9 Studio Pack Tools](https://github.com/markj3d/Red9_StudioPack_Python3) have been vendored into this project to simplify installation across sites. The plugin is primarily used for mirroring poses. A [YouTube Tutorial](https://www.youtube.com/watch?v=26GfTXKm_ZU) exists to guide you through the process of installation. However it has been auto-enabled when these scripts are added.

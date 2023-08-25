@@ -37,3 +37,22 @@ def setup():
     _add_sys_path('vendor/Red9_StudioPack_Python3')
     import Red9
     Red9.start()
+    # Assume for now that all commands go to Custom shelf
+    parent = 'Custom'
+
+    names = cmds.shelfLayout(parent, query=True, childArray=True) or []
+    labels = [cmds.shelfButton(n, query=True, label=True) for n in names]
+
+    # Add Button for TweenMachine
+    if 'TweenMachine' not in labels:
+        icon_path = _workspace_path('vendor/tweenMachine/python/icons/tm3-ShelfIcon.png')
+        cmds.shelfButton(
+            command="import tweenMachine\ntweenMachine.start()",
+            annotation='Tween Machine',
+            sourceType='Python',
+            label='TweenMachine',
+            image=icon_path,
+            image1=icon_path,
+            parent=parent
+        )
+
