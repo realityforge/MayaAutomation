@@ -45,6 +45,14 @@ from realityforge.maya import util as util
 
 # TODO: Add a python utility node so space switching can stay in the same place
 
+# TODO: Add an expression node or some other script based mechanism for matching on space switching
+#   https://download.autodesk.com/us/maya/2011help/Commandspython/expression.htmlgit
+#   https://www.riggingdojo.com/2014/10/03/everything-thought-knew-maya-joint-orient-wrong/
+#   https://discourse.techart.online/t/transferring-mocap-rig-anim/8743/3
+#   https://discourse.techart.online/t/pole-vector-match-help/8746/7
+
+# TODO: Default the colors of fingers so that each color is a slight variation ... makes easy to manage
+
 # TODO: Add offset for control config so can be translated in place (i.e. place head control above head)
 
 # TODO: Add control to root that hides geometry (this involves passing geometry to rigging process, possibly can
