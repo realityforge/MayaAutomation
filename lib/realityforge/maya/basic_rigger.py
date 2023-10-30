@@ -41,7 +41,27 @@ from realityforge.maya import util as util
 #  * Optionally add a control to the root control to show/hide the driver skeleton (if present)
 
 
+# TODO: Use https://www.youtube.com/watch?v=wjjzM1Vy344 and copy techniques
+#       i.e. Space switching, stretching, each "group of bones" can have different modes (i.e. arm is fk or IK, arm is in chest, cog, world head space etc)
+#       Also when space switching you can bake from one space to another. Essentially create locators for every bone
+#       and then point/orient(/scale?) constrain them to the  joint, bake the animation on every frame, delete constraints
+#       and then re-apply new space and match the controls that drive the bones to the locators. Now have animation in the
+#       "new space". (The locators are the anim cache and
+#       Information is store as extra attributes on root control so can always switch
+
+# TODO: Consider the equivalent of the "aim space" in above talk. Essentially the controls are all parented to the control
+#   group root and not the immediate parent thus allowing stretchy limbs but use aim constraint to point to next joint in
+#   chain with parent control as the upvector.
+#   (so joints are all translateable but not rotate is controllerd by "aim space"
+
+# TODO: We should use (hierarchichal?) "control groups" that will control follow possibilities, control
+#  visibility/hiding etc
+
+# TODO: Stretchy joints ... should be allow translate on controls that impact bones
+
 # TODO: Add Red9 integration (Extra attributes for side and control id). This makes pose mirroring easier.
+
+# TODO: Should the pole control of legs be in foot space by default? (other spaces being local (a.k.a. hips), and global)
 
 # TODO: Add a python utility node so space switching can stay in the same place
 
@@ -75,7 +95,7 @@ from realityforge.maya import util as util
 #  - Shoulder space - if COG, hips, torso or shoulder are rotated then the arm will follow.
 #  Implement this by adding configuration for spaces and a control to switch between them (and/or match to source space)
 #  This involves a new group above control and below offset group that parents each of the spaces and control will flip the
-#  weight between spaces. (Alternative if we need to match correctly maybe a separate chain for each space?)
+#  weight between spaces. (Alternative if we need to match correctly maybe a separate chain for each space?) Name the group with "_SPACE_GRP" suffix
 
 # TODO: Define space switching/sockets. So a weapon/prob can be space switched between multiple locators that are
 #   parent bound to  places in body. i.e. Locator can be just inside characters hands so can grab prop. These spaces
