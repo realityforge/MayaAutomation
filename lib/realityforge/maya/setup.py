@@ -57,6 +57,7 @@ def setup():
             annotation='Tween Machine',
             sourceType='Python',
             label='TweenMachine',
+            statusBarMessage='Open TweenMachine tool',
             image=icon_path,
             image1=icon_path,
             parent=parent
@@ -70,6 +71,20 @@ def setup():
             annotation='Studio Library',
             sourceType='Python',
             label='StudioLibrary',
+            statusBarMessage='Open StudioLibrary tool',
+            image=icon_path,
+            image1=icon_path,
+            parent=parent
+        )
+
+    if 'OpenExplorer' not in labels:
+        icon_path = 'copySkinWeight.png'
+        cmds.shelfButton(
+            command="import realityforge.maya.util as util\nutil.open_explorer_in_workspace()",
+            annotation='Open Explorer',
+            sourceType='Python',
+            label='OpenExplorer',
+            statusBarMessage='Open Explorer in Workspace',
             image=icon_path,
             image1=icon_path,
             parent=parent
