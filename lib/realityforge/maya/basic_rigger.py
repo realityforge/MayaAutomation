@@ -1815,10 +1815,6 @@ def _point_constraint(driven_name: str,
                       include_y: bool = True,
                       include_z: bool = True,
                       maintain_offset: bool = False) -> str:
-    if rs.debug_logging:
-        print(f"Adding point constraint where '{driven_name}' is driven by '{driver_name}' including "
-              f"axis x={include_x}, y={include_y}, z={include_z}")
-
     skip = []
     if not include_x:
         skip.append("x")
@@ -1829,6 +1825,11 @@ def _point_constraint(driven_name: str,
     if 0 == len(skip):
         skip.append("none")
     object_name = f"{driven_name}_pointConstraint_{driver_name}"
+
+    if rs.debug_logging:
+        print(f"Adding point constraint named '{object_name}' where '{driven_name}' is driven by '{driver_name}' including "
+              f"axis x={include_x}, y={include_y}, z={include_z} and maintainingOffset={maintain_offset}")
+
     # noinspection PyTypeChecker
     actual_object_name = cmds.pointConstraint(driver_name,
                                               driven_name,
@@ -1855,10 +1856,6 @@ def _orient_constraint(driven_name: str,
                        include_y: bool = True,
                        include_z: bool = True,
                        maintain_offset: bool = False) -> str:
-    if rs.debug_logging:
-        print(f"Adding orient constraint where '{driven_name}' is driven by '{driver_name}' including "
-              f"axis x={include_x}, y={include_y}, z={include_z}")
-
     skip = []
     if not include_x:
         skip.append("x")
@@ -1869,6 +1866,11 @@ def _orient_constraint(driven_name: str,
     if 0 == len(skip):
         skip.append("none")
     object_name = f"{driven_name}_orientConstraint_{driver_name}"
+
+    if rs.debug_logging:
+        print(f"Adding orient constraint named '{object_name}' where '{driven_name}' is driven by '{driver_name}' including "
+              f"axis x={include_x}, y={include_y}, z={include_z} and maintainingOffset={maintain_offset}")
+
     # noinspection PyTypeChecker
     actual_object_name = cmds.orientConstraint(driver_name,
                                                driven_name,
