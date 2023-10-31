@@ -1211,7 +1211,8 @@ def _process_joint(rs: RiggingSettings,
 def _maybe_create_point_constraint(control_configs: list[ControllerConfig],
                                    driven_object_name: str,
                                    driver_object_name: str,
-                                   rs: RiggingSettings) -> bool:
+                                   rs: RiggingSettings,
+                                   maintain_offset: str = True) -> bool:
     """Create the point constraint using specified control configs.
     * If no control configs exist or none have specified rules around translation then add point constraint on all axis.
     * Take the first config that has specified rules around translations and create the constraint using the rules or
@@ -1233,18 +1234,20 @@ def _maybe_create_point_constraint(control_configs: list[ControllerConfig],
                                   rs,
                                   include_x=include_x,
                                   include_y=include_y,
-                                  include_z=include_z)
+                                  include_z=include_z,
+                                  maintain_offset=maintain_offset)
                 return True
             return False
 
-    _point_constraint(driven_object_name, driver_object_name, rs)
+    _point_constraint(driven_object_name, driver_object_name, rs, maintain_offset=maintain_offset)
     return True
 
 
 def _maybe_create_orient_constraint(control_configs: list[ControllerConfig],
                                     driven_object_name: str,
                                     driver_object_name: str,
-                                    rs: RiggingSettings) -> bool:
+                                    rs: RiggingSettings,
+                                    maintain_offset: str = True) -> bool:
     """Create the orient constraint using specified control configs.
     * If no control configs exist or none have specified rules around rotation then add orient constraint on all axis.
     * Take the first config that has specified rules around rotations and create the constraint using the rules or
@@ -1266,18 +1269,20 @@ def _maybe_create_orient_constraint(control_configs: list[ControllerConfig],
                                    rs,
                                    include_x=include_x,
                                    include_y=include_y,
-                                   include_z=include_z)
+                                   include_z=include_z,
+                                   maintain_offset=maintain_offset)
                 return True
             return False
 
-    _orient_constraint(driven_object_name, driver_object_name, rs)
+    _orient_constraint(driven_object_name, driver_object_name, rs, maintain_offset=maintain_offset)
     return True
 
 
 def _maybe_create_scale_constraint(control_configs: list[ControllerConfig],
                                    driven_object_name: str,
                                    driver_object_name: str,
-                                   rs: RiggingSettings) -> bool:
+                                   rs: RiggingSettings,
+                                   maintain_offset: str = True) -> bool:
     """Create the scale constraint using specified control configs.
     * If no control configs exist or none have specified rules around scale then add scale constraint on all axis.
     * Take the first config that has specified rules around scales and create the constraint using the rules or
@@ -1299,11 +1304,12 @@ def _maybe_create_scale_constraint(control_configs: list[ControllerConfig],
                                   rs,
                                   include_x=include_x,
                                   include_y=include_y,
-                                  include_z=include_z)
+                                  include_z=include_z,
+                                  maintain_offset=maintain_offset)
                 return True
             return False
 
-    _scale_constraint(driven_object_name, driver_object_name, rs)
+    _scale_constraint(driven_object_name, driver_object_name, rs, maintain_offset=maintain_offset)
     return True
 
 
