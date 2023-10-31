@@ -20,6 +20,7 @@
     </content>
     <content url="file://D:/Code/aie_course/modules/6_Principles_of_Animation/Assessment" />
     <content url="file://D:/Code/aie_course/modules/7_CharacterAnimation" />
+    <content url="file://D:/Projects/aie_course/modules/10_Production/Maya/scripts" />
     <orderEntry type="jdk" jdkName="Python 3.10 (MayaAutomation)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
