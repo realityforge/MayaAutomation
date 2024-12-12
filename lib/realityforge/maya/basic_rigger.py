@@ -836,6 +836,18 @@ def _process_joint(rs: RiggingSettings,
     joint_constraining_control_name = None
     if is_root:
         if rs.generate_world_offset_control:
+            root_control_name, _ = _setup_control(rs.world_base_control_name, None, None, rs)
+            _maybe_lock_and_hide_controller_transform_attributes(root_control_name,
+                                                                 False,
+                                                                 False,
+                                                                 False,
+                                                                 False,
+                                                                 False,
+                                                                 False,
+                                                                 True,
+                                                                 True,
+                                                                 True,
+                                                                 True)
             control_name, _ = _setup_control(rs.world_offset_base_control_name, root_control_name, None, rs)
             _maybe_lock_and_hide_controller_transform_attributes(control_name,
                                                                  False,
@@ -850,6 +862,17 @@ def _process_joint(rs: RiggingSettings,
                                                                  True)
         else:
             control_name, _ = _setup_control(rs.world_base_control_name, None, None, rs)
+            _maybe_lock_and_hide_controller_transform_attributes(control_name,
+                                                                 False,
+                                                                 False,
+                                                                 False,
+                                                                 False,
+                                                                 False,
+                                                                 False,
+                                                                 True,
+                                                                 True,
+                                                                 True,
+                                                                 True)
             root_control_name = control_name
         joint_constraining_control_name = control_name
         if rs.generate_skeleton_visibility_control and is_root:
