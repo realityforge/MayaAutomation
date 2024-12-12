@@ -902,26 +902,29 @@ def _process_joint(rs: RiggingSettings,
 
         # Setup constraints on axis that should be constrained as defined in configuration
         if force_point_constraint:
-            _point_constraint(driver_joint_name, joint_constraining_control_name, rs)
+            _point_constraint(driver_joint_name, joint_constraining_control_name, rs, maintain_offset=True)
         else:
             force_point_constraint = _maybe_create_point_constraint(control_configs,
                                                                     driver_joint_name,
                                                                     joint_constraining_control_name,
-                                                                    rs)
+                                                                    rs,
+                                                                    maintain_offset=True)
         if force_orient_constraint:
-            _orient_constraint(driver_joint_name, joint_constraining_control_name, rs)
+            _orient_constraint(driver_joint_name, joint_constraining_control_name, rs, maintain_offset=True)
         else:
             force_orient_constraint = _maybe_create_orient_constraint(control_configs,
                                                                       driver_joint_name,
                                                                       joint_constraining_control_name,
-                                                                      rs)
+                                                                      rs,
+                                                                      maintain_offset=True)
         if force_scale_constraint:
-            _scale_constraint(driver_joint_name, joint_constraining_control_name, rs)
+            _scale_constraint(driver_joint_name, joint_constraining_control_name, rs, maintain_offset=True)
         else:
             force_scale_constraint = _maybe_create_scale_constraint(control_configs,
                                                                     driver_joint_name,
                                                                     joint_constraining_control_name,
-                                                                    rs)
+                                                                    rs,
+                                                                    maintain_offset=True)
 
     if rs.use_driver_hierarchy and rs.connect_driver_hierarchy:
         _connect_transform_attributes(driver_joint_name, joint_name)
